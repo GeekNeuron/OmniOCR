@@ -21,7 +21,7 @@
 pip install -r requirements.txt
 ```
 
-Make sure Tesseract OCR (https://github.com/tesseract-ocr/tesseract) is installed and added to your PATH.
+Make sure [Tesseract OCR](https://github.com/tesseract-ocr/tesseract) is installed and added to your PATH.
 
 Run the GUI
 
@@ -30,10 +30,10 @@ python ocr_gui.py
 ```
 
 Export Formats
-- .docx — Word file
-- .pdf — Printable OCR PDF
-- .epub, .mobi, .azw3 — eBooks (for Kindle or Apple Books)
-- .srt — Subtitle file from OCR results
+- `.docx` — Word file
+- `.pdf` — Printable OCR PDF
+- `.epub`, .mobi, .azw3 — eBooks (for Kindle or Apple Books)
+- `.srt` — Subtitle file from OCR results
 
 License
 MIT — Free and open source.
