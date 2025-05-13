@@ -35,5 +35,6 @@ Export Formats
 - `.epub`, .mobi, .azw3 — eBooks (for Kindle or Apple Books)
 - `.srt` — Subtitle file from OCR results
 
-License
-MIT — Free and open source.
+# License
+MIT 2025 GeekNeuron
+`Free and open source.`
