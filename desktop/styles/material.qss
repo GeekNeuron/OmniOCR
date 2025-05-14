@@ -1,0 +1,42 @@
+/* Material Design-inspired QSS stylesheet */
+
+QWidget {
+    font-family: 'Segoe UI', 'Roboto', sans-serif;
+    font-size: 14px;
+    background-color: #F5F5F5;
+    color: #212121;
+}
+
+QPushButton {
+    background-color: #6200EE;
+    color: white;
+    padding: 8px 16px;
+    border-radius: 6px;
+    border: none;
+}
+
+QPushButton:hover {
+    background-color: #3700B3;
+}
+
+QPushButton:pressed {
+    background-color: #03DAC5;
+    color: #000;
+}
+
+QLineEdit, QTextEdit {
+    border: 1px solid #CCC;
+    border-radius: 4px;
+    padding: 6px;
+    background-color: #FFFFFF;
+}
+
+QLabel {
+    font-weight: 500;
+    margin-bottom: 4px;
+}
+
+QMainWindow {
+    background-color: #F5F5F5;
+    border: none;
+}
