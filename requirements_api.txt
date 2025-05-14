@@ -1,1 +1,9 @@
-
+fastapi
+uvicorn[standard]
+pillow
+opencv-python
+pytesseract
+easyocr
+python-multipart
+PySide6
+streamlit
