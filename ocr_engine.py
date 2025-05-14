@@ -10,9 +10,9 @@ except ImportError:
     has_easyocr = False
 
 class OCREngine:
-    def __init__(self, engine_type="tesseract", lang="fas"):
-        self.engine_type = engine_type.lower()
-        self.lang = lang
+    def __init__(self, engine_type="tesseract", lang="fas+eng"):
+        self.engine_type = engine_type
+        self.lang = lang  # فارسی (fas) + انگلیسی (eng)
 
         if self.engine_type == "easyocr" and has_easyocr:
             self.reader = easyocr.Reader([self.lang], gpu=False)
@@ -20,11 +20,9 @@ class OCREngine:
     def recognize(self, image: Image.Image) -> str:
         if self.engine_type == "tesseract":
             return pytesseract.image_to_string(image, lang=self.lang)
-
         elif self.engine_type == "easyocr" and has_easyocr:
             result = self.reader.readtext(image, detail=0)
             return "\n".join(result)
-
         else:
             raise ValueError(f"Unsupported engine or missing dependency: {self.engine_type}")
 
@@ -35,4 +33,3 @@ if __name__ == "__main__":
     engine = OCREngine(engine_type="tesseract", lang="fas")
     text = engine.recognize(img)
     print(text)
-
