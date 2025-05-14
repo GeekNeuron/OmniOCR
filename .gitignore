@@ -1,41 +1,71 @@
-# General Python
+# Byte-compiled / optimized / DLL files
 __pycache__/
 *.py[cod]
-*.log
-*.tmp
-*.bak
+*$py.class
 
-# Virtual env
+# Virtual environments
+.env
 .venv/
 env/
 venv/
 
-# Build
-build/
-dist/
-*.spec
-*.egg-info/
-
-# Output
-output/
-*.processed.png
-*.traineddata
-
-# IDE
+# VSCode or JetBrains IDEs
 .vscode/
 .idea/
+
+# Logs and debugging
+*.log
+*.tmp
+*.bak
+
+# OS junk files
 .DS_Store
 Thumbs.db
 
-# Android/iOS
-*.iml
-.gradle/
-local.properties
-*.apk
-*.ipa
+# Test results
+coverage/
+htmlcov/
+.tox/
+.nox/
 
-# Node/npm (for docs if ever used)
-node_modules/
+# Build artifacts
+build/
+dist/
+*.egg-info/
 
-# macOS
-*.DS_Store
+# Python wheel
+*.whl
+
+# Docker
+*.pid
+*.tar
+
+# Streamlit cache
+.streamlit/
+
+# PySide6 UI designer
+*.ui
+
+# FastAPI autoreload
+**/__pycache__/
+**/*.pyc
+
+# Mobile build artifacts
+mobile/composeApp/.gradle/
+mobile/composeApp/build/
+mobile/composeApp/.idea/
+
+# Ignore subtitle output cache
+*.srt
+*.ass
+*.vtt
+*.idx
+*.sub
+
+# Ignore OCR outputs
+*.txt
+*.pdf
+*.epub
+*.docx
+*.mobi
+*.azw3
