@@ -1,8 +1,8 @@
 package ui.screens
 
-import androidx.compose.foundation.layout.* import androidx.compose.material3.* import androidx.compose.runtime.* import androidx.compose.ui.Alignment import androidx.compose.ui.Modifier import androidx.compose.ui.text.style.TextAlign import androidx.compose.ui.unit.dp import androidx.compose.ui.unit.sp
+import androidx.compose.foundation.layout.* import androidx.compose.material3.* import androidx.compose.runtime.* import androidx.compose.ui.Alignment import androidx.compose.ui.Modifier import androidx.compose.ui.text.style.TextAlign import androidx.compose.ui.unit.dp import androidx.compose.ui.unit.sp import kotlinx.coroutines.launch import util.OcrHelper
 
-@Composable fun MainScreen() { var result by remember { mutableStateOf("") }
+@Composable fun MainScreen() { var result by remember { mutableStateOf("") } val scope = rememberCoroutineScope()
 
 Surface(
     modifier = Modifier.fillMaxSize(),
@@ -22,7 +22,11 @@ Surface(
             textAlign = TextAlign.Center
         )
 
-        Button(onClick = { result = "OCR result here (placeholder)" }) {
+        Button(onClick = {
+            scope.launch {
+                result = OcrHelper.recognizeImagePlaceholder()
+            }
+        }) {
             Text("Pick Image")
         }
 
