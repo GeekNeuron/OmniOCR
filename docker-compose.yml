@@ -1,1 +1,13 @@
+version: '3.8'
 
+services:
+  api:
+    build: .
+    container_name: omniocr-api
+    ports:
+      - "8000:8000"
+    restart: unless-stopped
+    volumes:
+      - .:/app
+    environment:
+      - TZ=Asia/Tehran
