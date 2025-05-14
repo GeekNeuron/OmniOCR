@@ -31,7 +31,15 @@ OmniOCR Mobile is the cross-platform mobile version of the offline multilingual 
 
 ## Project Structure
 
-mobile/ ├── build.gradle.kts         # Root multiplatform setup ├── ui/                      # Compose UI code ├── ocr-core/                # Native OCR interface (expect/actual) │   ├── C++ JNI (Android) │   └── Swift bridge (iOS) ├── androidApp/              # Android entry point └── iosApp/                  # iOS AppDelegate + Swift glue
+mobile/ 
+├── build.gradle.kts         # Root multiplatform setup 
+├── ui/                      # Compose UI code 
+├── ocr-core/                # Native OCR interface (expect/actual) 
+│   
+├── C++ JNI (Android) 
+│   └── Swift bridge (iOS) 
+├── androidApp/              # Android entry point 
+└── iosApp/                  # iOS AppDelegate + Swift glue
 
 ---
 
