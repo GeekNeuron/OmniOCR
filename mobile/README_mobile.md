@@ -1,7 +1,3 @@
-OmniOCR - بخش 5 / فایل 1
-
-README_mobile.md
-
 # OmniOCR Mobile (Android & iOS)
 
 OmniOCR Mobile is the cross-platform mobile version of the offline multilingual OCR toolkit, built using **Kotlin Compose Multiplatform** and native **Tesseract OCR** bindings.
