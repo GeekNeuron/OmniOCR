@@ -10,10 +10,6 @@ All notable changes to **OmniOCR** will be documented in this file.
 - Native Tesseract OCR via JNI (Android) and Swift interop (iOS)
 - Shared UI with Compose (image picker, OCR run, share result)
 
-### Notes
-- iOS requires manual linking of `libtesseract.a`
-- Android supports API 26+ and 64-bit ABIs
-
 ---
 
 ## [v1.0.0-desktop] - 2025-05-10
@@ -23,10 +19,14 @@ All notable changes to **OmniOCR** will be documented in this file.
 - GUI with PySide6
 - Export to TXT, DOCX, PDF, EPUB, MOBI, AZW3, and SRT
 
-### Batch Features
-- Folder processing with live logs
-- Tesseract preprocessing controls (DPI, crop)
+---
+
+## Planned (v1.1.0+)
+- Live OCR from mobile camera
+- Tesseract config UI for tuning
+- OCR history & bookmarks
+- Release to PyPI / Play Store
 
 ---
 
-*This project is maintained by GeekNeuron — Open Source OCR for everyone.*
+*Project by [GeekNeuron](https://github.com/GeekNeuron) — Open Source OCR for everyone.*
