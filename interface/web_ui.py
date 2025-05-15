@@ -5,11 +5,14 @@ from core.ai.lang_detect import detect_language
 from core.ai.post_correction import correct_with_bert
 from core.utils.pdf_utils import pdf_to_images
 from core.utils.subtitle_parser import extract_frames_from_subtitle
+from ui.theme.material_theme import apply_material_theme
 from PIL import Image
 import tempfile
 import base64
 
 st.set_page_config(page_title="OmniOCR Web", layout="centered")
+apply_material_theme()
+
 st.title("OmniOCR – Web Interface")
 
 uploaded_file = st.file_uploader("Upload an image, PDF or subtitle:", type=["png", "jpg", "jpeg", "pdf", "srt", "sub"])
