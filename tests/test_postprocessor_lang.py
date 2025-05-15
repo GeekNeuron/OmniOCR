@@ -2,7 +2,7 @@ import pytest
 from core.ai.lang_detect import detect_language
 from core.ai.post_correction import correct_with_bert
 
-#pytest.mark.parametrize("text, expected_lang", [
+@pytest.mark.parametrize("text, expected_lang", [
 ("سلام دنیا", "fa"),
 ("Hello world", "en"),
 ("こんにちは世界", "ja")
