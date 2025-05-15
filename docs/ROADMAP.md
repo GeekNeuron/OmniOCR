@@ -7,17 +7,17 @@ This roadmap outlines the key milestones for building, improving, and extending 
 
 ## ✅ Core Milestones (Complete)
 
-[x] Modular architecture with CLI, GUI, API
+- [x] Modular architecture with CLI, GUI, API
 
-[x] EasyOCR & Tesseract integration
+- [x] EasyOCR & Tesseract integration
 
-[x] Compose UI for Android/iOS
+- [x] Compose UI for Android/iOS
 
-[x] FastAPI + Streamlit UI with Material Design
+- [x] FastAPI + Streamlit UI with Material Design
 
-[x] ParsBERT integration for post-correction
+- [x] ParsBERT integration for post-correction
 
-[x] Subtitle, PDF, EPUB input support
+- [x] Subtitle, PDF, EPUB input support
 
 
 
@@ -25,17 +25,17 @@ This roadmap outlines the key milestones for building, improving, and extending 
 
 ## 🚧 In Progress
 
-[ ] TrOCR model integration
+- [ ] TrOCR model integration
 
-[ ] WebSocket support for streaming OCR
+- [ ] WebSocket support for streaming OCR
 
-[ ] AI model switcher (EasyOCR ↔ TrOCR)
+- [ ] AI model switcher (EasyOCR ↔ TrOCR)
 
-[ ] OCR accuracy evaluation framework
+- [ ] OCR accuracy evaluation framework
 
-[ ] CLI: Auto-detect input format
+- [ ] CLI: Auto-detect input format
 
-[ ] Model benchmarking and speed tracking
+- [ ] Model benchmarking and speed tracking
 
 
 
@@ -43,15 +43,15 @@ This roadmap outlines the key milestones for building, improving, and extending 
 
 ## ⬜ Planned
 
-[ ] Table & Form recognition (LayoutLM / Donut)
+- [ ] Table & Form recognition (LayoutLM / Donut)
 
-[ ] Visual UI builder for custom pipelines
+- [ ] Visual UI builder for custom pipelines
 
-[ ] HuggingFace model hub integration
+- [ ] HuggingFace model hub integration
 
-[ ] PyPI + DockerHub packaging
+- [ ] PyPI + DockerHub packaging
 
-[ ] Developer portal & online demo
+- [ ] Developer portal & online demo
 
 
 
