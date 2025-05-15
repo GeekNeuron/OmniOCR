@@ -1,140 +1,70 @@
 # OmniOCR
 
-**OmniOCR** is a powerful, offline-first, AI-augmented OCR toolkit with multilingual support, real-time processing, and a modular architecture.
+OmniOCR is a professional-grade, offline-first OCR toolkit designed for image, PDF, and subtitle extraction. Featuring multilingual recognition and AI-powered text correction, it offers developers and users multiple interfaces including CLI, API, and Web UI.
 
----
+![OmniOCR Banner](https://raw.githubusercontent.com/GeekNeuron/OmniOCR/main/assets/omniocr-banner.png)
 
-## ✅ Features
+## Key Features
+- **Multilingual OCR**: Supports Farsi, English, Arabic, Japanese, Chinese, Turkish and more
+- **AI Correction**: Transformer-based error correction using BERT
+- **OCR Engines**: EasyOCR & Tesseract (pluggable)
+- **Input Formats**: PNG, JPG, PDF, SRT, SUB
+- **Cross-platform Interfaces**:
+  - Terminal CLI (Typer)
+  - Web App (Streamlit)
+  - RESTful API (FastAPI)
+- **Downloadable Results**: Auto-generate `.txt` files
+- **Fully Offline**: Works without internet
 
-- **Offline OCR** with Tesseract and EasyOCR  
-- **AI-powered post-processing** using ParsBERT  
-- **Auto language detection** (langdetect)  
-- **FastAPI + Streamlit interfaces**  
-- **Material 3 UI for Desktop and Mobile (Compose)**  
-- **Desktop GUI with PySide6 (Material-style QSS)**  
-- **Mobile UI via Compose Multiplatform (Android/iOS)**  
-- **PDF, subtitle, and image input support**
-
----
-
-## 📦 Structure Overview
-```
-OmniOCR/
-├── core/
-│   ├── ocr_engine.py
-│   ├── preprocessor.py
-│   ├── postprocessor.py
-│   └── ai/
-│       ├── lang_detect.py
-│       └── post_correction.py
-├── desktop/
-│   ├── main_window.py
-│   └── styles/material.qss
-├── mobile/composeApp/
-│   ├── Main.kt
-│   ├── ui/screens/MainScreen.kt
-│   ├── ui/theme/Theme.kt
-│   └── util/OcrHelper.kt
-├── interface/
-│   ├── api.py
-│   └── ui_streamlit.py
-├── omniocr/
-│   ├── cli.py
-│   └── __main__.py
-├── tests/
-│   └── test_ocr.py
-├── README.md, ROADMAP.md, ARCHITECTURE.md
-```
-
----
-
-## 🚀 Run Desktop App
+## Installation
 ```bash
-python desktop/main_window.py
+python -m venv .venv && source .venv/bin/activate
+pip install -r requirements.txt
 ```
-
-## 🌐 Run API
-```bash
-uvicorn interface.api:app --reload
+# Tesseract install for Linux
 ```
-
-## 📊 Run Streamlit UI
-```bash
-streamlit run interface/ui_streamlit.py
+sudo apt install tesseract-ocr tesseract-ocr-fas
 ```
+## Quick Usage
 
-## 🔁 CLI OCR
-```bash
-omniocr ocr input.jpg --lang fa --output result.txt
+CLI:
 ```
-
----
-
-## 🤖 AI Enhancements
-
-| Feature         | Engine/Model                     |
-|----------------|----------------------------------|
-| Language detect| langdetect                       |
-| Correction     | HooshvareLab/parsbert-uncased    |
-| Future         | TrOCR, LayoutLM, Donut, Pegasus  |
-
----
-
-## 🌍 Supported Languages
-- ✅ Persian (فارسی), English, Arabic, Turkish  
-- 🧪 Chinese, Japanese (EasyOCR only)  
-- Configurable via `--lang` or auto-detected
-
----
-
-## 📦 Build & Distribute
-
-### Local Install
-```bash
-pip install .
+omniocr ocr path/to/image.jpg --lang fas+eng
 ```
-
-### Package
-```bash
-python -m build
+Web UI:
 ```
-
-### Run from source
-```bash
-python -m omniocr ocr input.png
+streamlit run OmniOCR/interface/web_ui.py
 ```
-
----
-
-## 🧱 Architecture
-
-```mermaid
-flowchart TD
-    A[Image/PDF/Input] --> B[Preprocessing]
-    B --> C[OCR Engine]
-    C --> D[Lang Detect]
-    D --> E[AI Correction (BERT)]
-    E --> F[Output: CLI/API/GUI]
+REST API:
 ```
+uvicorn OmniOCR/interface/api:app --reload
+```
+Docker
+```
+docker-compose up --build
+```
+## Development
 
-More in [`ARCHITECTURE.md`](./ARCHITECTURE.md)
+- Python 3.8+
 
----
+- Torch, Transformers, EasyOCR, OpenCV
 
-## 🗺️ Roadmap Highlights
+- Modular directory structure with core/, interface/, ui/, tests/
 
-- [x] Modular OCR engine  
-- [x] Desktop, Mobile, Web UIs  
-- [x] Language-aware correction  
-- [ ] Real-time OCR queue (Celery, ONNX GPU)  
-- [ ] Layout-aware models (Donut/LayoutLM)  
-- [ ] Table detection + CSV export  
-- [ ] Subtitle/EPUB OCR enhancements  
 
-See [`ROADMAP.md`](./ROADMAP.md) for full plan.
+## Roadmap Highlights
 
----
+- [ ] Real-time subtitle OCR (live video)
 
-## 🔓 License
+- [ ] Handwritten Farsi OCR
 
-MIT © [GeekNeuron](https://github.com/GeekNeuron)
+- [ ] Mobile & Compose Multiplatform deployment
+
+
+## License
+
+MIT © GeekNeuron
+
+## Contributors
+
+Pull requests welcome – contribute to the dev branch!
