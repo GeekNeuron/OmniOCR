@@ -59,11 +59,11 @@ This roadmap outlines the key milestones for building, improving, and extending 
 
 ## 📦 Distribution
 
-[ ] Cross-platform desktop builds
+- [ ] Cross-platform desktop builds
 
-[ ] PyPI publishing (`omniocr`)
+- [ ] PyPI publishing (`omniocr`)
 
-[ ] GitHub Actions for CI/CD
+- [ ] GitHub Actions for CI/CD
 
 
 
