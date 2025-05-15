@@ -1,21 +1,23 @@
----
-name: Feature Request
-about: Suggest a feature for OmniOCR
-labels: enhancement
----
-
-### Is your feature request related to a problem?
-A clear and concise description of the problem or limitation.
-
-### Describe the solution you'd like
-What should OmniOCR do?
-
-### Describe alternatives you've considered
-Any alternative solutions or workarounds?
-
-### Additional context
-Add any other context, mockups, or references.
-
-### Environment (optional)
-- Platform: [Desktop / Mobile / Web / API]
-- Input Type: [Image / PDF / Subtitle / EPUB]
+name: "Feature Request"
+description: "Suggest a new feature or enhancement"
+title: "[FEATURE] Short summary"
+labels: [enhancement]
+body:
+  - type: textarea
+    id: problem
+    attributes:
+      label: Problem / Need
+  - type: textarea
+    id: solution
+    attributes:
+      label: Suggested solution
+  - type: checkboxes
+    id: scope
+    attributes:
+      label: Target areas
+      options:
+        - label: CLI
+        - label: Web UI
+        - label: API
+        - label: Core
+        - label: Mobile/Desktop
