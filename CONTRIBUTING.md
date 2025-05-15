@@ -1,64 +1,42 @@
 # Contributing to OmniOCR
 
-Thank you for your interest in contributing to OmniOCR! Your feedback, suggestions, and contributions help us improve and evolve.
+We welcome contributions from developers, researchers, and users. Whether you're fixing bugs, improving documentation, adding features, or testing the platform – your help is appreciated!
 
----
+## Getting Started
 
-## 🧩 Ways to Contribute
-- **Report bugs** via GitHub issues
-- **Request features** via GitHub discussions or issues
-- **Submit pull requests** with enhancements, fixes, or docs
-- **Improve documentation** in `README`, `docs/`, or code comments
-- **Add new language models or OCR engines**
+1. Fork the repository
+2. Create a new branch: `git checkout -b feature/your-feature`
+3. Make your changes (code, tests, docs)
+4. Commit and push: `git commit -m "feat: your message"`
+5. Submit a Pull Request to the `dev` branch
 
----
+## Code Guidelines
 
-## 🧪 Development Setup
+* Use Python 3.8+ compatible syntax
+* Follow PEP8 style (enforced via `flake8`)
+* Write clear, modular, documented code
+* Add/update tests for new functionality
 
-```bash
-# Clone the repo
-$ git clone https://github.com/GeekNeuron/OmniOCR
-$ cd OmniOCR
+## Feature Requests
 
-# Install dependencies
-$ pip install -r requirements.txt
+Open an issue using the `Feature Request` template and describe:
 
-# Run tests
-$ pytest
+* Problem or need
+* Proposed solution
+* Expected benefits or use-case
 
+## Bug Reports
 
----
+Please include:
 
-## 🧼 Code Guidelines
+* Environment (OS, Python version)
+* Exact error message or stack trace
+* Steps to reproduce
 
-Follow PEP8 for Python
+## Community
 
-Write clear, modular code
+* Discussions: [GitHub Discussions](https://github.com/GeekNeuron/OmniOCR/discussions)
+* Issues: Open [here](https://github.com/GeekNeuron/OmniOCR/issues)
+* Maintainer: [@GeekNeuron](https://github.com/GeekNeuron)
 
-Add docstrings and comments where helpful
-
-Add tests when submitting core changes
-
-
-
----
-
-## 🔁 Submitting Pull Requests
-
-Fork the repo and create a feature branch
-
-Describe your changes clearly
-
-Reference any related issues
-
-Ensure CI/CD checks pass
-
-
-
----
-
-## 📝 License
-
-By contributing, you agree that your contributions will be licensed under the same MIT license as the project.
-
-Maintained by @GeekNeuron
+Thank you for helping improve OmniOCR!
