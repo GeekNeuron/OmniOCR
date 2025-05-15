@@ -1,13 +1,13 @@
-version: '3.8'
+version: "3.9"
 
 services:
-  api:
+  omniocr:
     build: .
-    container_name: omniocr-api
+    container_name: omniocr_api
     ports:
       - "8000:8000"
-    restart: unless-stopped
     volumes:
       - .:/app
     environment:
-      - TZ=Asia/Tehran
+      - PYTHONUNBUFFERED=1
+    restart: unless-stopped
