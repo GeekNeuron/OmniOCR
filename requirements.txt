@@ -1,11 +1,18 @@
 # Core OCR
-pytesseract opencv-python Pillow easyocr langdetect
+pytesseract
+opencv-python
+Pillow easyocr
+langdetect
 
 # AI
-transformers torch sentencepiece
+transformers
+torch
+sentencepiece
 
 # Web/API
-fastapi uvicorn streamlit
+fastapi
+uvicorn
+streamlit
 
 # CLI
 typer[all]
@@ -14,10 +21,13 @@ typer[all]
 PySide6
 
 # Testing
-tqdm pytest pytest-mock
+tqdm
+pytest
+pytest-mock
 
 # Optional Enhancements
-python-multipart scikit-image
+python-multipart
+scikit-image
 
 # Version Pinning (optional)
 # torch==2.1.0
