@@ -7,6 +7,7 @@ from core.utils.pdf_utils import pdf_to_images
 from core.utils.subtitle_parser import extract_frames_from_subtitle
 from PIL import Image
 import tempfile
+import base64
 
 st.set_page_config(page_title="OmniOCR Web", layout="centered")
 st.title("OmniOCR – Web Interface")
@@ -15,20 +16,24 @@ uploaded_file = st.file_uploader("Upload an image, PDF or subtitle:", type=["png
 engine_type = st.selectbox("Select OCR engine:", ["tesseract", "easyocr"])
 lang_code = st.text_input("OCR language code (e.g., eng, fas, jpn):", value="eng")
 
+ocr_engine = OCREngine(engine_type=engine_type, lang=lang_code)
+results = []
+
 if uploaded_file:
     file_bytes = uploaded_file.read()
     suffix = uploaded_file.name.split(".")[-1].lower()
-    ocr_engine = OCREngine(engine_type=engine_type, lang=lang_code)
 
     def render_and_ocr(image):
         st.image(image, caption="Input Frame", use_column_width=True)
         st.subheader("Detected Text")
         result = ocr_engine.recognize(image)
         st.code(result)
+        results.append(result)
         if st.checkbox("Auto-correct with AI", key=f"correct_{hash(result)}"):
             st.subheader("Corrected Text")
             corrected = correct_with_bert(result)
             st.code(corrected)
+            results[-1] = corrected
         st.markdown(f"**Language:** `{detect_language(result)}`")
 
     if suffix in ["png", "jpg", "jpeg"]:
@@ -58,3 +63,10 @@ if uploaded_file:
 
     else:
         st.warning("Unsupported format.")
+
+    if results:
+        full_text = "\n\n".join(results)
+        b64 = base64.b64encode(full_text.encode()).decode()
+        href = f'<a href="data:file/txt;base64,{b64}" download="omniocr_output.txt">Download Output as TXT</a>'
+        st.markdown("---")
+        st.markdown(href, unsafe_allow_html=True)
