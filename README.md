@@ -1,32 +1,55 @@
 # OmniOCR
 
-**Offline, multilingual OCR toolkit** for processing images, PDFs, and videos — with full support for Persian, Arabic, Chinese, Japanese, and more.
+**OmniOCR** is a powerful, offline-first, AI-augmented OCR toolkit with multilingual support, real-time processing, and a modular architecture.
 
-## Features
+---
 
-- Offline OCR with support for 100+ languages
-- Input formats: Image (PNG, JPG), PDF, subtitle video (sub/idx/mp4)
-- Output formats: `.txt`, `.pdf`, `.epub`, `.docx`, `.srt`, `.mobi`, `.azw3`
-- OCR engines:
-  - Tesseract (default)
-  - EasyOCR (optional)
-- Advanced preprocessing: deskew, contrast enhancement, CLAHE, adaptive threshold
-- Interfaces:
-  - Desktop GUI (PySide6)
-  - REST API (FastAPI)
-  - Web UI (Streamlit)
-  - Mobile (Compose Multiplatform)
+## ✅ Features
 
-## Quick Start
+- **Offline OCR** with Tesseract and EasyOCR  
+- **AI-powered post-processing** using ParsBERT  
+- **Auto language detection** (langdetect)  
+- **FastAPI + Streamlit interfaces**  
+- **Material 3 UI for Desktop and Mobile (Compose)**  
+- **Desktop GUI with PySide6 (Material-style QSS)**  
+- **Mobile UI via Compose Multiplatform (Android/iOS)**  
+- **PDF, subtitle, and image input support**
+
+---
+
+## 📦 Structure Overview
+
+OmniOCR/ ├── core/ │   ├── ocr_engine.py │   ├── preprocessor.py │   ├── postprocessor.py │   └── ai/ │       ├── lang_detect.py │       └── post_correction.py ├── desktop/ │   ├── main_window.py │   └── styles/material.qss ├── mobile/composeApp/ │   ├── Main.kt │   ├── ui/screens/MainScreen.kt │   ├── ui/theme/Theme.kt │   └── util/OcrHelper.kt ├── interface/ │   ├── api.py │   └── ui_streamlit.py ├── tests/ │   └── test_ocr.py ├── README.md, ROADMAP.md, ARCHITECTURE.md
+
+---
+
+## 🚀 Run Desktop App
 
 ```bash
-uvicorn api:app --reload
+python desktop/main_window.py
 ```
 
-Run Tests
+🌐 Run API
 
-python -m unittest test_ocr.py
+uvicorn interface.api:app --reload
 
-## License
+📊 Run Streamlit UI
 
-MIT — developed by @GeekNeuron
+```streamli
+run interface/ui_streamlit.py
+```
+
+---
+
+🧠 AI-Enhanced Roadmap
+
+OCR correction with BERT (✓)
+
+Realtime OCR + Queue (⧗)
+
+TrOCR/Donut integration (⬜)
+
+Table extraction, layout-aware parsing (⬜)
+
+
+See ROADMAP.md for full plan.
