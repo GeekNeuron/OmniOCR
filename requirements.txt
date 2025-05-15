@@ -1,7 +1,8 @@
 # Core OCR
 pytesseract
 opencv-python
-Pillow easyocr
+Pillow
+easyocr
 langdetect
 
 # AI
