@@ -1,0 +1,34 @@
+# Core OCR
+
+pytesseract opencv-python Pillow easyocr langdetect
+
+# AI
+
+transformers torch sentencepiece
+
+# Web/API
+
+fastapi uvicorn streamlit
+
+# CLI
+
+typer[all]
+
+# Desktop UI
+
+PySide6
+
+# Testing
+
+tqdm pytest pytest-mock
+
+# Optional Enhancements
+
+python-multipart scikit-image
+
+# Version Pinning (optional)
+
+# torch==2.1.0
+
+# transformers==4.39.0
+
