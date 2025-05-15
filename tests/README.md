@@ -21,19 +21,21 @@ This directory contains automated tests for OCR engines, CLI, API, and AI module
 Run with `pytest` from the root:
 ```bash
 pytest -v
+```
 
 Or test one file:
-
+```
 pytest tests/test_cli.py
-
+```
 
 ---
 
 ## 📁 Requirements
 
 Install all testing dependencies:
-
+```
 pip install -r requirements.txt
+```
 
 You must have OCR engines (Tesseract/EasyOCR) installed and working locally.
 
