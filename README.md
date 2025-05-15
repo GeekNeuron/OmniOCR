@@ -1,140 +1,112 @@
-# OmniOCR
+OmniOCR
 
-**OmniOCR** is a powerful, offline-first, AI-augmented OCR toolkit with multilingual support, real-time processing, and a modular architecture.
+OmniOCR is a modular, offline-first, AI-enhanced OCR toolkit with multilingual support. It supports image, subtitle, and document OCR across multiple platforms (Desktop, Web, Mobile).
 
----
-
-## ✅ Features
-
-- **Offline OCR** with Tesseract and EasyOCR  
-- **AI-powered post-processing** using ParsBERT  
-- **Auto language detection** (langdetect)  
-- **FastAPI + Streamlit interfaces**  
-- **Material 3 UI for Desktop and Mobile (Compose)**  
-- **Desktop GUI with PySide6 (Material-style QSS)**  
-- **Mobile UI via Compose Multiplatform (Android/iOS)**  
-- **PDF, subtitle, and image input support**
 
 ---
 
-## 📦 Structure Overview
-```
-OmniOCR/
-├── core/
-│   ├── ocr_engine.py
-│   ├── preprocessor.py
-│   ├── postprocessor.py
-│   └── ai/
-│       ├── lang_detect.py
-│       └── post_correction.py
-├── desktop/
-│   ├── main_window.py
-│   └── styles/material.qss
-├── mobile/composeApp/
-│   ├── Main.kt
-│   ├── ui/screens/MainScreen.kt
-│   ├── ui/theme/Theme.kt
-│   └── util/OcrHelper.kt
-├── interface/
-│   ├── api.py
-│   └── ui_streamlit.py
-├── omniocr/
-│   ├── cli.py
-│   └── __main__.py
-├── tests/
-│   └── test_ocr.py
-├── README.md, ROADMAP.md, ARCHITECTURE.md
-```
+🚀 Quickstart
 
----
+1. CLI Usage
 
-## 🚀 Run Desktop App
-```bash
-python desktop/main_window.py
-```
-
-## 🌐 Run API
-```bash
-uvicorn interface.api:app --reload
-```
-
-## 📊 Run Streamlit UI
-```bash
-streamlit run interface/ui_streamlit.py
-```
-
-## 🔁 CLI OCR
-```bash
-omniocr ocr input.jpg --lang fa --output result.txt
-```
-
----
-
-## 🤖 AI Enhancements
-
-| Feature         | Engine/Model                     |
-|----------------|----------------------------------|
-| Language detect| langdetect                       |
-| Correction     | HooshvareLab/parsbert-uncased    |
-| Future         | TrOCR, LayoutLM, Donut, Pegasus  |
-
----
-
-## 🌍 Supported Languages
-- ✅ Persian (فارسی), English, Arabic, Turkish  
-- 🧪 Chinese, Japanese (EasyOCR only)  
-- Configurable via `--lang` or auto-detected
-
----
-
-## 📦 Build & Distribute
-
-### Local Install
-```bash
 pip install .
-```
+omniocr ocr input.jpg --lang fa --output result.txt
 
-### Package
-```bash
-python -m build
-```
+2. Desktop App
 
-### Run from source
-```bash
-python -m omniocr ocr input.png
-```
+python desktop/main_window.py
 
----
+3. Web App
 
-## 🧱 Architecture
+streamlit run interface/ui_streamlit.py
 
-```mermaid
-flowchart TD
-    A[Image/PDF/Input] --> B[Preprocessing]
-    B --> C[OCR Engine]
-    C --> D[Lang Detect]
-    D --> E[AI Correction (BERT)]
-    E --> F[Output: CLI/API/GUI]
-```
+4. API
 
-More in [`ARCHITECTURE.md`](./ARCHITECTURE.md)
+uvicorn interface.api:app --reload
+
 
 ---
 
-## 🗺️ Roadmap Highlights
+🧩 Features
 
-- [x] Modular OCR engine  
-- [x] Desktop, Mobile, Web UIs  
-- [x] Language-aware correction  
-- [ ] Real-time OCR queue (Celery, ONNX GPU)  
-- [ ] Layout-aware models (Donut/LayoutLM)  
-- [ ] Table detection + CSV export  
-- [ ] Subtitle/EPUB OCR enhancements  
+OCR via Tesseract or EasyOCR
 
-See [`ROADMAP.md`](./ROADMAP.md) for full plan.
+AI-enhanced correction (ParsBERT)
+
+Lang detection (langdetect)
+
+Subtitle, PDF, image input
+
+Material Design UI (Desktop, Compose Mobile)
+
+Streamlit web UI
+
+REST API via FastAPI
+
+
 
 ---
 
-## 🔓 License
+📦 Dependencies
 
-MIT © [GeekNeuron](https://github.com/GeekNeuron)
+Install full environment:
+
+pip install -r requirements.txt
+
+Or use pyproject.toml for isolated build.
+
+
+---
+
+🧪 Examples
+
+# Persian OCR
+omniocr ocr sample.png --lang fa
+
+# English subtitle
+omniocr ocr movie.sub --lang en --engine easyocr
+
+
+---
+
+📁 Folder Structure
+
+OmniOCR/
+├── core/          ← OCR logic + AI
+├── interface/     ← FastAPI, Streamlit
+├── desktop/       ← PySide6 GUI
+├── mobile/        ← Compose Android/iOS
+├── omniocr/       ← CLI runner
+├── tests/         ← pytest
+
+
+---
+
+📚 Docs
+
+ARCHITECTURE.md
+
+ROADMAP.md
+
+release-note.md
+
+
+
+---
+
+🧠 Future
+
+TrOCR integration
+
+Layout-aware OCR (Donut, LayoutLM)
+
+Table and form extraction
+
+
+
+---
+
+📜 License
+
+MIT © GeekNeuron
+
