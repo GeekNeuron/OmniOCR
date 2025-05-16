@@ -1,22 +1,25 @@
-# Pull Request Template – OmniOCR
+# Pull Request
 
 ## Description
-Explain what this PR does. What feature, fix, or improvement?
+Please include a summary of the changes and the related issue(s).
 
-## Related Issues
-Closes #[issue number] or Link to discussions
+Fixes # (issue number)
 
-## Type of Change
+## Type of change
 - [ ] Bug fix
 - [ ] New feature
-- [ ] Documentation update
-- [ ] Refactor / performance
+- [ ] Breaking change
+- [ ] Refactor
+- [ ] Documentation
 
 ## Checklist
-- [ ] Code is PEP8 compliant
-- [ ] Tests added/updated
-- [ ] Docs updated
-- [ ] CI/CD passes
+- [ ] I have tested the changes locally
+- [ ] I have updated related documentation if applicable
+- [ ] My code follows the style of this project (PEP8 / formatters)
+- [ ] I have added tests for the changes
+
+## Screenshots or logs (optional)
+Paste output logs, screenshots, or relevant results here.
 
 ## Additional Notes
-Any extra context, screenshots, or dependencies?
+Mention anything relevant for reviewers.
