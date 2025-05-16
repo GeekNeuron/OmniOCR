@@ -12,31 +12,33 @@ We welcome contributions from developers, researchers, and users. Whether you're
 
 ## Code Guidelines
 
-* Use Python 3.8+ compatible syntax
-* Follow PEP8 style (enforced via `flake8`)
-* Write clear, modular, documented code
-* Add/update tests for new functionality
+- Use Python 3.8+ compatible syntax
+- Follow [PEP8](https://www.python.org/dev/peps/pep-0008/) style (enforced via `flake8`)
+- Write clear, modular, documented code
+- Add/update tests for any new functionality
 
 ## Feature Requests
 
-Open an issue using the `Feature Request` template and describe:
+Open an issue using the **Feature Request** template and describe:
 
-* Problem or need
-* Proposed solution
-* Expected benefits or use-case
+- Problem or need
+- Proposed solution
+- Expected benefits or use-case
 
 ## Bug Reports
 
 Please include:
 
-* Environment (OS, Python version)
-* Exact error message or stack trace
-* Steps to reproduce
+- Environment (OS, Python version)
+- Exact error message or stack trace
+- Steps to reproduce
 
 ## Community
 
-* Discussions: [GitHub Discussions](https://github.com/GeekNeuron/OmniOCR/discussions)
-* Issues: Open [here](https://github.com/GeekNeuron/OmniOCR/issues)
-* Maintainer: [@GeekNeuron](https://github.com/GeekNeuron)
+- Discussions: [GitHub Discussions](https://github.com/GeekNeuron/OmniOCR/discussions)
+- Issues: Open [here](https://github.com/GeekNeuron/OmniOCR/issues)
+- Maintainer: [@GeekNeuron](https://github.com/GeekNeuron)
+
+---
 
 Thank you for helping improve OmniOCR!
