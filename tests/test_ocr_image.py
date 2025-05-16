@@ -4,15 +4,22 @@ from PIL import Image
 
 @pytest.fixture
 def sample_image():
-    # Creates a blank white image for OCR testing
     return Image.new("RGB", (300, 100), color=(255, 255, 255))
 
 @pytest.fixture
-def dummy_engine():
+def tesseract_engine():
     return OCREngine(engine_type="tesseract", lang="eng")
 
-def test_ocr_on_blank_image(dummy_engine, sample_image):
-    text = dummy_engine.recognize(sample_image)
+@pytest.fixture
+def easyocr_engine():
+    return OCREngine(engine_type="easyocr", lang="en")
+
+def test_ocr_on_blank_image_tesseract(tesseract_engine, sample_image):
+    text = tesseract_engine.recognize(sample_image)
+    assert text.strip() == ""
+
+def test_ocr_on_blank_image_easyocr(easyocr_engine, sample_image):
+    text = easyocr_engine.recognize(sample_image)
     assert text.strip() == ""
 
 def test_engine_init():
