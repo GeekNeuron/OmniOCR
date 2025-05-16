@@ -1,8 +1,8 @@
-# Security Policy
+# SECURITY.md
 
 ## Supported Versions
 
-We release security updates for the latest major version.
+We currently support the latest major version:
 
 | Version | Supported |
 |---------|-----------|
@@ -11,14 +11,35 @@ We release security updates for the latest major version.
 
 ## Reporting a Vulnerability
 
-To report a vulnerability, please:
+To report a security vulnerability:
 
-1. Open a GitHub [security advisory](https://github.com/GeekNeuron/OmniOCR/security/advisories)
-2. Or contact the maintainer privately via GitHub profile email
-3. Include steps to reproduce, potential impact, and mitigation (if known)
+1. Open a private security advisory via [GitHub Advisories](https://github.com/GeekNeuron/OmniOCR/security/advisories)
+2. Or email: **geekneuron@protonmail.com** (GPG key below)
 
-We aim to respond within **72 hours**.
+All reports will be reviewed and investigated within **72 hours**.
 
----
+## GPG Public Key
 
-Thank you for helping keep OmniOCR secure!
+```text
+-----BEGIN PGP PUBLIC KEY BLOCK-----
+Version: GnuPG v2
+
+mQENBGCi0nABCAD+z
+... (your public key block here) ...
+=EXAMPLE
+-----END PGP PUBLIC KEY BLOCK-----
+```
+
+## CVE Disclosure
+
+We support responsible disclosure via GitHub + MITRE CVE assignment.
+
+If a CVE ID is required, we will coordinate issuance.
+
+## Bounty
+
+We currently do not run a paid bug bounty program, but high-impact vulnerabilities may be eligible for recognition or swag.
+
+## Thanks
+
+Thanks to all contributors and researchers who help keep OmniOCR secure!
