@@ -1,29 +1,36 @@
+# Welcome to OmniOCR
+
+**OmniOCR** is an open-source, multilingual OCR toolkit designed to handle images, PDFs, subtitles, and more — all with offline-first capabilities and optional AI-enhanced postprocessing.
+
+![OmniOCR Banner](https://raw.githubusercontent.com/GeekNeuron/OmniOCR/main/assets/omniocr-banner.png)
+
 ---
-layout: default
-title: OmniOCR
----
-
-# OmniOCR
-
-**Offline, multilingual OCR toolkit** for image, video, and PDF recognition. Works across **desktop and mobile** platforms.
-
-## Downloads
-- [Latest Release (GitHub)](https://github.com/GeekNeuron/OmniOCR/releases)
 
 ## Features
-- OCR for **Image / PDF / Video (Subtitles)**
-- Works **offline** — no internet needed
-- Export to: `.txt`, `.docx`, `.pdf`, `.epub`, `.mobi`, `.azw3`, `.srt`
-- Built with: Python (desktop), Kotlin Compose Multiplatform (mobile)
-
-## Platforms
-- **Windows / Linux / macOS** (GUI)
-- **Android / iOS** (Compose UI)
-
-## Get Started
-See full instructions and source at:
-[github.com/GeekNeuron/OmniOCR](https://github.com/GeekNeuron/OmniOCR)
+- **Multilingual OCR** (100+ languages)
+- **OCR Engines**: Tesseract + EasyOCR
+- **Image, PDF, and Subtitle (SRT/SUB) support**
+- **Offline-first**, no cloud dependency
+- **AI-Powered** post-correction with BERT
+- **Web UI, CLI, REST API**
 
 ---
 
-OmniOCR is free software maintained by [@GeekNeuron](https://github.com/GeekNeuron).
+## Why OmniOCR?
+- Easy to use and extend
+- Fully modular and testable
+- Designed for real-world documents, screenshots, and scanned pages
+- Built-in subtitle parsing and OCR
+
+---
+
+## Get Started
+To begin, see [Getting Started](getting-started.md) or jump directly into:
+
+- [Command Line Interface](cli.md)
+- [REST API](api.md)
+- [Frequently Asked Questions](faq.md)
+
+---
+
+MIT License | Made with ♥ by [GeekNeuron](https://github.com/GeekNeuron)
