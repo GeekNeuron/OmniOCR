@@ -18,8 +18,5 @@ Maintainers are responsible for clarifying standards...
 ## Scope
 Applies within all project spaces and when representing the project in public.
 
-## Enforcement
-Report abusive behavior to: geekneuron@protonmail.com
-
 ## Attribution
 Adapted from the [Contributor Covenant](https://www.contributor-covenant.org), version 2.1.
