@@ -24,6 +24,13 @@
 
 ---
 
+To use `tesserocr` backend, install:
+```bash
+pip install -r requirements-optional.txt
+```
+
+---
+
 ## Get Started
 To begin, see [Getting Started](getting-started.md) or jump directly into:
 
