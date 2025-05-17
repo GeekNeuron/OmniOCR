@@ -66,7 +66,7 @@ uvicorn OmniOCR/interface/api:app --reload
 docker-compose up --build
 ```
 
-To use 'tesserocr' backend, install:
+To use `tesserocr` backend, install:
 ```bash
 pip install -r requirements-optional.txt
 ```
