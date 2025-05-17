@@ -1,1 +1,2 @@
+# Optional OCR backend (requirs local Tesseract installation)
 tesserocr
