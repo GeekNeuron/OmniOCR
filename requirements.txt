@@ -1,36 +1,37 @@
-# Core OCR
+# Core OCR dependencies
+tesserocr
 pytesseract
-opencv-python
-Pillow
 easyocr
-langdetect
+pdf2image
+Pillow
+opencv-python
+python-docx
+python-bidi
+arabic-reshaper
+numpy
+scipy
 
-# AI
-transformers
-torch
-sentencepiece
+# Subtitle & document support
+chardet
+pysrt
+ebooklib
+beautifulsoup4
 
-# Web/API
+# CLI, API, UI
+typer[all]
 fastapi
-uvicorn
+uvicorn[standard]
 streamlit
 
-# CLI
-typer[all]
+# AI postprocessing
+transformers
+torch
 
-# Desktop UI
-PySide6
-
-# Testing
-tqdm
+# Test & Dev
 pytest
-pytest-mock
+coverage
+mkdocs
+mkdocs-material
 
-# Optional Enhancements
-python-multipart
-scikit-image
-
-# Version Pinning (optional)
-# torch==2.1.0
-# transformers==4.39.0
-
+# Windows compatibility
+pywin32; platform_system == "Windows"
