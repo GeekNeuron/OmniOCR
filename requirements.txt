@@ -17,7 +17,7 @@ ebooklib
 beautifulsoup4
 
 # CLI, API, UI
-typer[all]
+typer
 fastapi
 uvicorn[standard]
 streamlit
