@@ -75,7 +75,7 @@ streamlit run ui_streamlit.py
 
 ## Contributing
 
-We welcome contributors! Please read CONTRIBUTING.md before submitting a pull request.
+We welcome contributors! Please read [CONTRIBUTING.md](CONTRIBUTING.md) before submitting a pull request.
 
 ## License
 
