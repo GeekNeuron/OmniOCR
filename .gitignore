@@ -1,71 +1,41 @@
 # Byte-compiled / optimized / DLL files
 __pycache__/
 *.py[cod]
-*$py.class
+*.pyo
+*.so
 
-# Virtual environments
-.env
+# Virtual environment
 .venv/
 env/
 venv/
 
-# VSCode or JetBrains IDEs
+# VSCode & PyCharm
 .vscode/
 .idea/
 
-# Logs and debugging
+# Log files
 *.log
-*.tmp
-*.bak
 
-# OS junk files
+# Unit test & coverage
+htmlcov/
+.coverage
+.cache/
+*.cover
+nosetests.xml
+coverage.xml
+*.pytest_cache/
+
+# mkdocs build output
+site/
+
+# Output
+output/
+ocr_output.*
+
+# Models & data
+models/
+data/
+
+# OS
 .DS_Store
 Thumbs.db
-
-# Test results
-coverage/
-htmlcov/
-.tox/
-.nox/
-
-# Build artifacts
-build/
-dist/
-*.egg-info/
-
-# Python wheel
-*.whl
-
-# Docker
-*.pid
-*.tar
-
-# Streamlit cache
-.streamlit/
-
-# PySide6 UI designer
-*.ui
-
-# FastAPI autoreload
-**/__pycache__/
-**/*.pyc
-
-# Mobile build artifacts
-mobile/composeApp/.gradle/
-mobile/composeApp/build/
-mobile/composeApp/.idea/
-
-# Ignore subtitle output cache
-*.srt
-*.ass
-*.vtt
-*.idx
-*.sub
-
-# Ignore OCR outputs
-*.txt
-*.pdf
-*.epub
-*.docx
-*.mobi
-*.azw3
