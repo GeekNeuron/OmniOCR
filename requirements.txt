@@ -1,5 +1,4 @@
 # Core OCR dependencies
-tesserocr
 pytesseract
 easyocr
 pdf2image
