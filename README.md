@@ -1,135 +1,82 @@
 # OmniOCR
 
+> OmniOCR is a modular, offline-first OCR engine designed to extract text from images, PDFs, subtitles, and documents—supporting multilingual pipelines including Persian, Chinese, Japanese, Arabic, and more.
 
-
-> **OmniOCR** is a modular, offline-first Optical Character Recognition engine supporting image, PDF, and subtitle (SRT/SUB) inputs with multilingual and AI-enhanced text correction. Built with Python and designed for cross-platform use.
-
-
-
+![OmniOCR Logo](https://raw.githubusercontent.com/GeekNeuron/OmniOCR/main/docs/assets/logo.png)
 
 ---
 
 ## Features
 
-**Multilingual OCR** — Farsi, English, Arabic, Turkish, Chinese, Japanese, etc.
-
-**OCR Engines** — Tesseract + EasyOCR (pluggable)
-
-**AI Postprocessing** — BERT-based correction, auto language detection
-
-**Formats Supported** — `.png`, `.jpg`, `.pdf`, `.srt`, `.sub`, `.epub`
-
-**Interfaces:**
-
-CLI via [Typer](https://typer.tiangolo.com)
-
-Web UI via [Streamlit](https://streamlit.io)
-
-REST API via [FastAPI](https://fastapi.tiangolo.com)
-
-
-**Offline-first** — Runs without internet after setup
-
-**Cross-platform** — Windows, Linux, macOS, Android (WIP), iOS (WIP)
-
-**Export Options** — Text output, batch mode, format conversion
-
-
+- **Multi-engine support**: EasyOCR, Tesseract, optional tesserocr
+- **Multi-language OCR**: Over 100 languages including Farsi, Chinese, Japanese
+- **File formats**: image (PNG, JPG), PDF, subtitle (SRT, VTT), EPUB
+- **Interfaces**: CLI, FastAPI, Web UI (Streamlit)
+- **Post-processing**: Rule-based correction + transformer-based AI
+- **Batch processing** for folders or multi-page files
+- **Offline-first**, optionally enhanced with online models
 
 ---
 
 ## Installation
 
-# Install dependencies
+Install base dependencies:
+
 ```bash
-python -m venv .venv && source .venv/bin/activate
 pip install -r requirements.txt
 ```
-# Install OCR engines
-```bash
-sudo apt install tesseract-ocr tesseract-ocr-fas  # Linux
-```
-## CLI Usage
-```bash
-omniocr ocr path/to/image.jpg --lang fas+eng
-```
-## Web UI
-```bash
-streamlit run OmniOCR/interface/web_ui.py
-```
-## REST API
-```bash
-uvicorn OmniOCR/interface/api:app --reload
-```
-## Docker (optional)
-```bash
-docker-compose up --build
-```
----
+To enable optional OCR engine (tesserocr), run:
 
-To use `tesserocr` backend, install:
-```bash
 pip install -r requirements-optional.txt
-```
 
----
+> See Optional Engine Installation Guide for platform-specific help.
 
-## Architecture
 
-```mermaid
-flowchart LR
-    Input[Input File (Image / PDF / Subtitle)] --> Pre[Preprocessing]
-    Pre --> OCR[OCR Engine (Tesseract/EasyOCR)]
-    OCR --> AI[AI Correction (BERT)]
-    AI --> Out[Output (TXT / JSON / Export)]
-```
-## Project Structure
-```
-OmniOCR/
-├── core/           # OCR engines, pre/post processors, lang detection
-├── interface/      # CLI, Web API, Streamlit UI
-├── ui/             # Material theme & components
-├── data/           # Sample assets, fonts, models
-├── tools/          # Helpers: subtitle parser, epub export
-├── tests/          # Pytest test coverage
-├── .github/        # CI/CD, templates, security
-```
-## Test & Coverage
-```bash
-pytest tests/
-coverage run -m pytest && coverage report
-```
-## Contribution & Community
-
-[Contributing Guide](CONTRIBUTING.md)
-
-[Issue Templates](.github/ISSUE_TEMPLATE/)
-
-[Security Policy](SECURITY.md)
-
-Discussions: [GitHub Discussions](https://github.com/GeekNeuron/OmniOCR/discussions)
 
 
 ---
 
-## Roadmap Highlights
+Usage Examples
 
-- [x] Subtitle & PDF OCR
+Run OCR on an image:
 
-- [x] Web UI with Material theme
+omniocr ocr input.jpg --engine easyocr --lang fas+eng
 
-- [x] AI postprocessing
+Batch OCR on PDF:
 
-- [ ] Handwritten Farsi OCR
+omniocr batch input.pdf --output-dir output/ --lang eng+deu
 
-- [ ] Real-time OCR stream
+Run OCR API:
 
-- [ ] Mobile multiplatform UI (Compose)
+uvicorn api:app --reload
+
+Launch Streamlit UI:
+
+streamlit run ui_streamlit.py
 
 
 ---
 
-## License
+Documentation
 
-MIT © [GeekNeuron](https://github.com/GeekNeuron)
+Getting Started
 
+CLI Usage
+
+API Reference
+
+FAQ
+
+Optional Engines Setup
+
+
+
+---
+
+Contributing
+
+We welcome contributors! Please read CONTRIBUTING.md before submitting a pull request.
+
+License
+
+MIT © GeekNeuron
