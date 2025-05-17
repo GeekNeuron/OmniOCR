@@ -25,58 +25,58 @@ Install base dependencies:
 ```bash
 pip install -r requirements.txt
 ```
-To enable optional OCR engine (tesserocr), run:
-
+To enable optional OCR engine (`tesserocr`), run:
+```bash
 pip install -r requirements-optional.txt
-
-> See Optional Engine Installation Guide for platform-specific help.
+```
+> See [Optional Engine Installation Guide](docs/optional.md) for platform-specific help.
 
 
 
 
 ---
 
-Usage Examples
+## Usage Examples
 
-Run OCR on an image:
-
+### Run OCR on an image:
+```bash
 omniocr ocr input.jpg --engine easyocr --lang fas+eng
-
-Batch OCR on PDF:
-
+```
+### Batch OCR on PDF:
+```bash
 omniocr batch input.pdf --output-dir output/ --lang eng+deu
-
-Run OCR API:
-
+```
+### Run OCR API:
+```bash
 uvicorn api:app --reload
-
-Launch Streamlit UI:
-
+```
+### Launch Streamlit UI:
+```bash
 streamlit run ui_streamlit.py
+```
+
+---
+
+## Documentation
+
+- [Getting Started](docs/getting-started.md)
+
+- [CLI Usage](docs/cli.md)
+
+- [API Reference](docs/api.md)
+
+- [FAQ](docs/faq.md)
+
+- [Optional Engines Setup](docs/optional.md)
+
 
 
 ---
 
-Documentation
-
-Getting Started
-
-CLI Usage
-
-API Reference
-
-FAQ
-
-Optional Engines Setup
-
-
-
----
-
-Contributing
+## Contributing
 
 We welcome contributors! Please read CONTRIBUTING.md before submitting a pull request.
 
-License
+## License
 
-MIT © GeekNeuron
+MIT © [GeekNeuron](https://github.com/GeekNeuron)
