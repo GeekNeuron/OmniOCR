@@ -24,10 +24,10 @@
 ```bash
 # Ubuntu/Debian
 sudo apt install tesseract-ocr libtesseract-dev
-```
+
 # macOS (Homebrew)
 brew install tesseract
-
+```
 
 ---
 
