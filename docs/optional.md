@@ -51,5 +51,4 @@ omniocr ocr input.png --engine tesserocr
 
 ---
 
-### If installation fails, fallback to `easyocr` or `pytesseract`.
-For more help, open an issue on [GitHub](https://github.com/GeekNeuron/OmniOCR/issues).
+If installation fails, fallback to `easyocr` or `pytesseract`. For more help, open an issue on [GitHub](https://github.com/GeekNeuron/OmniOCR/issues).
