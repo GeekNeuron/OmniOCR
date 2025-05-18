@@ -10,8 +10,11 @@ theme:
 
 nav:
   - Home: index.md
-  - Getting Started: getting-started.md
+  - Getting Started: getting_started.md
   - CLI Usage: cli.md
   - API Reference: api.md
   - Optional Engines: optional.md
+  - Architecture: ARCHITECTURE.md
+  - Changelog: CHANGELOG.md
   - FAQ: faq.md
+  - Contributing: ../CONTRIBUTING.md
