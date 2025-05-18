@@ -1,0 +1,17 @@
+site_name: OmniOCR
+repo_url: https://github.com/GeekNeuron/OmniOCR
+
+theme:
+  name: material
+  language: en
+  palette:
+    primary: cyan
+    accent: light blue
+
+nav:
+  - Home: index.md
+  - Getting Started: getting-started.md
+  - CLI Usage: cli.md
+  - API Reference: api.md
+  - Optional Engines: optional.md
+  - FAQ: faq.md
