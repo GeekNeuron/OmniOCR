@@ -1,30 +1,43 @@
 /**
- * Post-processing Module for RTL Languages.
- * Cleans and normalizes text extracted from Persian and Arabic documents.
+ * Post-processing Module.
+ * Cleans and normalizes text extracted from the OCR engine.
  */
 export const Postprocessor = {
     /**
-     * Normalizes text by correcting common OCR errors for RTL scripts.
+     * Cleans the OCR output text based on the detected language.
      * @param {string} text - The raw text from the OCR engine.
+     * @param {string} lang - The language code used for OCR.
      * @returns {string} The cleaned and normalized text.
      */
-    normalizeRTL(text) {
+    cleanup(text, lang) {
         if (!text) return '';
 
-        // 1. Character Normalization (Arabic to Persian variants)
-        text = text.replace(/ي/g, 'ی')
-                   .replace(/ك/g, 'ک');
+        let cleanedText = text;
 
-        // 2. Fix common OCR mistakes for Persian/Arabic
-        text = text.replace(/ه /g, 'هٔ ');
+        // --- Step 1: Language-specific normalization (currently for RTL) ---
+        if (lang === 'fas' || lang === 'ara') {
+            // Normalize Arabic characters to their Persian counterparts
+            cleanedText = cleanedText.replace(/ي/g, 'ی').replace(/ك/g, 'ک');
+            
+            // Fix common "he" spacing issue
+            cleanedText = cleanedText.replace(/ه /g, 'هٔ ');
+        }
+        
+        // --- Step 2: Universal Spacing and Punctuation Cleanup ---
+        
+        // Normalize spacing around punctuation for all languages
+        // Removes space before punctuation and ensures one space after.
+        cleanedText = cleanedText.replace(/\s+([.,!?:;،؛؟])/g, '$1'); 
+        cleanedText = cleanedText.replace(/([.,!?:;،؛؟])([^\s.,!?:;،؛؟])/g, '$1 $2');
+        
+        // --- Step 3: Universal Whitespace Cleanup ---
+        
+        // Replace multiple newlines with a single one to avoid large empty gaps
+        cleanedText = cleanedText.replace(/(\n\s*){2,}/g, '\n\n');
+        
+        // Replace multiple spaces with a single space
+        cleanedText = cleanedText.replace(/ +/g, ' ');
 
-        // 3. Normalize spacing around punctuation
-        text = text.replace(/\s+([.,!?:;،؛؟])/g, '$1'); 
-        text = text.replace(/([.,!?:;،؛؟])(\S)/g, '$1 $2');
-
-        // 4. Trim whitespace from start, end, and remove multiple spaces
-        text = text.replace(/\s+/g, ' ').trim();
-
-        return text;
+        return cleanedText.trim();
     }
 };
