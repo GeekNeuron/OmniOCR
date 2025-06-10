@@ -1,4 +1,5 @@
 import { UI } from './ui.js';
+import { Preprocessor } from './preprocessor.js';
 
 export const OCR = {
     worker: null,
@@ -12,7 +13,6 @@ export const OCR = {
         this.worker = await Tesseract.createWorker(lang, 1, {
             logger: m => {
                 if (m.status === 'recognizing text') {
-                   // The progress object from Tesseract is a value between 0 and 1.
                    UI.updateProgress(`Recognizing text...`, m.progress);
                 }
             }
@@ -20,7 +20,7 @@ export const OCR = {
     },
 
     /**
-     * Performs OCR on a given image file.
+     * Performs OCR on a given image file after preprocessing it.
      * @param {File} imageFile - The image file to process.
      * @returns {Promise<string>} The extracted text.
      */
@@ -28,7 +28,12 @@ export const OCR = {
         if (!this.worker) {
             throw new Error("OCR engine is not initialized.");
         }
-        const { data: { text } } = await this.worker.recognize(imageFile);
+        
+        // Preprocess the image for better accuracy
+        UI.updateProgress('Preprocessing image...', 0.25); // Arbitrary progress point
+        const preprocessedImage = await Preprocessor.process(imageFile);
+
+        const { data: { text } } = await this.worker.recognize(preprocessedImage);
         return text;
     },
 
