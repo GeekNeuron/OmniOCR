@@ -1,7 +1,7 @@
 # OmniOCR (Web Version)
 
 <p align="center">
-  <img src="https://raw.githubusercontent.com/GeekNeuron/OmniOCR/main/docs/assets/logo.png" alt="OmniOCR Logo" width="120">
+  <img src="/favicon-512x512.png" alt="OmniOCR Logo" width="120">
 </p>
 
 <p align="center">
