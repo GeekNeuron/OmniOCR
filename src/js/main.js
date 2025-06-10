@@ -25,11 +25,8 @@ async function handleFile(file) {
             throw new Error('Unsupported file format. Please use JPG, PNG, or PDF.');
         }
 
-        // Apply post-processing for RTL languages
-        let finalText = rawText;
-        if (lang === 'fas' || lang === 'ara') {
-            finalText = Postprocessor.normalizeRTL(rawText);
-        }
+        // Apply universal post-processing for all languages
+        const finalText = Postprocessor.cleanup(rawText, lang);
         
         UI.displayResult(finalText);
 
