@@ -33,7 +33,7 @@
     --cell-error-bg-dark: #4a2e33;
     --cell-error-text-dark: #f8d7da;
     --input-error-border-dark: #e74c3c;
-    --cell-highlight-bg-dark: #1d4357; /* Added from your list */
+    --cell-highlight-bg-dark: #1d4357;
 }
 
 /* --- Base Styles & Theme Setup --- */
@@ -145,7 +145,7 @@ body {
 .light-theme .selected-option { background-color: var(--surface-light); border-color: var(--border-light); }
 .dark-theme .selected-option { background-color: var(--select-bg-dark); border-color: var(--select-border-dark); }
 
-.custom-select-wrapper:focus .selected-option, .custom-select-wrapper.open .selected-option {
+.custom-select-wrapper.open .selected-option {
     outline: none;
 }
 .light-theme .custom-select-wrapper.open .selected-option { box-shadow: 0 0 0 3px rgba(79, 70, 229, 0.2); border-color: var(--accent-light); }
@@ -162,38 +162,66 @@ body {
     transform: rotate(180deg);
 }
 
-.lang-options-list {
+.lang-options-panel {
     position: absolute;
     top: calc(100% + 8px);
     left: 0;
     width: 100%;
-    box-sizing: border-box; /* ** THIS IS THE KEY FIX FOR WIDTH ** */
+    box-sizing: border-box;
     list-style: none;
     margin: 0;
-    padding: 0.5rem;
     border-radius: 8px;
     border: 1px solid;
     z-index: 10;
-    max-height: 200px;
-    overflow-y: auto;
     box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
     opacity: 0;
     transform: translateY(-10px);
     pointer-events: none;
     transition: opacity 0.2s ease, transform 0.2s ease;
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
 }
-.lang-options-list:not(.hidden) {
+.lang-options-panel:not(.hidden) {
     opacity: 1;
     transform: translateY(0);
     pointer-events: auto;
 }
-.light-theme .lang-options-list { background-color: var(--bg-light); border-color: var(--border-light); }
-.dark-theme .lang-options-list { background-color: var(--container-bg-dark); border-color: var(--container-border-dark); }
+.light-theme .lang-options-panel { background-color: var(--bg-light); border-color: var(--border-light); }
+.dark-theme .lang-options-panel { background-color: var(--container-bg-dark); border-color: var(--container-border-dark); }
+
+.lang-search-input {
+    width: 100%;
+    padding: 0.75rem;
+    border: none;
+    border-bottom: 1px solid;
+    box-sizing: border-box;
+    font-size: 0.9rem;
+    font-family: var(--font-sans);
+}
+.light-theme .lang-search-input { border-color: var(--border-light); background-color: var(--surface-light); }
+.dark-theme .lang-search-input { border-color: var(--container-border-dark); background-color: var(--select-bg-dark); color: var(--select-text-dark); }
+.lang-search-input:focus {
+    outline: none;
+}
+.light-theme .lang-search-input:focus { border-color: var(--accent-light); }
+.dark-theme .lang-search-input:focus { border-color: var(--input-focus-border-dark); }
+
+.lang-options-list {
+    max-height: 220px;
+    overflow-y: auto;
+    padding: 0.5rem;
+    margin: 0;
+}
 
 .lang-options-list li {
     padding: 0.75rem;
     border-radius: 6px;
     transition: background-color 0.2s;
+    cursor: pointer;
+}
+.lang-options-list li.hidden {
+    display: none;
 }
 .lang-options-list li:hover, .lang-options-list li.selected {
     font-weight: 500;
@@ -274,11 +302,9 @@ body {
     margin-top: 1.5rem;
     padding: 0;
 }
-/* Adjust error container padding when it becomes visible */
 .error-container:not(.hidden) {
     padding: 1rem;
 }
-
 
 .dark-theme .status-text { color: var(--text-color-dark); }
 
