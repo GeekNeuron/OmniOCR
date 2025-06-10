@@ -2,6 +2,7 @@ import { UI } from './ui.js';
 import { OCR } from './ocr.js';
 import { PDFHandler } from './pdfHandler.js';
 import { Postprocessor } from './postprocessor.js';
+import { SUBHandler } from './subHandler.js'; // Import the new handler
 
 /**
  * Main application logic to handle file processing.
@@ -17,12 +18,16 @@ async function handleFile(file) {
         await OCR.initialize(lang);
 
         let rawText = '';
+        const fileExtension = file.name.split('.').pop().toLowerCase();
+
         if (file.type === 'application/pdf') {
             rawText = await PDFHandler.process(file);
         } else if (file.type.startsWith('image/')) {
             rawText = await OCR.recognize(file);
+        } else if (fileExtension === 'sub') {
+            rawText = await SUBHandler.process(file);
         } else {
-            throw new Error('Unsupported file format. Please use JPG, PNG, or PDF.');
+            throw new Error('Unsupported file format. Please use JPG, PNG, PDF, or SUB.');
         }
 
         // Apply universal post-processing for all languages
