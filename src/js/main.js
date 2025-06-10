@@ -9,18 +9,23 @@ let ocrEngineCache = { worker: null, lang: null };
 /**
  * Gets the OCR engine, either from cache or by initializing a new one.
  * This improves performance for sequential operations with the same language.
+ * @param {string} lang - The language code for the desired OCR engine.
+ * @returns {Promise<Tesseract.Worker>} The initialized Tesseract worker.
  */
 async function getOcrEngine(lang) {
+    // If a worker exists and is for the correct language, return the cached one.
     if (ocrEngineCache.worker && ocrEngineCache.lang === lang) {
         console.log("Using cached OCR engine.");
         return ocrEngineCache.worker;
     }
     
+    // If a worker exists but for a different language, terminate it first.
     console.log("Initializing new OCR engine...");
     if (ocrEngineCache.worker) {
         await ocrEngineCache.worker.terminate();
     }
     
+    // Create and cache the new worker.
     const worker = await OCR.initialize(lang);
     ocrEngineCache = { worker, lang };
     return worker;
@@ -61,6 +66,8 @@ async function handleFiles(files) {
         } else if (fileCache.sub) {
             UI.showSubtitlePrompt("SUB file received. Please add the corresponding IDX file.");
         }
+        // Do not terminate the worker here, so the user can continue with other files.
+        UI.fileInput.value = '';
         return; 
     }
 
@@ -69,6 +76,7 @@ async function handleFiles(files) {
         const file = files[0];
         const lang = UI.getSelectedLanguage();
         try {
+            // Use the caching function to get the worker
             const worker = await getOcrEngine(lang);
             let rawText = '';
 
@@ -87,12 +95,13 @@ async function handleFiles(files) {
             console.error('Processing Error:', error);
             UI.displayError(error.message || 'An unknown error occurred.');
         } finally {
-            UI.fileInput.value = '';
+            UI.fileInput.value = ''; // Allow re-uploading the same file
         }
     } else if (files.length > 1) {
         UI.displayError("Please upload only one file at a time (or a matching .sub/.idx pair).");
     }
 }
+
 
 function init() {
     UI.populateLanguageOptions();
