@@ -46,10 +46,10 @@
         <section id="drop-zone" class="drop-zone">
             <div class="drop-zone-prompt">
                 <svg class="drop-zone-icon" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 16a4 4 0 01-4-4V7a4 4 0 014-4h4a4 4 0 014 4v5a4 4 0 01-4 4H7z"></path><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M14 9l-3 3-3-3"></path></svg>
-                <p><strong>Drop your file here</strong> or click to select</p>
-                <span class="drop-zone-format">Supports JPG, PNG, PDF, SUB/IDX</span>
+                <p><strong>Drop your file(s) here</strong> or click to select</p>
+                <span class="drop-zone-format">Supports JPG, PNG, PDF, and SUB+IDX pairs</span>
             </div>
-            <input type="file" id="file-input" class="file-input" accept="image/png, image/jpeg, application/pdf, .sub, .idx">
+            <input type="file" id="file-input" class="file-input" accept="image/png, image/jpeg, application/pdf, .sub, .idx" multiple>
         </section>
 
         <section id="status-container" class="status-container hidden">
@@ -79,47 +79,5 @@
         <p>Created by <a href="https://github.com/GeekNeuron/OmniOCR" target="_blank" rel="noopener noreferrer" class="footer-link">GeekNeuron</a></p>
     </footer>
 
-    <!-- Subtitle Guide Modal -->
-    <div id="subtitle-modal-overlay" class="modal-overlay hidden">
-        <div id="subtitle-modal" class="modal-content">
-            <button id="modal-close-btn" class="modal-close-btn">&times;</button>
-            <h2 class="modal-title">Professional Subtitle OCR Guide</h2>
-            <p class="modal-subtitle">
-                For the highest accuracy with `.sub/.idx` files, including perfect timing, we recommend using the powerful open-source tool **Subtitle Edit**.
-            </p>
-            <div class="guide-steps">
-                <div class="step">
-                    <div class="step-number">1</div>
-                    <div class="step-content">
-                        <strong>Download Subtitle Edit</strong>
-                        <p>It's a free, safe, and professional tool for all subtitle tasks.</p>
-                        <a href="https://github.com/SubtitleEdit/subtitleedit/releases/latest" target="_blank" class="guide-link">Download Latest Version</a>
-                    </div>
-                </div>
-                <div class="step">
-                    <div class="step-number">2</div>
-                    <div class="step-content">
-                        <strong>Open Your File</strong>
-                        <p>Go to `File > Open` and select your `.sub` or `.idx` file.</p>
-                    </div>
-                </div>
-                <div class="step">
-                    <div class="step-number">3</div>
-                    <div class="step-content">
-                        <strong>Start OCR</strong>
-                        <p>A dialog will appear. Select the correct language and click "Start OCR". Correct any mistakes if needed.</p>
-                    </div>
-                </div>
-                <div class="step">
-                    <div class="step-number">4</div>
-                    <div class="step-content">
-                        <strong>Save as SRT</strong>
-                        <p>Once finished, go to `File > Save as` and choose the `SubRip (.srt)` format.</p>
-                    </div>
-                </div>
-            </div>
-            <p class="modal-footer">This method guarantees the best results for your subtitles.</p>
-        </div>
-    </div>
 </body>
 </html>
