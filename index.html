@@ -1,0 +1,82 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>OmniOCR by GeekNeuron</title>
+
+    <!-- Google Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;700&display=swap" rel="stylesheet">
+    
+    <!-- Custom Stylesheet -->
+    <link rel="stylesheet" href="src/css/style.css">
+
+    <!-- Libraries (defer to load after DOM) -->
+    <script src='https://cdn.jsdelivr.net/npm/tesseract.js@5/dist/tesseract.min.js' defer></script>
+    <script src="https://mozilla.github.io/pdf.js/build/pdf.js" defer></script>
+    
+    <!-- Main Application Logic -->
+    <script type="module" src="src/js/main.js" defer></script>
+</head>
+<body class="light-theme">
+    <div id="galaxy-bg"></div>
+
+    <main class="main-container">
+        <header class="app-header">
+            <h1 id="theme-toggle" class="title">OmniOCR</h1>
+            <p class="subtitle">Extract text from images and PDFs directly in your browser.</p>
+        </header>
+
+        <section id="controls-section" class="controls-section">
+            <div class="lang-selector-wrapper">
+                <label for="lang-select" class="sr-only">Language</label>
+                <select id="lang-select">
+                    <option value="eng" selected>English</option>
+                    <option value="fas">Persian (Farsi)</option>
+                    <option value="ara">Arabic</option>
+                    <option value="jpn">Japanese</option>
+                    <option value="chi_sim">Chinese (Simplified)</option>
+                </select>
+            </div>
+        </section>
+
+        <section id="drop-zone" class="drop-zone">
+            <div class="drop-zone-prompt">
+                <svg class="drop-zone-icon" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 16a4 4 0 01-4-4V7a4 4 0 014-4h4a4 4 0 014 4v5a4 4 0 01-4 4H7z"></path><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M14 9l-3 3-3-3"></path></svg>
+                <p><strong>Drop your file here</strong> or click to select</p>
+                <span class="drop-zone-format">Supports JPG, PNG, PDF</span>
+            </div>
+            <input type="file" id="file-input" class="file-input" accept="image/png, image/jpeg, application/pdf">
+        </section>
+
+        <section id="status-container" class="status-container hidden">
+            <p id="status-text" class="status-text">Processing...</p>
+            <div class="progress-bar-wrapper">
+                <div id="progress-bar" class="progress-bar"></div>
+            </div>
+        </section>
+
+        <section id="result-container" class="result-container hidden">
+            <div class="result-header">
+                <h2>Extracted Text</h2>
+                <button id="copy-btn">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" viewBox="0 0 16 16"><path d="M4 1.5H3a2 2 0 0 0-2 2V14a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2V3.5a2 2 0 0 0-2-2h-1v1h1a1 1 0 0 1 1 1V14a1 1 0 0 1-1 1H3a1 1 0 0 1-1-1V3.5a1 1 0 0 1 1-1h1v-1z"/><path d="M9.5 1a.5.5 0 0 1 .5.5v1a.5.5 0 0 1-.5.5h-3a.5.5 0 0 1-.5-.5v-1a.5.5 0 0 1 .5-.5h3zM-1 8a.5.5 0 0 1 .5-.5h15a.5.5 0 0 1 0 1H-.5A.5.5 0 0 1-1 8z"/></svg>
+                    <span>Copy</span>
+                </button>
+            </div>
+            <textarea id="result-text" readonly></textarea>
+        </section>
+
+        <div id="error-container" class="error-container hidden">
+            <p id="error-text">An error occurred.</p>
+        </div>
+    </main>
+
+    <footer class="app-footer">
+        <p>Created by GeekNeuron</p>
+    </footer>
+
+</body>
+</html>
