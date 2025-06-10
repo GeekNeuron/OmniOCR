@@ -23,7 +23,7 @@
 ---
 
 <p align="center">
-  <img src="https://i.imgur.com/gKk7c8W.png" alt="OmniOCR Application Screenshot" style="border-radius: 8px; max-width: 100%; width: 700px;">
+  <img src="/Screenshot.png" alt="OmniOCR Application Screenshot" style="border-radius: 8px; max-width: 100%; width: 700px;">
 </p>
 
 ## ✨ Features
