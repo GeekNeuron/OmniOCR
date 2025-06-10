@@ -1,116 +1,183 @@
-/* All previous CSS variables and styles remain the same */
+/* --- CSS Variables for Theming --- */
 :root {
     --font-sans: 'Inter', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
-    --bg-light: #ffffff; --text-primary-light: #111827; --text-secondary-light: #6b7280; --border-light: #e5e7eb; --accent-light: #4f46e5; --surface-light: #f9fafb;
-    --bg-color-dark: #0d1117; --text-color-dark: #c9d1d9; --container-bg-dark: #161b22; --container-border-dark: #30363d; --header-text-dark: #c9d1d9; --cell-readonly-bg-dark: #1e2732; --cell-readonly-text-dark: #c9d1d9; --cell-highlight-bg-dark: #1d4357; --cell-error-bg-dark: #4a2e33; --cell-error-text-dark: #f8d7da; --input-error-border-dark: #e74c3c; --button-bg-dark: #3282b8; --button-text-dark: #ffffff; --button-hover-bg-dark: #1d4357; --button-primary-bg-dark: #3282b8; --select-bg-dark: #161b22; --select-border-dark: #3282b8; --select-text-dark: #c9d1d9; --input-focus-border-dark: #3282b8;
-}
-body { font-family: var(--font-sans); margin: 0; transition: background-color 0.4s, color 0.4s; overflow-x: hidden; }
-.light-theme { background-color: var(--bg-light); color: var(--text-primary-light); }
-.dark-theme { background-color: var(--bg-color-dark); color: var(--text-color-dark); }
-#galaxy-bg { position: fixed; top: 0; left: 0; width: 200%; height: 200%; background: transparent url('https://www.transparenttextures.com/patterns/stardust.png'); background-size: 500px 500px; z-index: -1; opacity: 0; transition: opacity 0.8s ease-in-out; animation: move-galaxy 120s linear infinite; }
-.dark-theme #galaxy-bg { opacity: 0.3; }
-@keyframes move-galaxy { from { transform: translate(0, 0); } to { transform: translate(-50%, -50%); } }
-.main-container { min-height: calc(100vh - 80px); display: flex; flex-direction: column; align-items: center; justify-content: center; padding: 1rem 2rem; box-sizing: border-box; }
-.app-header { text-align: center; margin-bottom: 2rem; }
-.title { display: inline-block; font-size: 2.5rem; font-weight: 700; margin: 0; cursor: pointer; transition: color 0.4s; user-select: none; -webkit-tap-highlight-color: transparent; outline: none; }
-.title:focus { outline: none; }
-.light-theme .title { color: var(--text-primary-light); }
-.dark-theme .title { color: var(--header-text-dark); }
-.subtitle { font-size: 1.1rem; margin-top: 0.5rem; transition: color 0.4s; }
-.light-theme .subtitle { color: var(--text-secondary-light); }
-.dark-theme .subtitle { color: var(--text-color-dark); }
-/* ... other existing styles ... */
-.controls-section, #lang-select, .drop-zone, .status-container, .result-container, .error-container, .app-footer { /* existing styles */ }
-#result-text, #copy-btn { /* existing styles */ }
+    
+    /* Light Theme */
+    --bg-light: #ffffff;
+    --text-primary-light: #111827;
+    --text-secondary-light: #6b7280;
+    --border-light: #e5e7eb;
+    --accent-light: #4f46e5;
+    --accent-hover-light: #4338ca;
+    --surface-light: #f9fafb;
 
-/* ** NEW: Modal Styles ** */
-.modal-overlay {
+    /* Dark Theme (User Provided Palette) */
+    --bg-color-dark: #0d1117;
+    --text-color-dark: #c9d1d9;
+    --container-bg-dark: #161b22;
+    --container-border-dark: #30363d;
+    --header-text-dark: #c9d1d9;
+    --cell-readonly-bg-dark: #1e2732;
+    --cell-readonly-text-dark: #c9d1d9;
+    --cell-highlight-bg-dark: #1d4357;
+    --cell-error-bg-dark: #4a2e33;
+    --cell-error-text-dark: #f8d7da;
+    --input-error-border-dark: #e74c3c;
+    --button-bg-dark: #3282b8;
+    --button-text-dark: #ffffff;
+    --button-hover-bg-dark: #1d4357;
+    --button-primary-bg-dark: #3282b8;
+    --select-bg-dark: #161b22;
+    --select-border-dark: #3282b8;
+    --select-text-dark: #c9d1d9;
+    --input-focus-border-dark: #3282b8;
+}
+
+/* --- Base Styles & Theme Setup --- */
+body {
+    font-family: var(--font-sans);
+    margin: 0;
+    transition: background-color 0.4s, color 0.4s;
+    overflow-x: hidden;
+}
+.light-theme {
+    background-color: var(--bg-light);
+    color: var(--text-primary-light);
+}
+.dark-theme {
+    background-color: var(--bg-color-dark);
+    color: var(--text-color-dark);
+}
+
+/* --- Galaxy Background for Dark Theme --- */
+#galaxy-bg {
     position: fixed;
     top: 0;
     left: 0;
-    width: 100%;
-    height: 100%;
-    background-color: rgba(0, 0, 0, 0.6);
-    backdrop-filter: blur(5px);
+    width: 200%;
+    height: 200%;
+    background: transparent url('https://www.transparenttextures.com/patterns/stardust.png');
+    background-size: 500px 500px;
+    z-index: -1;
+    opacity: 0;
+    transition: opacity 0.8s ease-in-out;
+    animation: move-galaxy 120s linear infinite;
+}
+.dark-theme #galaxy-bg {
+    opacity: 0.3;
+}
+@keyframes move-galaxy {
+    from { transform: translate(0, 0); }
+    to { transform: translate(-50%, -50%); }
+}
+
+/* --- Main Layout --- */
+.main-container {
+    min-height: calc(100vh - 80px); /* Account for footer */
     display: flex;
+    flex-direction: column;
     align-items: center;
     justify-content: center;
-    z-index: 1000;
-    opacity: 0;
-    transition: opacity 0.3s ease;
+    padding: 1rem 2rem;
+    box-sizing: border-box;
 }
-.modal-overlay:not(.hidden) {
-    opacity: 1;
+.app-header {
+    text-align: center;
+    margin-bottom: 2rem;
 }
-.modal-content {
-    padding: 2rem 2.5rem;
-    border-radius: 16px;
-    width: 90%;
-    max-width: 600px;
-    position: relative;
-    transform: scale(0.95);
-    transition: transform 0.3s ease;
+.title {
+    display: inline-block;
+    font-size: 2.5rem;
+    font-weight: 700;
+    margin: 0;
+    cursor: pointer;
+    transition: color 0.4s;
+    user-select: none;
+    -webkit-tap-highlight-color: transparent;
+    outline: none;
 }
-.modal-overlay:not(.hidden) .modal-content {
-    transform: scale(1);
+.title:focus {
+    outline: none;
 }
+.light-theme .title { color: var(--text-primary-light); }
+.dark-theme .title { color: var(--header-text-dark); }
+.subtitle {
+    font-size: 1.1rem;
+    margin-top: 0.5rem;
+    transition: color 0.4s;
+}
+.light-theme .subtitle { color: var(--text-secondary-light); }
+.dark-theme .subtitle { color: var(--text-color-dark); }
+.controls-section { width: 100%; max-width: 500px; margin-bottom: 1.5rem; }
+#lang-select { width: 100%; padding: 0.75rem; border-radius: 8px; font-size: 1rem; border: 1px solid; appearance: none; transition: background-color 0.4s, border-color 0.4s, color 0.4s; }
+.light-theme #lang-select { background-color: var(--surface-light); border-color: var(--border-light); color: var(--text-primary-light); }
+.dark-theme #lang-select { background-color: var(--select-bg-dark); border-color: var(--select-border-dark); color: var(--select-text-dark); }
+.dark-theme #lang-select:focus { border-color: var(--input-focus-border-dark); box-shadow: 0 0 0 3px rgba(50, 130, 184, 0.3); }
+.drop-zone { width: 100%; max-width: 500px; padding: 2.5rem; border: 2px dashed; border-radius: 12px; display: flex; align-items: center; justify-content: center; cursor: pointer; transition: border-color 0.3s, background-color 0.3s; position: relative; box-sizing: border-box; }
+.light-theme .drop-zone { border-color: var(--border-light); }
+.dark-theme .drop-zone { border-color: var(--container-border-dark); background-color: var(--container-bg-dark); }
+.dark-theme .drop-zone.drag-over { background-color: var(--cell-highlight-bg-dark); border-color: var(--select-border-dark); }
+.drop-zone-prompt { text-align: center; }
+.drop-zone-prompt .drop-zone-icon { width: 2.5rem; height: 2.5rem; margin: 0 auto 0.5rem; }
+.dark-theme .drop-zone-prompt { color: var(--text-color-dark); }
+.file-input { position: absolute; top: 0; left: 0; width: 100%; height: 100%; opacity: 0; cursor: pointer; }
+.status-container { width: 100%; max-width: 500px; margin-top: 1.5rem; }
+.dark-theme .status-text { color: var(--text-color-dark); }
+.dark-theme .progress-bar-wrapper { background-color: var(--cell-border-dark); }
+.dark-theme .progress-bar { background-color: var(--button-primary-bg-dark); }
+.progress-bar-wrapper { width: 100%; height: 8px; border-radius: 4px; overflow: hidden; }
+.progress-bar { width: 0%; height: 100%; transition: width 0.3s ease; }
+.light-theme .progress-bar { background-color: var(--accent-light); }
+.result-container { width: 100%; max-width: 500px; margin-top: 1.5rem; }
+.result-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 0.75rem; }
+.result-header h2 { font-size: 1.25rem; font-weight: 700; margin: 0; }
+#copy-btn { display: inline-flex; align-items: center; gap: 0.5rem; padding: 0.5rem 1rem; border: none; border-radius: 6px; font-size: 0.9rem; font-family: var(--font-sans); cursor: pointer; transition: background-color 0.3s, color 0.3s, border-color 0.3s; }
+.light-theme #copy-btn { background-color: var(--surface-light); color: var(--text-primary-light); border: 1px solid var(--border-light); }
+.dark-theme #copy-btn { background-color: var(--button-bg-dark); color: var(--button-text-dark); border: 1px solid var(--button-bg-dark); }
+.light-theme #copy-btn:hover { background-color: #f3f4f6; }
+.dark-theme #copy-btn:hover { background-color: var(--button-hover-bg-dark); border-color: var(--button-hover-bg-dark); }
+#result-text { width: 100%; height: 250px; padding: 1rem; border-radius: 8px; border: 1px solid; font-size: 1rem; line-height: 1.6; resize: vertical; box-sizing: border-box; }
+.light-theme #result-text { background-color: var(--surface-light); border-color: var(--border-light); color: var(--text-primary-light); }
+.dark-theme #result-text { background-color: var(--cell-readonly-bg-dark); border-color: var(--container-border-dark); color: var(--cell-readonly-text-dark); }
+.dark-theme #result-text:focus { border-color: var(--input-focus-border-dark); outline: none; box-shadow: 0 0 0 3px rgba(50, 130, 184, 0.3); }
+.error-container { width: 100%; max-width: 500px; margin-top: 1.5rem; padding: 1rem; border-radius: 8px; border: 1px solid; }
+.light-theme .error-container { background-color: #fef2f2; color: #b91c1c; border-color: #fecaca; }
+.dark-theme .error-container { background-color: var(--cell-error-bg-dark); color: var(--cell-error-text-dark); border-color: var(--input-error-border-dark); }
+.app-footer { width: 100%; text-align: center; padding: 1rem; box-sizing: border-box; font-size: 0.9rem; }
+.light-theme .app-footer { color: var(--text-secondary-light); }
+.dark-theme .app-footer { color: var(--text-color-dark); }
+.footer-link { text-decoration: none; transition: color 0.3s; }
+.light-theme .footer-link { color: var(--accent-light); }
+.dark-theme .footer-link { color: var(--select-border-dark); }
+.footer-link:hover { text-decoration: underline; }
+.modal-overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background-color: rgba(0, 0, 0, 0.6); backdrop-filter: blur(5px); display: flex; align-items: center; justify-content: center; z-index: 1000; opacity: 0; transition: opacity 0.3s ease; }
+.modal-overlay:not(.hidden) { opacity: 1; }
+.modal-content { padding: 2rem 2.5rem; border-radius: 16px; width: 90%; max-width: 600px; position: relative; transform: scale(0.95); transition: transform 0.3s ease; }
+.modal-overlay:not(.hidden) .modal-content { transform: scale(1); }
 .light-theme .modal-content { background-color: var(--bg-light); }
 .dark-theme .modal-content { background-color: var(--container-bg-dark); border: 1px solid var(--container-border-dark); }
-
-.modal-close-btn {
-    position: absolute;
-    top: 1rem;
-    right: 1rem;
-    background: none;
-    border: none;
-    font-size: 2rem;
-    cursor: pointer;
-    line-height: 1;
-}
+.modal-close-btn { position: absolute; top: 1rem; right: 1rem; background: none; border: none; font-size: 2rem; cursor: pointer; line-height: 1; }
 .light-theme .modal-close-btn { color: var(--text-secondary-light); }
 .dark-theme .modal-close-btn { color: var(--text-color-dark); }
-
 .modal-title { margin: 0 0 0.5rem 0; font-size: 1.75rem; font-weight: 700; }
 .modal-subtitle { margin: 0 0 2rem 0; font-size: 1rem; line-height: 1.6; }
 .light-theme .modal-subtitle { color: var(--text-secondary-light); }
 .dark-theme .modal-subtitle { color: var(--text-color-dark); }
-
 .guide-steps { display: flex; flex-direction: column; gap: 1.5rem; }
 .step { display: flex; align-items: flex-start; gap: 1rem; }
-.step-number {
-    flex-shrink: 0;
-    width: 2.5rem;
-    height: 2.5rem;
-    border-radius: 50%;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    font-weight: 700;
-    font-size: 1.25rem;
-}
+.step-number { flex-shrink: 0; width: 2.5rem; height: 2.5rem; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-weight: 700; font-size: 1.25rem; }
 .light-theme .step-number { background-color: var(--surface-light); border: 1px solid var(--border-light); }
 .dark-theme .step-number { background-color: var(--container-border-dark); }
 .step-content p { margin: 0.25rem 0 0 0; line-height: 1.5; }
 .light-theme .step-content p { color: var(--text-secondary-light); }
 .dark-theme .step-content p { color: var(--text-color-dark); }
-
-.guide-link {
-    display: inline-block;
-    margin-top: 0.5rem;
-    padding: 0.5rem 1rem;
-    border-radius: 6px;
-    text-decoration: none;
-    font-weight: 500;
-    transition: background-color 0.2s;
-}
+.guide-link { display: inline-block; margin-top: 0.5rem; padding: 0.5rem 1rem; border-radius: 6px; text-decoration: none; font-weight: 500; transition: background-color 0.2s; }
 .light-theme .guide-link { background-color: var(--accent-light); color: white; }
 .dark-theme .guide-link { background-color: var(--button-bg-dark); color: var(--button-text-dark); }
 .light-theme .guide-link:hover { background-color: var(--accent-hover-light); }
 .dark-theme .guide-link:hover { background-color: var(--button-hover-bg-dark); }
-
 .modal-footer { margin-top: 2rem; font-size: 0.9rem; text-align: center; }
 .light-theme .modal-footer { color: var(--text-secondary-light); }
 .dark-theme .modal-footer { color: var(--text-color-dark); }
-
-/* Utility classes remain the same */
 .hidden { display: none !important; }
+.sr-only { position: absolute; width: 1px; height: 1px; padding: 0; margin: -1px; overflow: hidden; clip: rect(0, 0, 0, 0); white-space: nowrap; border-width: 0; }
