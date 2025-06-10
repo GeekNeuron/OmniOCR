@@ -2,7 +2,6 @@ import { UI } from './ui.js';
 import { OCR } from './ocr.js';
 import { PDFHandler } from './pdfHandler.js';
 import { Postprocessor } from './postprocessor.js';
-// ** MODIFICATION: Replace old parsers with the new professional handler **
 import { SubtitleHandler } from './subtitleHandler.js';
 
 const fileCache = { idx: null, sub: null };
@@ -28,35 +27,6 @@ async function getOcrEngine(lang) {
 }
 
 /**
- * Handles the logic for processing a pair of .sub and .idx files.
- */
-async function handleSubtitleFiles() {
-    const { idx, sub } = fileCache;
-    const lang = UI.getSelectedLanguage();
-    try {
-        const worker = await getOcrEngine(lang);
-        
-        // ** MODIFICATION: Use the new SubtitleHandler instead of manual parsing **
-        const srtOutput = await SubtitleHandler.process(sub, idx, worker, lang);
-        
-        if (!srtOutput) {
-            throw new Error("No text could be extracted from the subtitle files.");
-        }
-        
-        UI.displayResult(srtOutput, 'srt');
-        
-    } catch (error) {
-        console.error('Subtitle Processing Error:', error);
-        UI.displayError(error.message || 'An error occurred during subtitle processing.');
-    } finally {
-        // Clear cache and file input for the next operation
-        fileCache.idx = null;
-        fileCache.sub = null;
-        UI.fileInput.value = '';
-    }
-}
-
-/**
  * Main file handling logic. Routes files to the correct processor.
  */
 async function handleFiles(files) {
@@ -78,43 +48,52 @@ async function handleFiles(files) {
         }
     }
 
-    if (hasSub || hasIdx) {
-        if (fileCache.idx && fileCache.sub) {
-            handleSubtitleFiles();
-        } else if (fileCache.idx) {
-            UI.showSubtitlePrompt("IDX file received. Please add the corresponding SUB file.");
-        } else if (fileCache.sub) {
-            UI.showSubtitlePrompt("SUB file received. Please add the corresponding IDX file.");
-        }
-        return; 
-    }
+    const lang = UI.getSelectedLanguage();
+    try {
+        let rawText = '';
+        let fileType = 'txt';
 
-    // --- Standard File Processing for Single Files ---
-    if (files.length === 1) {
-        const file = files[0];
-        const lang = UI.getSelectedLanguage();
-        try {
+        if (hasSub || hasIdx) {
+            if (fileCache.idx && fileCache.sub) {
+                const worker = await getOcrEngine(lang);
+                rawText = await SubtitleHandler.process(fileCache.sub, fileCache.idx, worker, lang);
+                fileType = 'srt';
+            } else if (fileCache.idx) {
+                UI.showSubtitlePrompt("IDX file received. Please add the corresponding SUB file.");
+                return;
+            } else if (fileCache.sub) {
+                UI.showSubtitlePrompt("SUB file received. Please add the corresponding IDX file.");
+                return;
+            }
+        } else if (files.length === 1) {
+            const file = files[0];
             const worker = await getOcrEngine(lang);
-            let rawText = '';
-
             if (file.type === 'application/pdf') {
                 rawText = await PDFHandler.process(file, worker);
             } else if (file.type.startsWith('image/')) {
                 rawText = await OCR.recognize(file, worker);
             } else {
-                throw new Error('Unsupported file format. Please use JPG, PNG, or PDF.');
+                throw new Error('Unsupported file format. Please use JPG, PNG, PDF, or a SUB+IDX pair.');
             }
+        } else if (files.length > 1) {
+            throw new Error("Please upload only one file at a time (or a matching .sub/.idx pair).");
+        }
 
-            const finalText = Postprocessor.cleanup(rawText, lang);
-            UI.displayResult(finalText, 'txt');
-        } catch (error) {
-            console.error('Processing Error:', error);
-            UI.displayError(error.message || 'An unknown error occurred.');
-        } finally {
+        if (rawText) {
+             const finalText = Postprocessor.cleanup(rawText, lang);
+             UI.displayResult(finalText, fileType);
+        }
+
+    } catch (error) {
+        console.error('Processing Error:', error);
+        UI.displayError(error.message || 'An unknown error occurred.');
+    } finally {
+        // Reset cache and input only if not waiting for a paired file
+        if (!((hasSub && !hasIdx) || (hasIdx && !hasSub))) {
+            fileCache.idx = null;
+            fileCache.sub = null;
             UI.fileInput.value = '';
         }
-    } else if (files.length > 1) {
-        UI.displayError("Please upload only one file at a time (or a matching .sub/.idx pair).");
     }
 }
 
