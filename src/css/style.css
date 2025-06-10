@@ -136,7 +136,7 @@ body {
     border-radius: 8px;
     font-size: 1rem;
     border: 1px solid;
-    transition: background-color 0.4s, border-color 0.4s;
+    transition: background-color 0.4s, border-color 0.4s, box-shadow 0.2s;
 }
 .light-theme .selected-option { background-color: var(--surface-light); border-color: var(--border-light); }
 .dark-theme .selected-option { background-color: var(--select-bg-dark); border-color: var(--select-border-dark); }
@@ -144,8 +144,8 @@ body {
 .custom-select-wrapper:focus .selected-option, .custom-select-wrapper.open .selected-option {
     outline: none;
 }
-.light-theme .custom-select-wrapper:focus .selected-option { box-shadow: 0 0 0 3px rgba(79, 70, 229, 0.2); }
-.dark-theme .custom-select-wrapper:focus .selected-option { border-color: var(--input-focus-border-dark); box-shadow: 0 0 0 3px rgba(50, 130, 184, 0.3); }
+.light-theme .custom-select-wrapper.open .selected-option { box-shadow: 0 0 0 3px rgba(79, 70, 229, 0.2); border-color: var(--accent-light); }
+.dark-theme .custom-select-wrapper.open .selected-option { border-color: var(--input-focus-border-dark); box-shadow: 0 0 0 3px rgba(50, 130, 184, 0.3); }
 
 .dropdown-arrow {
     width: 1.25rem;
@@ -163,6 +163,7 @@ body {
     top: calc(100% + 8px);
     left: 0;
     width: 100%;
+    box-sizing: border-box; /* ** THIS IS THE KEY FIX FOR WIDTH ** */
     list-style: none;
     margin: 0;
     padding: 0.5rem;
@@ -172,16 +173,18 @@ body {
     max-height: 200px;
     overflow-y: auto;
     box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
-    transition: opacity 0.2s, transform 0.2s;
-}
-.light-theme .lang-options-list { background-color: var(--bg-light); border-color: var(--border-light); }
-.dark-theme .lang-options-list { background-color: var(--container-bg-dark); border-color: var(--container-border-dark); }
-
-.lang-options-list.hidden {
     opacity: 0;
     transform: translateY(-10px);
     pointer-events: none;
+    transition: opacity 0.2s ease, transform 0.2s ease;
 }
+.lang-options-list:not(.hidden) {
+    opacity: 1;
+    transform: translateY(0);
+    pointer-events: auto;
+}
+.light-theme .lang-options-list { background-color: var(--bg-light); border-color: var(--border-light); }
+.dark-theme .lang-options-list { background-color: var(--container-bg-dark); border-color: var(--container-border-dark); }
 
 .lang-options-list li {
     padding: 0.75rem;
@@ -193,7 +196,6 @@ body {
 }
 .light-theme .lang-options-list li:hover { background-color: var(--surface-light); }
 .dark-theme .lang-options-list li:hover { background-color: var(--cell-highlight-bg-dark); }
-
 .light-theme .lang-options-list li.selected { background-color: #eef2ff; color: var(--accent-light); }
 .dark-theme .lang-options-list li.selected { background-color: var(--button-bg-dark); color: var(--button-text-dark); }
 
@@ -203,9 +205,27 @@ body {
 .dark-theme .drop-zone { border-color: var(--container-border-dark); background-color: var(--container-bg-dark); }
 .dark-theme .drop-zone.drag-over { background-color: var(--cell-highlight-bg-dark); border-color: var(--select-border-dark); }
 .file-input { position: absolute; top: 0; left: 0; width: 100%; height: 100%; opacity: 0; cursor: pointer; }
-.status-container, .result-container, .error-container { transition: opacity 0.3s ease, transform 0.3s ease; }
-.hidden { opacity: 0; transform: translateY(10px); pointer-events: none; display: block !important; height: 0; overflow: hidden; margin-top: 0; }
-.status-container:not(.hidden), .result-container:not(.hidden), .error-container:not(.hidden) { opacity: 1; transform: translateY(0); height: auto; overflow: visible; margin-top: 1.5rem; }
+
+.status-container, .result-container, .error-container {
+    transition: opacity 0.3s ease, transform 0.3s ease, height 0.3s ease, margin 0.3s ease;
+}
+.hidden {
+    opacity: 0;
+    transform: translateY(10px);
+    pointer-events: none;
+    height: 0 !important; /* Use important to override other styles */
+    margin-top: 0 !important;
+    margin-bottom: 0 !important;
+    padding-top: 0 !important;
+    padding-bottom: 0 !important;
+    overflow: hidden;
+}
+.status-container, .result-container, .error-container {
+    width: 100%;
+    max-width: 500px;
+    height: auto;
+    margin-top: 1.5rem;
+}
 .progress-bar-wrapper { width: 100%; height: 8px; border-radius: 4px; overflow: hidden; }
 .light-theme .progress-bar-wrapper { background-color: var(--border-light); }
 .dark-theme .progress-bar-wrapper { background-color: var(--container-border-dark); }
