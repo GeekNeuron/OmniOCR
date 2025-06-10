@@ -142,8 +142,8 @@ body {
     position: relative;
     display: inline-block;
     width: 34px;
-    height: 18px;
-    -webkit-tap-highlight-color: transparent; /* Removes tap highlight on mobile */
+    height: 18px; 
+    -webkit-tap-highlight-color: transparent;
 }
 .switch input {
     opacity: 0;
@@ -183,12 +183,13 @@ input:checked + .slider {
 }
 
 input:focus + .slider {
-    box-shadow: none; /* Removes focus outline */
+    box-shadow: none;
 }
 
 input:checked + .slider:before {
     transform: translateX(16px);
 }
+
 
 /* --- Custom Select (Dropdown) Styles --- */
 .custom-select-wrapper {
@@ -196,6 +197,12 @@ input:checked + .slider:before {
     width: 100%;
     cursor: pointer;
     user-select: none;
+    transition: opacity 0.3s;
+}
+.custom-select-wrapper.disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+    pointer-events: none;
 }
 .selected-option {
     display: flex;
