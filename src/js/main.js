@@ -2,33 +2,87 @@ import { UI } from './ui.js';
 import { OCR } from './ocr.js';
 import { PDFHandler } from './pdfHandler.js';
 import { Postprocessor } from './postprocessor.js';
+import { IDXParser } from './idx-parser.js';
+import { SUBParser } from './sub-parser.js';
 
 const fileCache = { idx: null, sub: null };
 let ocrEngineCache = { worker: null, lang: null };
 
 /**
  * Gets the OCR engine, either from cache or by initializing a new one.
- * This improves performance for sequential operations with the same language.
- * @param {string} lang - The language code for the desired OCR engine.
- * @returns {Promise<Tesseract.Worker>} The initialized Tesseract worker.
  */
 async function getOcrEngine(lang) {
-    // If a worker exists and is for the correct language, return the cached one.
     if (ocrEngineCache.worker && ocrEngineCache.lang === lang) {
         console.log("Using cached OCR engine.");
         return ocrEngineCache.worker;
     }
     
-    // If a worker exists but for a different language, terminate it first.
     console.log("Initializing new OCR engine...");
     if (ocrEngineCache.worker) {
         await ocrEngineCache.worker.terminate();
     }
     
-    // Create and cache the new worker.
     const worker = await OCR.initialize(lang);
     ocrEngineCache = { worker, lang };
     return worker;
+}
+
+/**
+ * Handles the logic for processing a pair of .sub and .idx files.
+ */
+async function handleSubtitleFiles() {
+    const { idx, sub } = fileCache;
+    const lang = UI.getSelectedLanguage();
+    try {
+        const worker = await getOcrEngine(lang);
+        const idxContent = await idx.text();
+        const subBuffer = await sub.arrayBuffer();
+        const metadata = IDXParser.parse(idxContent);
+        
+        let srtOutput = '';
+        let subtitleCounter = 1;
+
+        for (let i = 0; i < metadata.length; i++) {
+            UI.updateProgress(`Processing subtitle ${subtitleCounter} of ${metadata.length}...`, i / metadata.length);
+            const canvas = SUBParser.renderImageAt(subBuffer, metadata[i].filepos);
+            if (canvas) {
+                const text = await OCR.recognize(canvas, worker);
+                const cleanedText = Postprocessor.cleanup(text, lang).trim();
+                if (cleanedText) {
+                    const startTime = metadata[i].timestamp;
+                    const endTime = metadata[i + 1] ? metadata[i + 1].timestamp : getEndTime(startTime);
+                    srtOutput += `${subtitleCounter++}\n${startTime} --> ${endTime}\n${cleanedText}\n\n`;
+                }
+            }
+        }
+        
+        if (!srtOutput) {
+            throw new Error("No text could be extracted from the subtitle files.");
+        }
+        
+        UI.displayResult(srtOutput, 'srt');
+        
+    } catch (error) {
+        console.error('Subtitle Processing Error:', error);
+        UI.displayError(error.message || 'An error occurred during subtitle processing.');
+    } finally {
+        // Clear cache and file input for the next operation
+        fileCache.idx = null;
+        fileCache.sub = null;
+        UI.fileInput.value = '';
+    }
+}
+
+/**
+ * Calculates a default end time by adding 2 seconds.
+ */
+function getEndTime(startTime) {
+    const parts = startTime.match(/(\d+):(\d+):(\d+),(\d+)/);
+    let [, hours, minutes, seconds, ms] = parts.map(Number);
+    seconds += 2; // Add 2 seconds
+    if (seconds >= 60) { minutes += 1; seconds -= 60; }
+    if (minutes >= 60) { hours += 1; minutes -= 60; }
+    return `${String(hours).padStart(2, '0')}:${String(minutes).padStart(2, '0')}:${String(seconds).padStart(2, '0')},${String(ms).padStart(3, '0')}`;
 }
 
 /**
@@ -55,19 +109,12 @@ async function handleFiles(files) {
 
     if (hasSub || hasIdx) {
         if (fileCache.idx && fileCache.sub) {
-            UI.showSubtitlePrompt("For best results, please use a dedicated tool like Subtitle Edit for .sub/.idx files.");
-            setTimeout(() => {
-                UI.reset();
-                fileCache.idx = null;
-                fileCache.sub = null;
-            }, 4000);
+            handleSubtitleFiles();
         } else if (fileCache.idx) {
             UI.showSubtitlePrompt("IDX file received. Please add the corresponding SUB file.");
         } else if (fileCache.sub) {
             UI.showSubtitlePrompt("SUB file received. Please add the corresponding IDX file.");
         }
-        // Do not terminate the worker here, so the user can continue with other files.
-        UI.fileInput.value = '';
         return; 
     }
 
@@ -76,7 +123,6 @@ async function handleFiles(files) {
         const file = files[0];
         const lang = UI.getSelectedLanguage();
         try {
-            // Use the caching function to get the worker
             const worker = await getOcrEngine(lang);
             let rawText = '';
 
@@ -89,19 +135,17 @@ async function handleFiles(files) {
             }
 
             const finalText = Postprocessor.cleanup(rawText, lang);
-            UI.displayResult(finalText);
-
+            UI.displayResult(finalText, 'txt');
         } catch (error) {
             console.error('Processing Error:', error);
             UI.displayError(error.message || 'An unknown error occurred.');
         } finally {
-            UI.fileInput.value = ''; // Allow re-uploading the same file
+            UI.fileInput.value = '';
         }
     } else if (files.length > 1) {
         UI.displayError("Please upload only one file at a time (or a matching .sub/.idx pair).");
     }
 }
-
 
 function init() {
     UI.populateLanguageOptions();
