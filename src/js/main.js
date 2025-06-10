@@ -1,7 +1,7 @@
 import { UI } from './ui.js';
 import { OCR } from './ocr.js';
 import { PDFHandler } from './pdfHandler.js';
-import './preprocessor.js'; // Ensure the preprocessor module is included
+import { Postprocessor } from './postprocessor.js';
 
 /**
  * Main application logic to handle file processing.
@@ -16,16 +16,22 @@ async function handleFile(file) {
     try {
         await OCR.initialize(lang);
 
-        let resultText = '';
+        let rawText = '';
         if (file.type === 'application/pdf') {
-            resultText = await PDFHandler.process(file);
+            rawText = await PDFHandler.process(file);
         } else if (file.type.startsWith('image/')) {
-            resultText = await OCR.recognize(file);
+            rawText = await OCR.recognize(file);
         } else {
             throw new Error('Unsupported file format. Please use JPG, PNG, or PDF.');
         }
+
+        // Apply post-processing for RTL languages
+        let finalText = rawText;
+        if (lang === 'fas' || lang === 'ara') {
+            finalText = Postprocessor.normalizeRTL(rawText);
+        }
         
-        UI.displayResult(resultText);
+        UI.displayResult(finalText);
 
     } catch (error) {
         console.error('Processing Error:', error);
