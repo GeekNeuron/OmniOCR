@@ -2,8 +2,8 @@ import { UI } from './ui.js';
 import { OCR } from './ocr.js';
 import { PDFHandler } from './pdfHandler.js';
 import { Postprocessor } from './postprocessor.js';
-import { IDXParser } from './idx-parser.js';
-import { SUBParser } from './sub-parser.js';
+// ** MODIFICATION: Replace old parsers with the new professional handler **
+import { SubtitleHandler } from './subtitleHandler.js';
 
 const fileCache = { idx: null, sub: null };
 let ocrEngineCache = { worker: null, lang: null };
@@ -35,26 +35,9 @@ async function handleSubtitleFiles() {
     const lang = UI.getSelectedLanguage();
     try {
         const worker = await getOcrEngine(lang);
-        const idxContent = await idx.text();
-        const subBuffer = await sub.arrayBuffer();
-        const metadata = IDXParser.parse(idxContent);
         
-        let srtOutput = '';
-        let subtitleCounter = 1;
-
-        for (let i = 0; i < metadata.length; i++) {
-            UI.updateProgress(`Processing subtitle ${subtitleCounter} of ${metadata.length}...`, i / metadata.length);
-            const canvas = SUBParser.renderImageAt(subBuffer, metadata[i].filepos);
-            if (canvas) {
-                const text = await OCR.recognize(canvas, worker);
-                const cleanedText = Postprocessor.cleanup(text, lang).trim();
-                if (cleanedText) {
-                    const startTime = metadata[i].timestamp;
-                    const endTime = metadata[i + 1] ? metadata[i + 1].timestamp : getEndTime(startTime);
-                    srtOutput += `${subtitleCounter++}\n${startTime} --> ${endTime}\n${cleanedText}\n\n`;
-                }
-            }
-        }
+        // ** MODIFICATION: Use the new SubtitleHandler instead of manual parsing **
+        const srtOutput = await SubtitleHandler.process(sub, idx, worker, lang);
         
         if (!srtOutput) {
             throw new Error("No text could be extracted from the subtitle files.");
@@ -71,18 +54,6 @@ async function handleSubtitleFiles() {
         fileCache.sub = null;
         UI.fileInput.value = '';
     }
-}
-
-/**
- * Calculates a default end time by adding 2 seconds.
- */
-function getEndTime(startTime) {
-    const parts = startTime.match(/(\d+):(\d+):(\d+),(\d+)/);
-    let [, hours, minutes, seconds, ms] = parts.map(Number);
-    seconds += 2; // Add 2 seconds
-    if (seconds >= 60) { minutes += 1; seconds -= 60; }
-    if (minutes >= 60) { hours += 1; minutes -= 60; }
-    return `${String(hours).padStart(2, '0')}:${String(minutes).padStart(2, '0')}:${String(seconds).padStart(2, '0')},${String(ms).padStart(3, '0')}`;
 }
 
 /**
@@ -148,6 +119,10 @@ async function handleFiles(files) {
 }
 
 function init() {
+    // Set PDF.js worker path locally
+    if (window.pdfjsLib) {
+        pdfjsLib.GlobalWorkerOptions.workerSrc = 'src/js/libraries/pdf.worker.min.js';
+    }
     UI.populateLanguageOptions();
     UI.setupEventListeners();
     UI.loadLanguagePreference(); 
