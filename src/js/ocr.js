@@ -1,11 +1,12 @@
 import { UI } from './ui.js';
 import { Preprocessor } from './preprocessor.js';
+import { AppConfig } from './config.js';
 
 export const OCR = {
     worker: null,
 
     /**
-     * Initializes the Tesseract worker with a specified language.
+     * Initializes the Tesseract worker with a specified language and parameters.
      * @param {string} lang - The language code for OCR (e.g., 'eng', 'fas').
      */
     async initialize(lang) {
@@ -17,21 +18,29 @@ export const OCR = {
                 }
             }
         });
+
+        // **IMPROVEMENT**: Dynamically set a character whitelist if available for the language.
+        // This dramatically reduces "hallucinated" characters from other scripts.
+        if (AppConfig.whitelists[lang]) {
+            await this.worker.setParameters({
+                tessedit_char_whitelist: AppConfig.whitelists[lang],
+            });
+            console.log(`Whitelist applied for language: ${lang}`);
+        }
     },
 
     /**
      * Performs OCR on a given image file after preprocessing it.
-     * @param {File} imageFile - The image file to process.
+     * @param {File|HTMLCanvasElement} imageSource - The image file or canvas to process.
      * @returns {Promise<string>} The extracted text.
      */
-    async recognize(imageFile) {
+    async recognize(imageSource) {
         if (!this.worker) {
             throw new Error("OCR engine is not initialized.");
         }
         
-        // Preprocess the image for better accuracy
-        UI.updateProgress('Preprocessing image...', 0.25); // Arbitrary progress point
-        const preprocessedImage = await Preprocessor.process(imageFile);
+        UI.updateProgress('Preprocessing image...', 0.25);
+        const preprocessedImage = await Preprocessor.process(imageSource);
 
         const { data: { text } } = await this.worker.recognize(preprocessedImage);
         return text;
