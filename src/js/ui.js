@@ -7,11 +7,18 @@ export const UI = {
     dropZone: document.getElementById('drop-zone'),
     fileInput: document.getElementById('file-input'),
     subtitle: document.getElementById('subtitle'),
+    
+    // Custom Select elements
     customSelect: document.getElementById('custom-lang-select'),
     selectedLangText: document.getElementById('selected-lang-text'),
     langOptionsPanel: document.getElementById('lang-options-panel'),
     langOptionsList: document.getElementById('lang-options-list'),
     langSearchInput: document.getElementById('lang-search-input'),
+    
+    // Advanced Mode
+    advancedToggle: document.getElementById('advanced-toggle-switch'),
+    
+    // Status and Result elements
     statusContainer: document.getElementById('status-container'),
     statusText: document.getElementById('status-text'),
     progressBar: document.getElementById('progress-bar'),
@@ -34,7 +41,7 @@ export const UI = {
         this.resultEditor.innerHTML = '';
         this.copyBtn.lastElementChild.textContent = 'Copy';
         this.downloadBtnText.textContent = 'Download';
-        this.subtitle.textContent = 'Extract text from images and PDFs directly in your browser.';
+        this.updateSubtitle();
     },
 
     updateProgress(status, progress) {
@@ -104,11 +111,26 @@ export const UI = {
             this.downloadBtn.setAttribute('data-file-type', 'txt');
         }
     },
+    
+    updateSubtitle() {
+        if (this.isAdvancedMode()) {
+            this.subtitle.textContent = "Advanced mode enabled. Using powerful cloud APIs.";
+        } else {
+            this.subtitle.textContent = "Extract text from images and PDFs directly in your browser.";
+        }
+    },
+
+    isAdvancedMode() {
+        return this.advancedToggle.checked;
+    },
 
     // --- Event Listeners Setup ---
     setupEventListeners() {
         this.loadTheme();
         this.themeToggle.addEventListener('click', () => this.toggleTheme());
+        
+        // Advanced Mode Toggle
+        this.advancedToggle.addEventListener('change', () => this.updateSubtitle());
         
         // Custom Select Logic
         this.customSelect.addEventListener('click', (e) => {
