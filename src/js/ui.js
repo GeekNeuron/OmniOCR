@@ -11,6 +11,7 @@ export const UI = {
     resultContainer: document.getElementById('result-container'),
     resultText: document.getElementById('result-text'),
     copyBtn: document.getElementById('copy-btn'),
+    downloadBtn: document.getElementById('download-btn'),
     errorContainer: document.getElementById('error-container'),
     errorText: document.getElementById('error-text'),
 
@@ -94,6 +95,22 @@ export const UI = {
                 copySpan.textContent = 'Copied!';
                 setTimeout(() => { copySpan.textContent = 'Copy'; }, 2000);
             });
+        });
+
+        // Download button
+        this.downloadBtn.addEventListener('click', () => {
+            const text = this.resultText.value;
+            if (!text) return;
+
+            const blob = new Blob([text], { type: 'text/plain;charset=utf-8' });
+            const url = URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = 'omniocr_output.txt';
+            document.body.appendChild(a);
+            a.click();
+            document.body.removeChild(a);
+            URL.revokeObjectURL(url);
         });
 
         // Drag and drop events
