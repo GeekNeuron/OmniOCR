@@ -1,3 +1,5 @@
+import { languages } from './languages.js';
+
 export const UI = {
     // DOM Element Cache
     body: document.body,
@@ -9,7 +11,9 @@ export const UI = {
     // Custom Select elements
     customSelect: document.getElementById('custom-lang-select'),
     selectedLangText: document.getElementById('selected-lang-text'),
-    langOptions: document.getElementById('lang-options'),
+    langOptionsPanel: document.getElementById('lang-options-panel'),
+    langOptionsList: document.getElementById('lang-options-list'),
+    langSearchInput: document.getElementById('lang-search-input'),
     
     // Status and Result elements
     statusContainer: document.getElementById('status-container'),
@@ -100,31 +104,42 @@ export const UI = {
         this.loadTheme();
         this.themeToggle.addEventListener('click', () => this.toggleTheme());
         
-        // Custom Select Logic
+        // --- Custom Select Logic ---
         this.customSelect.addEventListener('click', (e) => {
-            e.stopPropagation(); // Prevent click from bubbling to document
-            this.langOptions.classList.toggle('hidden');
+            e.stopPropagation();
+            this.langOptionsPanel.classList.toggle('hidden');
             this.customSelect.classList.toggle('open');
+            if (!this.langOptionsPanel.classList.contains('hidden')) {
+                this.langSearchInput.focus();
+                this.langSearchInput.value = ''; // Clear search on open
+                this.filterLanguages(''); // Show all languages
+            }
         });
 
         document.addEventListener('click', () => {
-            this.langOptions.classList.add('hidden');
+            this.langOptionsPanel.classList.add('hidden');
             this.customSelect.classList.remove('open');
         });
 
-        this.langOptions.addEventListener('click', (e) => {
+        this.langOptionsList.addEventListener('click', (e) => {
             if (e.target && e.target.tagName === 'LI') {
-                e.stopPropagation(); // Prevent document click listener from firing
+                e.stopPropagation();
                 const value = e.target.getAttribute('data-value');
                 this.selectedLangText.textContent = e.target.textContent;
                 this.customSelect.setAttribute('data-value', value);
                 localStorage.setItem('selectedLang', value);
-                this.langOptions.querySelector('.selected')?.classList.remove('selected');
-                e.target.classList.add('selected');
-                this.langOptions.classList.add('hidden');
+                this.updateSelectedOption(value);
+                this.langOptionsPanel.classList.add('hidden');
                 this.customSelect.classList.remove('open');
             }
         });
+
+        // Search/Filter Logic
+        this.langSearchInput.addEventListener('input', (e) => {
+            this.filterLanguages(e.target.value);
+        });
+
+        this.langSearchInput.addEventListener('click', e => e.stopPropagation());
         
         // Copy button
         this.copyBtn.addEventListener('click', () => {
@@ -157,7 +172,41 @@ export const UI = {
         });
     },
 
-    // --- Preference Management ---
+    // --- Language Preference Management ---
+    populateLanguageOptions() {
+        this.langOptionsList.innerHTML = '';
+        languages.forEach(lang => {
+            const li = document.createElement('li');
+            li.setAttribute('data-value', lang.code);
+            li.textContent = lang.name;
+            this.langOptionsList.appendChild(li);
+        });
+    },
+    
+    filterLanguages(searchTerm) {
+        const term = searchTerm.toLowerCase();
+        const options = this.langOptionsList.getElementsByTagName('li');
+        for (const option of options) {
+            const text = option.textContent.toLowerCase();
+            option.classList.toggle('hidden', !text.includes(term));
+        }
+    },
+
+    updateSelectedOption(langCode) {
+        this.langOptionsList.querySelector('.selected')?.classList.remove('selected');
+        const newSelected = this.langOptionsList.querySelector(`li[data-value="${langCode}"]`);
+        if(newSelected) {
+            newSelected.classList.add('selected');
+            this.selectedLangText.textContent = newSelected.textContent;
+            this.customSelect.setAttribute('data-value', langCode);
+        }
+    },
+
+    loadLanguagePreference() {
+        const savedLang = localStorage.getItem('selectedLang') || 'eng';
+        this.updateSelectedOption(savedLang);
+    },
+    
     toggleTheme() {
         this.body.classList.toggle('dark-theme');
         this.body.classList.toggle('light-theme');
@@ -168,16 +217,6 @@ export const UI = {
         const savedTheme = localStorage.getItem('theme');
         if (savedTheme === 'dark') {
             this.body.classList.replace('light-theme', 'dark-theme');
-        }
-    },
-
-    loadLanguagePreference() {
-        const savedLang = localStorage.getItem('selectedLang') || 'eng';
-        const option = this.langOptions.querySelector(`li[data-value="${savedLang}"]`);
-        if (option) {
-            this.selectedLangText.textContent = option.textContent;
-            this.customSelect.setAttribute('data-value', savedLang);
-            option.classList.add('selected');
         }
     },
     
