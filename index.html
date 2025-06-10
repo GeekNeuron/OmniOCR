@@ -31,19 +31,18 @@
         </header>
 
         <section id="controls-section" class="controls-section">
-            <!-- Custom Dropdown -->
+            <!-- Custom Dropdown with Search -->
             <div id="custom-lang-select" class="custom-select-wrapper" tabindex="0">
                 <div class="selected-option">
                     <span id="selected-lang-text">English</span>
                     <svg class="dropdown-arrow" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor"><path fill-rule="evenodd" d="M5.293 7.293a1 1 0 011.414 0L10 10.586l3.293-3.293a1 1 0 111.414 1.414l-4 4a1 1 0 01-1.414 0l-4-4a1 1 0 010-1.414z" clip-rule="evenodd" /></svg>
                 </div>
-                <ul id="lang-options" class="lang-options-list hidden">
-                    <li data-value="eng">English</li>
-                    <li data-value="fas">Persian (Farsi)</li>
-                    <li data-value="ara">Arabic</li>
-                    <li data-value="jpn">Japanese</li>
-                    <li data-value="chi_sim">Chinese (Simplified)</li>
-                </ul>
+                <div id="lang-options-panel" class="lang-options-panel hidden">
+                    <input type="text" id="lang-search-input" class="lang-search-input" placeholder="Search language...">
+                    <ul id="lang-options-list" class="lang-options-list">
+                        <!-- Language options will be dynamically populated here -->
+                    </ul>
+                </div>
             </div>
         </section>
 
