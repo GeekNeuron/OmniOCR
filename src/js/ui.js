@@ -22,6 +22,7 @@ export const UI = {
     resultContainer: document.getElementById('result-container'),
     resultEditor: document.getElementById('result-editor'),
     copyBtn: document.getElementById('copy-btn'),
+    downloadBtn: document.getElementById('download-btn'),
     errorContainer: document.getElementById('error-container'),
     errorText: document.getElementById('error-text'),
 
@@ -46,10 +47,11 @@ export const UI = {
         this.progressBar.style.width = `${Math.round(progress * 100)}%`;
     },
 
-    displayResult(text) {
+    displayResult(text, fileType = 'txt') {
         this.hide(this.statusContainer);
         this.show(this.resultContainer);
         this.resultEditor.innerHTML = '';
+        this.downloadBtn.setAttribute('data-file-type', fileType);
 
         const lineNumbersCol = document.createElement('div');
         lineNumbersCol.className = 'line-numbers';
@@ -104,15 +106,15 @@ export const UI = {
         this.loadTheme();
         this.themeToggle.addEventListener('click', () => this.toggleTheme());
         
-        // --- Custom Select Logic ---
+        // Custom Select Logic
         this.customSelect.addEventListener('click', (e) => {
             e.stopPropagation();
             this.langOptionsPanel.classList.toggle('hidden');
             this.customSelect.classList.toggle('open');
             if (!this.langOptionsPanel.classList.contains('hidden')) {
                 this.langSearchInput.focus();
-                this.langSearchInput.value = ''; // Clear search on open
-                this.filterLanguages(''); // Show all languages
+                this.langSearchInput.value = '';
+                this.filterLanguages('');
             }
         });
 
@@ -125,8 +127,6 @@ export const UI = {
             if (e.target && e.target.tagName === 'LI') {
                 e.stopPropagation();
                 const value = e.target.getAttribute('data-value');
-                this.selectedLangText.textContent = e.target.textContent;
-                this.customSelect.setAttribute('data-value', value);
                 localStorage.setItem('selectedLang', value);
                 this.updateSelectedOption(value);
                 this.langOptionsPanel.classList.add('hidden');
@@ -134,7 +134,6 @@ export const UI = {
             }
         });
 
-        // Search/Filter Logic
         this.langSearchInput.addEventListener('input', (e) => {
             this.filterLanguages(e.target.value);
         });
@@ -150,6 +149,28 @@ export const UI = {
                 copySpan.textContent = 'Copied!';
                 setTimeout(() => { copySpan.textContent = 'Copy'; }, 2000);
             });
+        });
+        
+        // Download button
+        this.downloadBtn.addEventListener('click', () => {
+            const lines = Array.from(this.resultEditor.querySelectorAll('.code-line'));
+            const textToDownload = lines.map(line => line.textContent.replace(/\u00A0/g, '')).join('\n');
+            
+            if (!textToDownload) return;
+
+            const fileType = this.downloadBtn.getAttribute('data-file-type') || 'txt';
+            const fileName = fileType === 'srt' ? 'OmniOCR-Subtitle.srt' : 'OmniOCR-text.txt';
+            const mimeType = fileType === 'srt' ? 'application/x-subrip' : 'text/plain';
+
+            const blob = new Blob([textToDownload], { type: `${mimeType};charset=utf-8` });
+            const url = URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = fileName;
+            document.body.appendChild(a);
+            a.click();
+            document.body.removeChild(a);
+            URL.revokeObjectURL(url);
         });
 
         // Drag and drop events
@@ -193,11 +214,11 @@ export const UI = {
     },
 
     updateSelectedOption(langCode) {
-        this.langOptionsList.querySelector('.selected')?.classList.remove('selected');
-        const newSelected = this.langOptionsList.querySelector(`li[data-value="${langCode}"]`);
-        if(newSelected) {
-            newSelected.classList.add('selected');
-            this.selectedLangText.textContent = newSelected.textContent;
+        const option = this.langOptionsList.querySelector(`li[data-value="${langCode}"]`);
+        if(option) {
+            this.langOptionsList.querySelector('.selected')?.classList.remove('selected');
+            option.classList.add('selected');
+            this.selectedLangText.textContent = option.textContent;
             this.customSelect.setAttribute('data-value', langCode);
         }
     },
