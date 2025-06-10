@@ -1,6 +1,7 @@
 import { UI } from './ui.js';
 import { OCR } from './ocr.js';
 import { PDFHandler } from './pdfHandler.js';
+import './preprocessor.js'; // Ensure the preprocessor module is included
 
 /**
  * Main application logic to handle file processing.
@@ -19,7 +20,6 @@ async function handleFile(file) {
         if (file.type === 'application/pdf') {
             resultText = await PDFHandler.process(file);
         } else if (file.type.startsWith('image/')) {
-            UI.updateProgress('Recognizing text in image...', 0);
             resultText = await OCR.recognize(file);
         } else {
             throw new Error('Unsupported file format. Please use JPG, PNG, or PDF.');
@@ -31,7 +31,6 @@ async function handleFile(file) {
         console.error('Processing Error:', error);
         UI.displayError(error.message || 'An unknown error occurred during processing.');
     } finally {
-        // Terminate worker to free up memory
         OCR.terminate();
     }
 }
@@ -45,5 +44,4 @@ function init() {
     console.log("OmniOCR Web App Initialized.");
 }
 
-// Start the application once the DOM is ready
 document.addEventListener('DOMContentLoaded', init);
