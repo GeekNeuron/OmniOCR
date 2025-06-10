@@ -66,5 +66,4 @@ export const languages = [
     { code: 'ukr', name: 'Ukrainian' },
     { code: 'urd', name: 'Urdu' },
     { code: 'vie', name: 'Vietnamese' },
-    // Add more languages as needed
 ];
