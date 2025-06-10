@@ -33,28 +33,87 @@
     --input-focus-border-dark: #3282b8;
 }
 
-/* Base Styles, Galaxy Background, Main Layout, Header, Controls, Drop Zone... */
-/* (Previous styles remain the same) */
-
+/* --- Base Styles & Theme Setup --- */
 body {
     font-family: var(--font-sans);
     margin: 0;
     transition: background-color 0.4s, color 0.4s;
     overflow-x: hidden;
 }
-.light-theme { background-color: var(--bg-light); color: var(--text-primary-light); }
-.dark-theme { background-color: var(--bg-color-dark); color: var(--text-color-dark); }
-#galaxy-bg { position: fixed; top: 0; left: 0; width: 200%; height: 200%; background: transparent url('https://www.transparenttextures.com/patterns/stardust.png'); background-size: 500px 500px; z-index: -1; opacity: 0; transition: opacity 0.8s ease-in-out; animation: move-galaxy 120s linear infinite; }
-.dark-theme #galaxy-bg { opacity: 0.3; }
-@keyframes move-galaxy { from { transform: translate(0, 0); } to { transform: translate(-50%, -50%); } }
-.main-container { min-height: calc(100vh - 80px); display: flex; flex-direction: column; align-items: center; justify-content: center; padding: 1rem 2rem; box-sizing: border-box; }
-.app-header { text-align: center; margin-bottom: 2rem; }
-.title { font-size: 2.5rem; font-weight: 700; margin: 0; cursor: pointer; transition: color 0.4s; }
+.light-theme {
+    background-color: var(--bg-light);
+    color: var(--text-primary-light);
+}
+.dark-theme {
+    background-color: var(--bg-color-dark);
+    color: var(--text-color-dark);
+}
+
+/* --- Galaxy Background for Dark Theme --- */
+#galaxy-bg {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 200%;
+    height: 200%;
+    background: transparent url('https://www.transparenttextures.com/patterns/stardust.png');
+    background-size: 500px 500px;
+    z-index: -1;
+    opacity: 0;
+    transition: opacity 0.8s ease-in-out;
+    animation: move-galaxy 120s linear infinite;
+}
+.dark-theme #galaxy-bg {
+    opacity: 0.3;
+}
+@keyframes move-galaxy {
+    from { transform: translate(0, 0); }
+    to { transform: translate(-50%, -50%); }
+}
+
+/* --- Main Layout --- */
+.main-container {
+    min-height: calc(100vh - 80px); /* Account for footer */
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    padding: 1rem 2rem;
+    box-sizing: border-box;
+}
+.app-header {
+    text-align: center;
+    margin-bottom: 2rem;
+}
+
+/* ** MODIFICATION HERE ** */
+.title {
+    display: inline-block; /* Shrinks the element to fit the text */
+    font-size: 2.5rem;
+    font-weight: 700;
+    margin: 0;
+    cursor: pointer;
+    transition: color 0.4s;
+    user-select: none; /* Prevents text selection on click */
+    -webkit-tap-highlight-color: transparent; /* Removes tap highlight on mobile */
+    outline: none; /* Removes focus outline */
+}
+.title:focus {
+    outline: none;
+}
 .light-theme .title { color: var(--text-primary-light); }
 .dark-theme .title { color: var(--header-text-dark); }
-.subtitle { font-size: 1.1rem; margin-top: 0.5rem; transition: color 0.4s; }
+/* ** END MODIFICATION ** */
+
+.subtitle {
+    font-size: 1.1rem;
+    margin-top: 0.5rem;
+    transition: color 0.4s;
+}
 .light-theme .subtitle { color: var(--text-secondary-light); }
 .dark-theme .subtitle { color: var(--text-color-dark); }
+
+/* (The rest of the CSS file remains the same) */
 .controls-section { width: 100%; max-width: 500px; margin-bottom: 1.5rem; }
 #lang-select { width: 100%; padding: 0.75rem; border-radius: 8px; font-size: 1rem; border: 1px solid; appearance: none; transition: background-color 0.4s, border-color 0.4s, color 0.4s; }
 .light-theme #lang-select { background-color: var(--surface-light); border-color: var(--border-light); color: var(--text-primary-light); }
@@ -75,65 +134,18 @@ body {
 .progress-bar-wrapper { width: 100%; height: 8px; border-radius: 4px; overflow: hidden; }
 .progress-bar { width: 0%; height: 100%; transition: width 0.3s ease; }
 .light-theme .progress-bar { background-color: var(--accent-light); }
-
-/* --- Result Section --- */
-.result-container {
-    width: 100%;
-    max-width: 500px;
-    margin-top: 1.5rem;
-}
-.result-header {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    margin-bottom: 0.75rem;
-}
-.result-header h2 {
-    font-size: 1.25rem;
-    font-weight: 700;
-    margin: 0;
-}
-#copy-btn {
-    display: inline-flex;
-    align-items: center;
-    gap: 0.5rem;
-    padding: 0.5rem 1rem;
-    border: none;
-    border-radius: 6px;
-    font-size: 0.9rem;
-    font-family: var(--font-sans);
-    cursor: pointer;
-    transition: background-color 0.3s, color 0.3s, border-color 0.3s;
-}
-.light-theme #copy-btn {
-    background-color: var(--surface-light);
-    color: var(--text-primary-light);
-    border: 1px solid var(--border-light);
-}
-.dark-theme #copy-btn {
-    background-color: var(--button-bg-dark);
-    color: var(--button-text-dark);
-    border: 1px solid var(--button-bg-dark);
-}
+.result-container { width: 100%; max-width: 500px; margin-top: 1.5rem; }
+.result-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 0.75rem; }
+.result-header h2 { font-size: 1.25rem; font-weight: 700; margin: 0; }
+#copy-btn { display: inline-flex; align-items: center; gap: 0.5rem; padding: 0.5rem 1rem; border: none; border-radius: 6px; font-size: 0.9rem; font-family: var(--font-sans); cursor: pointer; transition: background-color 0.3s, color 0.3s, border-color 0.3s; }
+.light-theme #copy-btn { background-color: var(--surface-light); color: var(--text-primary-light); border: 1px solid var(--border-light); }
+.dark-theme #copy-btn { background-color: var(--button-bg-dark); color: var(--button-text-dark); border: 1px solid var(--button-bg-dark); }
 .light-theme #copy-btn:hover { background-color: #f3f4f6; }
 .dark-theme #copy-btn:hover { background-color: var(--button-hover-bg-dark); border-color: var(--button-hover-bg-dark); }
-
-#result-text {
-    width: 100%;
-    height: 250px;
-    padding: 1rem;
-    border-radius: 8px;
-    border: 1px solid;
-    font-size: 1rem;
-    line-height: 1.6;
-    resize: vertical;
-    box-sizing: border-box;
-}
+#result-text { width: 100%; height: 250px; padding: 1rem; border-radius: 8px; border: 1px solid; font-size: 1rem; line-height: 1.6; resize: vertical; box-sizing: border-box; }
 .light-theme #result-text { background-color: var(--surface-light); border-color: var(--border-light); color: var(--text-primary-light); }
 .dark-theme #result-text { background-color: var(--cell-readonly-bg-dark); border-color: var(--container-border-dark); color: var(--cell-readonly-text-dark); }
 .dark-theme #result-text:focus { border-color: var(--input-focus-border-dark); outline: none; box-shadow: 0 0 0 3px rgba(50, 130, 184, 0.3); }
-
-/* --- Error & Footer --- */
 .error-container { width: 100%; max-width: 500px; margin-top: 1.5rem; padding: 1rem; border-radius: 8px; border: 1px solid; }
 .light-theme .error-container { background-color: #fef2f2; color: #b91c1c; border-color: #fecaca; }
 .dark-theme .error-container { background-color: var(--cell-error-bg-dark); color: var(--cell-error-text-dark); border-color: var(--input-error-border-dark); }
@@ -144,7 +156,5 @@ body {
 .light-theme .footer-link { color: var(--accent-light); }
 .dark-theme .footer-link { color: var(--select-border-dark); }
 .footer-link:hover { text-decoration: underline; }
-
-/* --- Utility --- */
 .hidden { display: none !important; }
 .sr-only { position: absolute; width: 1px; height: 1px; padding: 0; margin: -1px; overflow: hidden; clip: rect(0, 0, 0, 0); white-space: nowrap; border-width: 0; }
