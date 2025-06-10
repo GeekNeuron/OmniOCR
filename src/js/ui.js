@@ -101,26 +101,28 @@ export const UI = {
         this.themeToggle.addEventListener('click', () => this.toggleTheme());
         
         // Custom Select Logic
-        this.customSelect.addEventListener('click', () => {
+        this.customSelect.addEventListener('click', (e) => {
+            e.stopPropagation(); // Prevent click from bubbling to document
             this.langOptions.classList.toggle('hidden');
             this.customSelect.classList.toggle('open');
         });
 
-        document.addEventListener('click', (e) => {
-            if (!this.customSelect.contains(e.target)) {
-                this.langOptions.classList.add('hidden');
-                this.customSelect.classList.remove('open');
-            }
+        document.addEventListener('click', () => {
+            this.langOptions.classList.add('hidden');
+            this.customSelect.classList.remove('open');
         });
 
         this.langOptions.addEventListener('click', (e) => {
             if (e.target && e.target.tagName === 'LI') {
+                e.stopPropagation(); // Prevent document click listener from firing
                 const value = e.target.getAttribute('data-value');
                 this.selectedLangText.textContent = e.target.textContent;
                 this.customSelect.setAttribute('data-value', value);
                 localStorage.setItem('selectedLang', value);
                 this.langOptions.querySelector('.selected')?.classList.remove('selected');
                 e.target.classList.add('selected');
+                this.langOptions.classList.add('hidden');
+                this.customSelect.classList.remove('open');
             }
         });
         
