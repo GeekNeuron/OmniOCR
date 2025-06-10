@@ -1,4 +1,3 @@
-
 /* --- CSS Variables for Theming --- */
 :root {
     --font-sans: 'Inter', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
@@ -129,11 +128,11 @@ body {
 /* --- Advanced Mode Toggle Styles --- */
 .advanced-toggle-container {
     display: flex;
-    justify-content: flex-end; /* ** MODIFICATION: Pushes content to the right ** */
+    justify-content: flex-end;
     align-items: center;
     gap: 0.75rem;
     margin-bottom: 1rem;
-    font-size: 0.8rem; /* ** MODIFICATION: Smaller text ** */
+    font-size: 0.8rem;
     font-weight: 500;
 }
 .light-theme .advanced-toggle-label { color: var(--text-secondary-light); }
@@ -142,9 +141,9 @@ body {
 .switch {
     position: relative;
     display: inline-block;
-    /* ** MODIFICATION: Smaller switch inspired by isega.ro ** */
     width: 34px;
-    height: 18px; 
+    height: 18px;
+    -webkit-tap-highlight-color: transparent; /* Removes tap highlight on mobile */
 }
 .switch input {
     opacity: 0;
@@ -167,7 +166,6 @@ body {
 .slider:before {
     position: absolute;
     content: "";
-    /* ** MODIFICATION: Smaller thumb ** */
     height: 14px;
     width: 14px;
     left: 2px;
@@ -184,10 +182,13 @@ input:checked + .slider {
     background-color: var(--button-bg-dark);
 }
 
+input:focus + .slider {
+    box-shadow: none; /* Removes focus outline */
+}
+
 input:checked + .slider:before {
     transform: translateX(16px);
 }
-
 
 /* --- Custom Select (Dropdown) Styles --- */
 .custom-select-wrapper {
