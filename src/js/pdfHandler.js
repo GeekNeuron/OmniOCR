@@ -1,5 +1,6 @@
 import { UI } from './ui.js';
 import { OCR } from './ocr.js';
+import { Preprocessor } from './preprocessor.js';
 
 export const PDFHandler = {
     /**
@@ -8,7 +9,6 @@ export const PDFHandler = {
      * @returns {Promise<string>} The concatenated text from all pages.
      */
     async process(file) {
-        // Ensure the pdfjsLib is loaded
         if (typeof pdfjsLib === 'undefined') {
             throw new Error("PDF.js library is not loaded.");
         }
@@ -21,12 +21,14 @@ export const PDFHandler = {
                     const typedarray = new Uint8Array(event.target.result);
                     const pdf = await pdfjsLib.getDocument(typedarray).promise;
                     let fullText = '';
+                    const totalPages = pdf.numPages;
 
-                    for (let i = 1; i <= pdf.numPages; i++) {
-                        UI.updateProgress(`Processing page ${i} of ${pdf.numPages}...`, (i - 1) / pdf.numPages);
+                    for (let i = 1; i <= totalPages; i++) {
+                        const overallProgress = (i - 1) / totalPages;
+                        UI.updateProgress(`Processing page ${i} of ${totalPages}...`, overallProgress);
                         
                         const page = await pdf.getPage(i);
-                        const viewport = page.getViewport({ scale: 2.0 });
+                        const viewport = page.getViewport({ scale: 2.5 }); // Higher scale for better quality
                         const canvas = document.createElement('canvas');
                         const context = canvas.getContext('2d');
                         canvas.height = viewport.height;
@@ -34,10 +36,12 @@ export const PDFHandler = {
 
                         await page.render({ canvasContext: context, viewport: viewport }).promise;
                         
-                        const pageText = await OCR.recognize(canvas);
+                        // Preprocess the canvas image of the page
+                        const preprocessedCanvas = await Preprocessor.process(canvas);
+
+                        const pageText = await OCR.recognize(preprocessedCanvas);
                         fullText += pageText.trim() + '\n\n';
                         
-                        // Clean up to save memory
                         page.cleanup();
                     }
                     resolve(fullText.trim());
