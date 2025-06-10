@@ -24,7 +24,7 @@ export const SubtitleHandler = {
             const vobsub = new VobSub({
                 subFile: subFile,
                 idxFile: idxFile,
-                debug: false,
+                debug: false, // Set to true for development console logs
                 onReady: async () => {
                     try {
                         let srtOutput = '';
@@ -41,6 +41,7 @@ export const SubtitleHandler = {
                             const canvas = this.renderSubtitleToCanvas(sub);
 
                             if (canvas) {
+                                // Use the advanced preprocessor to enhance the image
                                 const preprocessedImage = await Preprocessor.process(canvas);
                                 const text = await OCR.recognize(preprocessedImage, worker);
                                 const cleanedText = Postprocessor.cleanup(text, lang).trim();
@@ -96,4 +97,3 @@ export const SubtitleHandler = {
         return `${hours}:${minutes}:${seconds},${milliseconds}`;
     }
 };
-
