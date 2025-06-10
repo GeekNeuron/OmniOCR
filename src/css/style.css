@@ -1,4 +1,4 @@
-/* --- CSS Variables for Theming  --- */
+/* --- CSS Variables for Theming --- */
 :root {
     --font-sans: 'Inter', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
     --font-mono: 'Fira Code', monospace;
@@ -54,24 +54,37 @@ body {
     color: var(--text-color-dark);
 }
 
-/* --- Galaxy Background for Dark Theme --- */
-#galaxy-bg {
+/* --- Animated Backgrounds --- */
+#galaxy-bg, #dust-bg {
     position: fixed;
     top: 0;
     left: 0;
     width: 200%;
     height: 200%;
-    background: transparent url('https://www.transparenttextures.com/patterns/stardust.png');
-    background-size: 500px 500px;
     z-index: -1;
     opacity: 0;
     transition: opacity 0.8s ease-in-out;
+}
+
+#galaxy-bg {
+    background: transparent url('https://www.transparenttextures.com/patterns/stardust.png');
+    background-size: 500px 500px;
     animation: move-galaxy 120s linear infinite;
+}
+
+#dust-bg {
+    background: transparent url('https://www.transparenttextures.com/patterns/light-paper-fibers.png');
+    background-size: 300px 300px;
+    animation: move-galaxy 180s linear infinite reverse; /* Slower and reversed animation */
 }
 
 .dark-theme #galaxy-bg {
     opacity: 0.3;
 }
+.light-theme #dust-bg {
+    opacity: 0.08; /* Very subtle */
+}
+
 
 @keyframes move-galaxy {
     from { transform: translate(0, 0); }
@@ -190,7 +203,6 @@ input:checked + .slider:before {
     transform: translateX(16px);
 }
 
-
 /* --- Custom Select (Dropdown) Styles --- */
 .custom-select-wrapper {
     position: relative;
@@ -302,7 +314,6 @@ input:checked + .slider:before {
 .dark-theme .lang-options-list li:hover { background-color: var(--cell-highlight-bg-dark); }
 .light-theme .lang-options-list li.selected { background-color: #eef2ff; color: var(--accent-light); }
 .dark-theme .lang-options-list li.selected { background-color: var(--button-bg-dark); color: var(--button-text-dark); }
-
 
 .drop-zone {
     width: 100%;
