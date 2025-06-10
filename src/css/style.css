@@ -338,30 +338,42 @@ body {
     margin: 0;
 }
 
-#copy-btn {
+.result-actions {
+    display: flex;
+    gap: 0.5rem;
+}
+
+.action-btn {
     display: inline-flex;
     align-items: center;
+    justify-content: center;
     gap: 0.5rem;
     padding: 0.5rem 1rem;
-    border: none;
+    border: 1px solid transparent;
     border-radius: 6px;
     font-size: 0.9rem;
     font-family: var(--font-sans);
+    font-weight: 500;
     cursor: pointer;
-    transition: background-color 0.3s, color 0.3s, border-color 0.3s;
+    transition: background-color 0.2s, color 0.2s, border-color 0.2s;
 }
-.light-theme #copy-btn {
+.action-btn svg {
+    width: 1em;
+    height: 1em;
+}
+
+.light-theme .action-btn {
     background-color: var(--surface-light);
     color: var(--text-primary-light);
-    border: 1px solid var(--border-light);
+    border-color: var(--border-light);
 }
-.dark-theme #copy-btn {
+.dark-theme .action-btn {
     background-color: var(--button-bg-dark);
     color: var(--button-text-dark);
-    border: 1px solid var(--button-bg-dark);
+    border-color: var(--button-bg-dark);
 }
-.light-theme #copy-btn:hover { background-color: #f3f4f6; }
-.dark-theme #copy-btn:hover {
+.light-theme .action-btn:hover { background-color: #f3f4f6; }
+.dark-theme .action-btn:hover {
     background-color: var(--button-hover-bg-dark);
     border-color: var(--button-hover-bg-dark);
 }
