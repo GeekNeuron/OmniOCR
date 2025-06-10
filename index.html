@@ -6,19 +6,15 @@
     <title>OmniOCR by GeekNeuron</title>
     <link rel="icon" href="favicon-512x512.png" type="image/png">
 
-    <!-- Google Fonts. -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;700&family=Fira+Code&display=swap" rel="stylesheet">
     
-    <!-- Custom Stylesheet -->
     <link rel="stylesheet" href="src/css/style.css">
 
-    <!-- Libraries (defer to load after DOM) -->
     <script src='https://cdn.jsdelivr.net/npm/tesseract.js@5/dist/tesseract.min.js' defer></script>
     <script src="https://mozilla.github.io/pdf.js/build/pdf.js" defer></script>
     
-    <!-- Main Application Logic -->
     <script type="module" src="src/js/main.js" defer></script>
 </head>
 <body class="light-theme">
@@ -69,7 +65,7 @@
                     </button>
                     <button id="download-btn" class="action-btn">
                         <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" viewBox="0 0 16 16"><path d="M.5 9.9a.5.5 0 0 1 .5.5v2.5a1 1 0 0 0 1 1h12a1 1 0 0 0 1-1v-2.5a.5.5 0 0 1 1 0v2.5a2 2 0 0 1-2 2H2a2 2 0 0 1-2-2v-2.5a.5.5 0 0 1 .5-.5z"/><path d="M7.646 11.854a.5.5 0 0 0 .708 0l3-3a.5.5 0 0 0-.708-.708L8.5 10.293V1.5a.5.5 0 0 0-1 0v8.793L5.354 8.146a.5.5 0 1 0-.708.708l3 3z"/></svg>
-                        <span>Download</span>
+                        <span id="download-btn-text">Download</span>
                     </button>
                 </div>
             </div>
