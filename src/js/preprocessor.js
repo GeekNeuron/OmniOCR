@@ -1,43 +1,69 @@
 /**
- * Post-processing Module.
- * Cleans and normalizes text extracted from the OCR engine.
+ * Image Preprocessing Module.
+ * Applies filters to an image to improve OCR accuracy.
  */
-export const Postprocessor = {
+export const Preprocessor = {
     /**
-     * Cleans the OCR output text based on the detected language.
-     * @param {string} text - The raw text from the OCR engine.
-     * @param {string} lang - The language code used for OCR.
-     * @returns {string} The cleaned and normalized text.
+     * Processes an image source (from a File or a Canvas) and returns a
+     * preprocessed image data URL ready for OCR.
+     * @param {File|HTMLCanvasElement} imageSource - The source image.
+     * @returns {Promise<string>} A promise that resolves with the data URL of the preprocessed image.
      */
-    cleanup(text, lang) {
-        if (!text) return '';
+    process(imageSource) {
+        return new Promise((resolve, reject) => {
+            const image = new Image();
+            image.onload = () => {
+                const canvas = document.createElement('canvas');
+                const ctx = canvas.getContext('2d');
 
-        let cleanedText = text;
+                canvas.width = image.width;
+                canvas.height = image.height;
 
-        // --- Step 1: Language-specific normalization (currently for RTL) ---
-        if (lang === 'fas' || lang === 'ara') {
-            // Normalize Arabic characters to their Persian counterparts
-            cleanedText = cleanedText.replace(/ي/g, 'ی').replace(/ك/g, 'ک');
-            
-            // Fix common "he" spacing issue
-            cleanedText = cleanedText.replace(/ه /g, 'هٔ ');
-        }
-        
-        // --- Step 2: Universal Spacing and Punctuation Cleanup ---
-        
-        // Normalize spacing around punctuation for all languages
-        // Removes space before punctuation and ensures one space after.
-        cleanedText = cleanedText.replace(/\s+([.,!?:;،؛؟])/g, '$1'); 
-        cleanedText = cleanedText.replace(/([.,!?:;،؛؟])([^\s.,!?:;،؛؟])/g, '$1 $2');
-        
-        // --- Step 3: Universal Whitespace Cleanup ---
-        
-        // Replace multiple newlines with a single one to avoid large empty gaps
-        cleanedText = cleanedText.replace(/(\n\s*){2,}/g, '\n\n');
-        
-        // Replace multiple spaces with a single space
-        cleanedText = cleanedText.replace(/ +/g, ' ');
+                // 1. Draw the original image
+                ctx.drawImage(image, 0, 0);
 
-        return cleanedText.trim();
+                // 2. Get image data to manipulate pixels
+                const imageData = ctx.getImageData(0, 0, canvas.width, canvas.height);
+                const data = imageData.data;
+
+                // 3. Apply filters: Grayscale and Thresholding
+                for (let i = 0; i < data.length; i += 4) {
+                    // Grayscale conversion (average method)
+                    const avg = (data[i] + data[i + 1] + data[i + 2]) / 3;
+                    data[i] = avg;     // Red
+                    data[i + 1] = avg; // Green
+                    data[i + 2] = avg; // Blue
+                }
+                
+                // Simple thresholding
+                const threshold = 128; 
+                for (let i = 0; i < data.length; i += 4) {
+                    const brightness = data[i]; // Since it's grayscale, R, G, and B are the same
+                    const value = brightness > threshold ? 255 : 0;
+                    data[i] = value;
+                    data[i + 1] = value;
+                    data[i + 2] = value;
+                }
+                
+                // 4. Put the modified data back onto the canvas
+                ctx.putImageData(imageData, 0, 0);
+
+                // 5. Resolve with the new image data URL
+                resolve(canvas.toDataURL('image/png'));
+            };
+            image.onerror = (err) => reject(new Error("Failed to load image for preprocessing."));
+
+            // Handle both File objects and existing Canvas elements
+            if (imageSource instanceof File) {
+                // To prevent memory leaks, revoke the object URL after the image has loaded
+                const url = URL.createObjectURL(imageSource);
+                image.src = url;
+                image.addEventListener('load', () => URL.revokeObjectURL(url), { once: true });
+            } else if (imageSource instanceof HTMLCanvasElement) {
+                image.src = imageSource.toDataURL();
+            } else {
+                 reject(new Error("Unsupported image source type for preprocessing."));
+            }
+        });
     }
 };
