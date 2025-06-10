@@ -115,8 +115,10 @@ export const UI = {
     updateSubtitle() {
         if (this.isAdvancedMode()) {
             this.subtitle.textContent = "Advanced mode enabled. Using powerful cloud APIs.";
+            this.customSelect.classList.add('disabled');
         } else {
             this.subtitle.textContent = "Extract text from images and PDFs directly in your browser.";
+            this.customSelect.classList.remove('disabled');
         }
     },
 
@@ -134,6 +136,7 @@ export const UI = {
         
         // Custom Select Logic
         this.customSelect.addEventListener('click', (e) => {
+            if (this.isAdvancedMode()) return; // Prevent opening when disabled
             e.stopPropagation();
             this.langOptionsPanel.classList.toggle('hidden');
             this.customSelect.classList.toggle('open');
