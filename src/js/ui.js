@@ -37,6 +37,7 @@ export const UI = {
         this.progressBar.style.width = '0%';
         this.resultEditor.innerHTML = '';
         this.copyBtn.lastElementChild.textContent = 'Copy';
+        this.downloadBtnText.textContent = 'Download';
         this.subtitle.textContent = 'Extract text from images and PDFs directly in your browser.';
     },
 
@@ -57,23 +58,18 @@ export const UI = {
 
         const lineNumbersCol = document.createElement('div');
         lineNumbersCol.className = 'line-numbers';
-
         const codeContentCol = document.createElement('div');
         codeContentCol.className = 'code-content';
-
         const lines = text.trim().split('\n');
-
         lines.forEach((line, index) => {
             const numberEl = document.createElement('div');
             numberEl.textContent = index + 1;
             lineNumbersCol.appendChild(numberEl);
-
             const codeEl = document.createElement('div');
             codeEl.className = 'code-line';
             codeEl.textContent = line || '\u00A0'; 
             codeContentCol.appendChild(codeEl);
         });
-
         this.resultEditor.appendChild(lineNumbersCol);
         this.resultEditor.appendChild(codeContentCol);
     },
@@ -105,10 +101,10 @@ export const UI = {
     
     setDownloadButtonState(fileType) {
         if (fileType === 'srt') {
-            this.downloadBtnText.textContent = "Download SRT";
+            this.downloadBtnText.textContent = "SRT";
             this.downloadBtn.setAttribute('data-file-type', 'srt');
         } else {
-            this.downloadBtnText.textContent = "Download TXT";
+            this.downloadBtnText.textContent = "TXT";
             this.downloadBtn.setAttribute('data-file-type', 'txt');
         }
     },
@@ -162,7 +158,7 @@ export const UI = {
                 setTimeout(() => { copySpan.textContent = 'Copy'; }, 2000);
             });
         });
-
+        
         // Download Button Logic
         this.downloadBtn.addEventListener('click', () => {
             const lines = Array.from(this.resultEditor.querySelectorAll('.code-line'));
