@@ -23,6 +23,7 @@ export const UI = {
     resultEditor: document.getElementById('result-editor'),
     copyBtn: document.getElementById('copy-btn'),
     downloadBtn: document.getElementById('download-btn'),
+    downloadBtnText: document.getElementById('download-btn-text'),
     errorContainer: document.getElementById('error-container'),
     errorText: document.getElementById('error-text'),
 
@@ -51,7 +52,8 @@ export const UI = {
         this.hide(this.statusContainer);
         this.show(this.resultContainer);
         this.resultEditor.innerHTML = '';
-        this.downloadBtn.setAttribute('data-file-type', fileType);
+        
+        this.setDownloadButtonState(fileType);
 
         const lineNumbersCol = document.createElement('div');
         lineNumbersCol.className = 'line-numbers';
@@ -68,7 +70,7 @@ export const UI = {
 
             const codeEl = document.createElement('div');
             codeEl.className = 'code-line';
-            codeEl.textContent = line || '\u00A0';
+            codeEl.textContent = line || '\u00A0'; 
             codeContentCol.appendChild(codeEl);
         });
 
@@ -99,6 +101,16 @@ export const UI = {
 
     hide(element) {
         element.classList.add('hidden');
+    },
+    
+    setDownloadButtonState(fileType) {
+        if (fileType === 'srt') {
+            this.downloadBtnText.textContent = "Download SRT";
+            this.downloadBtn.setAttribute('data-file-type', 'srt');
+        } else {
+            this.downloadBtnText.textContent = "Download TXT";
+            this.downloadBtn.setAttribute('data-file-type', 'txt');
+        }
     },
 
     // --- Event Listeners Setup ---
@@ -150,8 +162,8 @@ export const UI = {
                 setTimeout(() => { copySpan.textContent = 'Copy'; }, 2000);
             });
         });
-        
-        // Download button
+
+        // Download Button Logic
         this.downloadBtn.addEventListener('click', () => {
             const lines = Array.from(this.resultEditor.querySelectorAll('.code-line'));
             const textToDownload = lines.map(line => line.textContent.replace(/\u00A0/g, '')).join('\n');
