@@ -13,6 +13,8 @@ export const UI = {
     copyBtn: document.getElementById('copy-btn'),
     errorContainer: document.getElementById('error-container'),
     errorText: document.getElementById('error-text'),
+    subtitleModalOverlay: document.getElementById('subtitle-modal-overlay'),
+    modalCloseBtn: document.getElementById('modal-close-btn'),
 
     /**
      * Toggles the theme between light and dark mode.
@@ -78,6 +80,18 @@ export const UI = {
         this.errorContainer.classList.remove('hidden');
         this.errorText.textContent = message;
     },
+    
+    /**
+     * Shows or hides the subtitle guide modal.
+     * @param {boolean} show - True to show, false to hide.
+     */
+    showSubtitleGuide(show) {
+        if (show) {
+            this.subtitleModalOverlay.classList.remove('hidden');
+        } else {
+            this.subtitleModalOverlay.classList.add('hidden');
+        }
+    },
 
     /**
      * Sets up all necessary event listeners for the UI.
@@ -87,6 +101,14 @@ export const UI = {
         this.loadTheme();
         this.themeToggle.addEventListener('click', () => this.toggleTheme());
         
+        // Modal close events
+        this.modalCloseBtn.addEventListener('click', () => this.showSubtitleGuide(false));
+        this.subtitleModalOverlay.addEventListener('click', (e) => {
+            if (e.target === this.subtitleModalOverlay) {
+                this.showSubtitleGuide(false);
+            }
+        });
+
         // Copy button
         this.copyBtn.addEventListener('click', () => {
             navigator.clipboard.writeText(this.resultText.value).then(() => {
