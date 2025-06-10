@@ -7,15 +7,11 @@ export const UI = {
     dropZone: document.getElementById('drop-zone'),
     fileInput: document.getElementById('file-input'),
     subtitle: document.getElementById('subtitle'),
-    
-    // Custom Select elements
     customSelect: document.getElementById('custom-lang-select'),
     selectedLangText: document.getElementById('selected-lang-text'),
     langOptionsPanel: document.getElementById('lang-options-panel'),
     langOptionsList: document.getElementById('lang-options-list'),
     langSearchInput: document.getElementById('lang-search-input'),
-    
-    // Status and Result elements
     statusContainer: document.getElementById('status-container'),
     statusText: document.getElementById('status-text'),
     progressBar: document.getElementById('progress-bar'),
