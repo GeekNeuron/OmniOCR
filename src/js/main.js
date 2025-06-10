@@ -48,18 +48,20 @@ async function handleFiles(files) {
         }
     }
 
-    // If any subtitle file is detected, check for pairs.
     if (hasSub || hasIdx) {
         if (fileCache.idx && fileCache.sub) {
             UI.showSubtitlePrompt("For best results, please use a dedicated tool like Subtitle Edit for .sub/.idx files.");
-            // We could attempt processing here in the future if a robust library becomes available.
-            setTimeout(() => UI.reset(), 4000);
+            setTimeout(() => {
+                UI.reset();
+                fileCache.idx = null;
+                fileCache.sub = null;
+            }, 4000);
         } else if (fileCache.idx) {
             UI.showSubtitlePrompt("IDX file received. Please add the corresponding SUB file.");
         } else if (fileCache.sub) {
             UI.showSubtitlePrompt("SUB file received. Please add the corresponding IDX file.");
         }
-        return; // Stop further processing
+        return; 
     }
 
     // --- Standard File Processing for Single Files ---
@@ -67,7 +69,7 @@ async function handleFiles(files) {
         const file = files[0];
         const lang = UI.getSelectedLanguage();
         try {
-            const worker = await getOcrEngine(lang); // Use the caching function
+            const worker = await getOcrEngine(lang);
             let rawText = '';
 
             if (file.type === 'application/pdf') {
@@ -85,17 +87,17 @@ async function handleFiles(files) {
             console.error('Processing Error:', error);
             UI.displayError(error.message || 'An unknown error occurred.');
         } finally {
-            UI.fileInput.value = ''; // Allow re-uploading the same file
+            UI.fileInput.value = '';
         }
     } else if (files.length > 1) {
         UI.displayError("Please upload only one file at a time (or a matching .sub/.idx pair).");
     }
 }
 
-
 function init() {
+    UI.populateLanguageOptions();
     UI.setupEventListeners();
-    UI.loadLanguagePreference(); // Load saved language
+    UI.loadLanguagePreference(); 
     UI.fileInput.addEventListener('change', (e) => handleFiles(e.target.files));
 }
 
