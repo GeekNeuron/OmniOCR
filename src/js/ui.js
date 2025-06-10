@@ -9,12 +9,10 @@ export const UI = {
     statusText: document.getElementById('status-text'),
     progressBar: document.getElementById('progress-bar'),
     resultContainer: document.getElementById('result-container'),
-    resultText: document.getElementById('result-text'),
+    resultEditor: document.getElementById('result-editor'), // Changed from resultText
     copyBtn: document.getElementById('copy-btn'),
     errorContainer: document.getElementById('error-container'),
     errorText: document.getElementById('error-text'),
-    subtitleModalOverlay: document.getElementById('subtitle-modal-overlay'),
-    modalCloseBtn: document.getElementById('modal-close-btn'),
 
     /**
      * Toggles the theme between light and dark mode.
@@ -44,7 +42,7 @@ export const UI = {
         this.resultContainer.classList.add('hidden');
         this.errorContainer.classList.add('hidden');
         this.progressBar.style.width = '0%';
-        this.resultText.value = '';
+        this.resultEditor.innerHTML = ''; // Clear the editor
         this.copyBtn.lastElementChild.textContent = 'Copy';
     },
 
@@ -62,15 +60,38 @@ export const UI = {
     },
 
     /**
-     * Displays the final OCR result.
+     * Displays the final OCR result in the code-like editor.
      * @param {string} text - The extracted text.
      */
     displayResult(text) {
         this.statusContainer.classList.add('hidden');
         this.resultContainer.classList.remove('hidden');
-        this.resultText.value = text.trim();
-    },
+        this.resultEditor.innerHTML = ''; // Clear previous content
 
+        const lineNumbersCol = document.createElement('div');
+        lineNumbersCol.className = 'line-numbers';
+
+        const codeContentCol = document.createElement('div');
+        codeContentCol.className = 'code-content';
+
+        const lines = text.trim().split('\n');
+
+        lines.forEach((line, index) => {
+            const numberEl = document.createElement('div');
+            numberEl.textContent = index + 1;
+            lineNumbersCol.appendChild(numberEl);
+
+            const codeEl = document.createElement('div');
+            codeEl.className = 'code-line';
+            // Use a non-breaking space for empty lines to ensure height is maintained
+            codeEl.textContent = line || '\u00A0'; 
+            codeContentCol.appendChild(codeEl);
+        });
+
+        this.resultEditor.appendChild(lineNumbersCol);
+        this.resultEditor.appendChild(codeContentCol);
+    },
+    
     /**
      * Displays an error message.
      * @param {string} message - The error message to display.
@@ -79,18 +100,6 @@ export const UI = {
         this.statusContainer.classList.add('hidden');
         this.errorContainer.classList.remove('hidden');
         this.errorText.textContent = message;
-    },
-    
-    /**
-     * Shows or hides the subtitle guide modal.
-     * @param {boolean} show - True to show, false to hide.
-     */
-    showSubtitleGuide(show) {
-        if (show) {
-            this.subtitleModalOverlay.classList.remove('hidden');
-        } else {
-            this.subtitleModalOverlay.classList.add('hidden');
-        }
     },
 
     /**
@@ -101,17 +110,13 @@ export const UI = {
         this.loadTheme();
         this.themeToggle.addEventListener('click', () => this.toggleTheme());
         
-        // Modal close events
-        this.modalCloseBtn.addEventListener('click', () => this.showSubtitleGuide(false));
-        this.subtitleModalOverlay.addEventListener('click', (e) => {
-            if (e.target === this.subtitleModalOverlay) {
-                this.showSubtitleGuide(false);
-            }
-        });
-
         // Copy button
         this.copyBtn.addEventListener('click', () => {
-            navigator.clipboard.writeText(this.resultText.value).then(() => {
+            // Reconstruct text from the code editor divs for copying
+            const lines = Array.from(this.resultEditor.querySelectorAll('.code-line'));
+            const textToCopy = lines.map(line => line.textContent.replace(/\u00A0/g, '')).join('\n');
+
+            navigator.clipboard.writeText(textToCopy).then(() => {
                 const copySpan = this.copyBtn.lastElementChild;
                 copySpan.textContent = 'Copied!';
                 setTimeout(() => { copySpan.textContent = 'Copy'; }, 2000);
