@@ -2,6 +2,7 @@
 :root {
     --font-sans: 'Inter', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
     --font-mono: 'Fira Code', monospace;
+    --font-rtl: 'Vazirmatn', var(--font-sans);
     
     /* Light Theme */
     --bg-light: #ffffff;
@@ -507,6 +508,10 @@ input:checked + .slider:before {
     padding: 1rem;
     white-space: pre-wrap;
     word-break: break-all;
+}
+/* New style for RTL text */
+.code-content[dir="rtl"] {
+    font-family: var(--font-rtl);
 }
 .light-theme .code-content { color: var(--text-primary-light); }
 .dark-theme .code-content { color: var(--editor-text-dark); }
