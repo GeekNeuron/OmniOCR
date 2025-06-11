@@ -4,7 +4,6 @@ import { PDFHandler } from './pdfHandler.js';
 import { Postprocessor } from './postprocessor.js';
 import { SubtitleHandler } from './subtitleHandler.js';
 import { CloudOCR } from './cloudOcr.js';
-import { Preprocessor } from './preprocessor.js';
 
 let ocrEngineCache = { worker: null, lang: null };
 
@@ -28,16 +27,18 @@ async function getLocalOcrEngine(lang) {
 }
 
 /**
- * Converts a file or canvas to a Base64 string.
+ * Converts a file or canvas to a Base64 string, stripping the data URI prefix.
  * @param {File|HTMLCanvasElement} source - The file or canvas to convert.
  * @returns {Promise<string>} A promise that resolves with the Base64 data string.
  */
 function toBase64(source) {
     return new Promise((resolve, reject) => {
+        // For canvas, directly get the data URL
         if (source instanceof HTMLCanvasElement) {
-            resolve(source.toDataURL().split(',')[1]);
+            resolve(source.toDataURL('image/png').split(',')[1]);
             return;
         }
+        // For files, use FileReader
         const reader = new FileReader();
         reader.onload = () => resolve(reader.result.split(',')[1]);
         reader.onerror = error => reject(error);
@@ -52,38 +53,38 @@ async function handleFiles(files) {
     if (!files || files.length === 0) return;
 
     UI.reset();
-    const isAdvanced = UI.isAdvancedMode();
     
-    // For subtitles, we always use the local engine for now.
-    // Cloud processing for subtitles is a future enhancement.
+    // For subtitles, we always use the local engine for now
+    // as cloud processing is a future enhancement.
     if (files.length > 1) {
-        // (Smart subtitle handling logic from previous steps remains the same)
+        // (Smart subtitle handling logic using local engine remains the same)
         return; 
     }
     
     const file = files[0];
+    const isAdvanced = UI.isAdvancedMode();
+    const lang = UI.getSelectedLanguage(); // For post-processing
     
     try {
         let rawText = '';
+
         if (isAdvanced) {
+            // --- ADVANCED MODE LOGIC ---
             let apiKey = UI.getApiKey();
             if (!apiKey) {
                 apiKey = UI.promptForApiKey();
                 if (!apiKey) {
                     UI.advancedToggle.checked = false;
                     UI.updateSubtitle();
-                    UI.displayError("API Key is required for Advanced Mode. Switching to Local Mode.");
-                    return;
+                    throw new Error("API Key is required for Advanced Mode. Switched to Local Mode.");
                 }
             }
-            UI.updateProgress("Uploading to cloud for advanced OCR...", 0.1);
-            const preprocessedImage = await Preprocessor.process(file);
-            const base64Image = await toBase64(preprocessedImage);
+            UI.updateProgress("Uploading to cloud for advanced OCR...", 0.3);
+            const base64Image = await toBase64(file);
             rawText = await CloudOCR.recognize(base64Image, apiKey);
 
         } else {
-            // Local Processing Logic
-            const lang = UI.getSelectedLanguage();
+            // --- LOCAL MODE LOGIC ---
             const worker = await getLocalOcrEngine(lang);
             
             if (file.type === 'application/pdf') {
@@ -91,11 +92,10 @@ async function handleFiles(files) {
             } else if (file.type.startsWith('image/')) {
                 rawText = await OCR.recognize(file, worker);
             } else {
-                throw new Error('Unsupported file format.');
+                 throw new Error('Unsupported file format. For subtitles, please select both .sub and .idx files.');
             }
         }
 
-        const lang = UI.getSelectedLanguage(); // For post-processing
         const finalText = Postprocessor.cleanup(rawText, lang);
         UI.displayResult(finalText, 'txt');
 
