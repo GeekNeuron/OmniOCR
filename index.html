@@ -95,24 +95,24 @@
         <p>Created by <a href="https://github.com/GeekNeuron/OmniOCR" target="_blank" rel="noopener noreferrer" class="footer-link">GeekNeuron</a></p>
     </footer>
 
-    <!-- API Key Modal -->
+    <!-- ** MODIFICATION: Advanced API Key Modal ** -->
     <div id="api-key-modal-overlay" class="modal-overlay hidden">
         <div id="api-key-modal" class="modal-content">
             <h2 class="modal-title">Advanced Mode Credentials</h2>
             <p class="modal-subtitle">
-                Enter your keys for cloud services. They are only stored for this session. You can leave fields blank to skip a service.
+                Enter your keys for cloud services. They are only stored for this session. You can leave optional fields blank.
             </p>
             <div class="modal-input-grid">
                 <div class="modal-input-group">
-                    <label for="google-key-input">Google Vision API Key</label>
+                    <label for="google-key-input">Google Vision API Key (Required)</label>
                     <input type="password" id="google-key-input" class="modal-input" placeholder="Enter Google API Key...">
                 </div>
                 <div class="modal-input-group">
-                    <label for="cloudinary-name-input">Cloudinary Cloud Name</label>
+                    <label for="cloudinary-name-input">Cloudinary Cloud Name (Optional)</label>
                     <input type="text" id="cloudinary-name-input" class="modal-input" placeholder="Enter Cloudinary Name...">
                 </div>
                 <div class="modal-input-group">
-                    <label for="huggingface-key-input">Hugging Face Token</label>
+                    <label for="huggingface-key-input">Hugging Face Token (Optional)</label>
                     <input type="password" id="huggingface-key-input" class="modal-input" placeholder="Enter Hugging Face Token...">
                 </div>
             </div>
