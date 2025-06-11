@@ -5,6 +5,7 @@ import { Postprocessor } from './postprocessor.js';
 import { SubtitleHandler } from './subtitleHandler.js';
 import { API } from './apiHandlers.js';
 
+const fileCache = { idx: null, sub: null };
 let ocrEngineCache = { worker: null, lang: null };
 
 /**
@@ -28,8 +29,6 @@ async function getLocalOcrEngine(lang) {
 
 /**
  * Converts a file or canvas to a Base64 string, stripping the data URI prefix.
- * @param {File|HTMLCanvasElement} source - The file or canvas to convert.
- * @returns {Promise<string>} A promise that resolves with the Base64 data string.
  */
 function toBase64(source) {
     return new Promise((resolve, reject) => {
@@ -46,16 +45,12 @@ function toBase64(source) {
 
 
 /**
- * Executes the advanced cloud-based OCR pipeline.
+ * Executes the advanced cloud-based OCR pipeline for a single image/page.
  */
 async function processWithCloud(file, apiKeys) {
-    let enhancedImageUrl;
-    
     // Step 1: Enhance image with Cloudinary (optional)
-    if (apiKeys.cloudinaryCloudName) {
-        UI.updateProgress('Enhancing image with Cloudinary...', 0.2);
-        enhancedImageUrl = await API.Cloudinary.enhanceImage(file, apiKeys.cloudinaryCloudName, 'ml_default');
-    }
+    UI.updateProgress('Enhancing image with Cloudinary...', 0.2);
+    const enhancedImageUrl = await API.Cloudinary.enhanceImage(file, apiKeys.cloudinaryCloudName);
     
     // Step 2: Perform OCR with Google Vision AI
     UI.updateProgress('Performing OCR with Google Vision AI...', 0.5);
@@ -78,14 +73,27 @@ async function processWithCloud(file, apiKeys) {
 }
 
 /**
- * Handles the logic for processing a pair of .sub and .idx files (always locally).
+ * Handles the logic for processing a pair of .sub and .idx files.
+ * This version decides whether to use local or cloud OCR for subtitles based on the Advanced toggle.
  */
 async function handleSubtitleFiles() {
     const { idx, sub } = fileCache;
-    const lang = UI.getSelectedLanguage();
+    const isAdvanced = UI.isAdvancedMode();
+    const lang = UI.getSelectedLanguage(); // Still needed for post-processing
+
     try {
-        const worker = await getLocalOcrEngine(lang);
-        const srtOutput = await SubtitleHandler.process(sub, idx, worker, lang);
+        let apiKeys = null;
+        let worker = null;
+
+        if (isAdvanced) {
+            apiKeys = UI.getApiKeys();
+            if (!apiKeys.google) throw new Error("Google Vision API Key is required for Advanced Subtitle OCR.");
+        } else {
+            worker = await getLocalOcrEngine(lang);
+        }
+        
+        // The subtitle handler will internally decide which OCR method to use
+        const srtOutput = await SubtitleHandler.process(sub, idx, worker, lang, isAdvanced, apiKeys);
         
         if (!srtOutput) {
             throw new Error("No text could be extracted from the subtitle files.");
@@ -103,6 +111,7 @@ async function handleSubtitleFiles() {
     }
 }
 
+
 /**
  * Main file handling logic. Routes files to the correct processor.
  */
@@ -111,30 +120,27 @@ async function handleFiles(files) {
 
     UI.reset();
 
-    // --- Smart Subtitle Handling Logic ---
+    // --- Smart Subtitle Handling ---
     let isSubtitleJob = false;
     for (const file of files) {
         const extension = file.name.split('.').pop().toLowerCase();
         if (extension === 'sub') fileCache.sub = file;
         if (extension === 'idx') fileCache.idx = file;
     }
-    
-    if (fileCache.sub || fileCache.idx) {
-        isSubtitleJob = true;
-    }
+    if (fileCache.sub || fileCache.idx) isSubtitleJob = true;
 
     if (isSubtitleJob) {
         if (fileCache.idx && fileCache.sub) {
-            handleSubtitleFiles(); // Call the dedicated subtitle function
+            handleSubtitleFiles();
         } else if (fileCache.idx) {
             UI.showSubtitlePrompt("IDX file received. Please add the corresponding SUB file.");
         } else if (fileCache.sub) {
             UI.showSubtitlePrompt("SUB file received. Please add the corresponding IDX file.");
         }
-        return; 
+        return;
     }
 
-    // --- Standard & Advanced File Processing ---
+    // --- Image & PDF Processing ---
     if (files.length === 1) {
         const file = files[0];
         const isAdvanced = UI.isAdvancedMode();
@@ -147,7 +153,7 @@ async function handleFiles(files) {
                 if (!apiKeys.google) {
                     throw new Error("Google Vision API Key is required for Advanced Mode. Please turn off Advanced Mode or provide a key.");
                 }
-                rawText = await processWithCloud(file, apiKeys);
+                rawText = await processWithCloud(file);
             } else {
                 const lang = UI.getSelectedLanguage();
                 const worker = await getLocalOcrEngine(lang);
@@ -160,7 +166,7 @@ async function handleFiles(files) {
                 }
             }
             
-            const lang = isAdvanced ? 'eng' : UI.getSelectedLanguage(); 
+            const lang = isAdvanced ? 'eng' : UI.getSelectedLanguage();
             const finalText = Postprocessor.cleanup(rawText, lang);
             UI.displayResult(finalText, 'txt');
 
@@ -172,52 +178,6 @@ async function handleFiles(files) {
         }
     } else if (files.length > 1) {
         UI.displayError("Please upload only one file at a time (or a matching .sub/.idx pair).");
-    }
-}
-    
-    const file = files[0];
-    const isAdvanced = UI.isAdvancedMode();
-    const lang = UI.getSelectedLanguage(); // For post-processing
-    
-    try {
-        let rawText = '';
-
-        if (isAdvanced) {
-            // --- ADVANCED MODE LOGIC ---
-            let apiKey = UI.getApiKey();
-            if (!apiKey) {
-                apiKey = UI.promptForApiKey();
-                if (!apiKey) {
-                    UI.advancedToggle.checked = false;
-                    UI.updateSubtitle();
-                    throw new Error("API Key is required for Advanced Mode. Switched to Local Mode.");
-                }
-            }
-            UI.updateProgress("Uploading to cloud for advanced OCR...", 0.3);
-            const base64Image = await toBase64(file);
-            rawText = await CloudOCR.recognize(base64Image, apiKey);
-
-        } else {
-            // --- LOCAL MODE LOGIC ---
-            const worker = await getLocalOcrEngine(lang);
-            
-            if (file.type === 'application/pdf') {
-                rawText = await PDFHandler.process(file, worker);
-            } else if (file.type.startsWith('image/')) {
-                rawText = await OCR.recognize(file, worker);
-            } else {
-                 throw new Error('Unsupported file format. For subtitles, please select both .sub and .idx files.');
-            }
-        }
-
-        const finalText = Postprocessor.cleanup(rawText, lang);
-        UI.displayResult(finalText, 'txt');
-
-    } catch (error) {
-        console.error('Processing Error:', error);
-        UI.displayError(error.message || 'An unknown error occurred.');
-    } finally {
-        UI.fileInput.value = '';
     }
 }
 
