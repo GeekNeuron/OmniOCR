@@ -7,18 +7,12 @@ export const UI = {
     dropZone: document.getElementById('drop-zone'),
     fileInput: document.getElementById('file-input'),
     subtitle: document.getElementById('subtitle'),
-    
-    // Custom Select elements
     customSelect: document.getElementById('custom-lang-select'),
     selectedLangText: document.getElementById('selected-lang-text'),
     langOptionsPanel: document.getElementById('lang-options-panel'),
     langOptionsList: document.getElementById('lang-options-list'),
     langSearchInput: document.getElementById('lang-search-input'),
-    
-    // Advanced Mode
     advancedToggle: document.getElementById('advanced-toggle-switch'),
-    
-    // Status and Result elements
     statusContainer: document.getElementById('status-container'),
     statusText: document.getElementById('status-text'),
     progressBar: document.getElementById('progress-bar'),
@@ -129,14 +123,18 @@ export const UI = {
     // --- Event Listeners Setup ---
     setupEventListeners() {
         this.loadTheme();
+        this.loadAdvancedModePreference();
         this.themeToggle.addEventListener('click', () => this.toggleTheme());
         
         // Advanced Mode Toggle
-        this.advancedToggle.addEventListener('change', () => this.updateSubtitle());
+        this.advancedToggle.addEventListener('change', (e) => {
+            localStorage.setItem('advancedMode', e.target.checked);
+            this.updateSubtitle();
+        });
         
         // Custom Select Logic
         this.customSelect.addEventListener('click', (e) => {
-            if (this.isAdvancedMode()) return; // Prevent opening when disabled
+            if (this.isAdvancedMode()) return;
             e.stopPropagation();
             this.langOptionsPanel.classList.toggle('hidden');
             this.customSelect.classList.toggle('open');
@@ -268,6 +266,12 @@ export const UI = {
         if (savedTheme === 'dark') {
             this.body.classList.replace('light-theme', 'dark-theme');
         }
+    },
+
+    loadAdvancedModePreference() {
+        const savedMode = localStorage.getItem('advancedMode') === 'true';
+        this.advancedToggle.checked = savedMode;
+        this.updateSubtitle();
     },
     
     getSelectedLanguage() {
