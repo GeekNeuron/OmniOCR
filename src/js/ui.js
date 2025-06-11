@@ -333,15 +333,28 @@ export const UI = {
     },
     
     toggleTheme() {
-        this.body.classList.toggle('dark-theme');
-        this.body.classList.toggle('light-theme');
-        localStorage.setItem('theme', this.body.classList.contains('dark-theme') ? 'dark' : 'light');
+        const isCurrentlyDark = this.body.classList.contains('dark-theme');
+        if (isCurrentlyDark) {
+            this.body.classList.remove('dark-theme');
+            this.body.classList.add('light-theme');
+            localStorage.setItem('theme', 'light');
+        } else {
+            this.body.classList.remove('light-theme');
+            this.body.classList.add('dark-theme');
+            localStorage.setItem('theme', 'dark');
+        }
     },
 
     loadTheme() {
         const savedTheme = localStorage.getItem('theme');
+        // Ensure the body starts clean before applying the correct theme
+        this.body.classList.remove('light-theme', 'dark-theme');
+        
         if (savedTheme === 'dark') {
-            this.body.classList.replace('light-theme', 'dark-theme');
+            this.body.classList.add('dark-theme');
+        } else {
+            // Default to light theme if nothing is saved or if it's explicitly 'light'
+            this.body.classList.add('light-theme');
         }
     },
 
