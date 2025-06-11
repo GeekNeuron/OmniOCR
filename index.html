@@ -33,7 +33,6 @@
         </header>
 
         <section id="controls-section" class="controls-section">
-            <!-- Advanced Mode Toggle -->
             <div id="advanced-mode-container" class="advanced-toggle-container">
                 <label for="advanced-toggle-switch" class="advanced-toggle-label">Advanced:</label>
                 <label class="switch">
@@ -42,7 +41,6 @@
                 </label>
             </div>
             
-            <!-- Custom Language Dropdown -->
             <div id="custom-lang-select" class="custom-select-wrapper" tabindex="0">
                 <div class="selected-option">
                     <span id="selected-lang-text">English</span>
@@ -97,5 +95,21 @@
         <p>Created by <a href="https://github.com/GeekNeuron/OmniOCR" target="_blank" rel="noopener noreferrer" class="footer-link">GeekNeuron</a></p>
     </footer>
 
+    <!-- API Key Modal -->
+    <div id="api-key-modal-overlay" class="modal-overlay hidden">
+        <div id="api-key-modal" class="modal-content">
+            <h2 class="modal-title">API Key Required</h2>
+            <p class="modal-subtitle">
+                Advanced Mode uses Google Cloud Vision. Please enter your API key to continue. It will only be stored for this session.
+            </p>
+            <div class="modal-input-wrapper">
+                <input type="password" id="api-key-input" class="modal-input" placeholder="Enter your API key here...">
+            </div>
+            <div class="modal-actions">
+                <button id="cancel-api-key-btn" class="modal-btn modal-btn-secondary">Cancel</button>
+                <button id="confirm-api-key-btn" class="modal-btn modal-btn-primary">Confirm</button>
+            </div>
+        </div>
+    </div>
 </body>
 </html>
