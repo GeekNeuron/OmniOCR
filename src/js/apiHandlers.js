@@ -5,16 +5,20 @@
 
 // --- Cloudinary Handler for Image Preprocessing ---
 const CloudinaryHandler = {
-    async enhanceImage(file, cloudName, uploadPreset) {
-        if (!cloudName || !uploadPreset) {
-            console.warn("Cloudinary credentials not provided. Skipping enhancement.");
+    async enhanceImage(file, cloudName, uploadPreset = 'ml_default') {
+        // If credentials aren't provided, skip this step.
+        if (!cloudName) {
+            console.warn("Cloudinary Cloud Name not provided. Skipping enhancement.");
             return null; // Return null to indicate no enhancement was done
         }
 
         const formData = new FormData();
         formData.append('file', file);
         formData.append('upload_preset', uploadPreset);
-        // Apply transformations for better OCR results
+        // Apply transformations for better OCR results:
+        // e_improve: improve color, contrast, and brightness
+        // w_2000,h_2000,c_limit: resize image to a max of 2000x2000, keeping aspect ratio
+        // e_sharpen: sharpen the image
         formData.append('transformation', 'e_improve:50,w_2000,h_2000,c_limit/e_sharpen:40');
 
         const endpoint = `https://api.cloudinary.com/v1_1/${cloudName}/image/upload`;
@@ -40,18 +44,17 @@ const GoogleVisionOCR = {
         const endpoint = `https://vision.googleapis.com/v1/images:annotate?key=${apiKey}`;
         
         let imageRequest;
+        // Check if the source is a URL (from Cloudinary) or a base64 string
         if (typeof source === 'string' && source.startsWith('http')) {
-            // It's a URL from Cloudinary
             imageRequest = { source: { imageUri: source } };
         } else {
-            // It's a base64 string
             imageRequest = { content: source };
         }
 
         const requestBody = {
             requests: [{
                 image: imageRequest,
-                features: [{ type: "DOCUMENT_TEXT_DETECTION" }],
+                features: [{ type: "DOCUMENT_TEXT_DETECTION" }], // Best for dense text
             }],
         };
 
@@ -78,11 +81,12 @@ const GoogleVisionOCR = {
 // --- Hugging Face Handler for Text Post-processing ---
 const HuggingFaceCorrector = {
     async correctGrammar(text, apiKey) {
+        // If no token is provided, skip this step.
         if (!apiKey) {
             console.warn("Hugging Face token not provided. Skipping grammar correction.");
             return text;
         }
-        
+        // Using a popular grammar correction model
         const model = 'grammarly/coedit-large';
         const endpoint = `https://api-inference.huggingface.co/models/${model}`;
         
@@ -98,7 +102,7 @@ const HuggingFaceCorrector = {
 
             if (!response.ok) {
                 console.warn('Hugging Face API failed, returning original text.');
-                return text;
+                return text; // Return original text if correction fails
             }
             
             const data = await response.json();
