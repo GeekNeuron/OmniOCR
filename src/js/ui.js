@@ -172,7 +172,7 @@ export const UI = {
 
             const cancelHandler = () => {
                 cleanup();
-                resolve(null);
+                resolve(null); // Resolve with null on cancel
             };
             
             const keydownHandler = (e) => {
@@ -186,6 +186,8 @@ export const UI = {
 
             const cleanup = () => {
                 this.hide(this.apiKeyModalOverlay);
+                this.googleKeyInput.style.borderColor = "";
+                this.googleKeyInput.placeholder = "Enter your API key here...";
                 this.confirmApiKeyBtn.removeEventListener('click', confirmHandler);
                 this.cancelApiKeyBtn.removeEventListener('click', cancelHandler);
                 this.apiKeyModal.removeEventListener('keydown', keydownHandler);
@@ -208,6 +210,7 @@ export const UI = {
         this.loadAdvancedModePreference();
         this.themeToggle.addEventListener('click', () => this.toggleTheme());
         
+        // Advanced Mode Toggle
         this.advancedToggle.addEventListener('change', async (e) => {
             const isEnabled = e.target.checked;
             localStorage.setItem('advancedMode', isEnabled);
