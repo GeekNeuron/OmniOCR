@@ -639,6 +639,11 @@ input:checked + .slider:before {
     font-weight: 500;
     cursor: pointer;
     transition: background-color 0.2s, opacity 0.2s;
+    -webkit-tap-highlight-color: transparent;
+}
+
+.modal-btn:focus {
+    outline: none;
 }
 
 .modal-btn-primary {
