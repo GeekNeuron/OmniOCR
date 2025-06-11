@@ -132,7 +132,7 @@ export const UI = {
         return this.advancedToggle.checked;
     },
     
-    // --- API Key Modal Logic ---
+// --- API Key Modal Logic ---
     promptForApiKey() {
         return new Promise((resolve) => {
             this.show(this.apiKeyModalOverlay);
@@ -153,21 +153,26 @@ export const UI = {
                 cleanup();
                 resolve(null);
             };
+            
+            const keydownHandler = (e) => {
+                if (e.key === 'Enter') {
+                    confirmHandler();
+                } else if (e.key === 'Escape') {
+                    cancelHandler();
+                }
+            };
 
             const cleanup = () => {
                 this.hide(this.apiKeyModalOverlay);
                 this.confirmApiKeyBtn.removeEventListener('click', confirmHandler);
                 this.cancelApiKeyBtn.removeEventListener('click', cancelHandler);
-                this.apiKeyInput.value = '';
+                document.removeEventListener('keydown', keydownHandler);
             };
 
             this.confirmApiKeyBtn.addEventListener('click', confirmHandler);
             this.cancelApiKeyBtn.addEventListener('click', cancelHandler);
+            document.addEventListener('keydown', keydownHandler);
         });
-    },
-    
-    getApiKey() {
-        return sessionStorage.getItem('cloudApiKey');
     },
 
     // --- Event Listeners Setup ---
@@ -185,6 +190,7 @@ export const UI = {
             if (isEnabled && !this.getApiKey()) {
                 const apiKey = await this.promptForApiKey();
                 if (!apiKey) {
+                    // If user cancels or enters nothing, turn the toggle back off
                     e.target.checked = false;
                     localStorage.setItem('advancedMode', 'false');
                     this.updateSubtitle();
@@ -224,6 +230,7 @@ export const UI = {
         this.langSearchInput.addEventListener('input', (e) => {
             this.filterLanguages(e.target.value);
         });
+
         this.langSearchInput.addEventListener('click', e => e.stopPropagation());
         
         // Copy button
