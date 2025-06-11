@@ -95,30 +95,19 @@
         <p>Created by <a href="https://github.com/GeekNeuron/OmniOCR" target="_blank" rel="noopener noreferrer" class="footer-link">GeekNeuron</a></p>
     </footer>
 
-    <!-- ** MODIFICATION: Advanced API Key Modal ** -->
+    <!-- API Key Modal -->
     <div id="api-key-modal-overlay" class="modal-overlay hidden">
         <div id="api-key-modal" class="modal-content">
-            <h2 class="modal-title">Advanced Mode Credentials</h2>
+            <h2 class="modal-title">API Key Required</h2>
             <p class="modal-subtitle">
-                Enter your keys for cloud services. They are only stored for this session. You can leave optional fields blank.
+                Advanced Mode uses Google Cloud Vision. Please enter your API key to continue. It will only be stored for this session.
             </p>
-            <div class="modal-input-grid">
-                <div class="modal-input-group">
-                    <label for="google-key-input">Google Vision API Key (Required)</label>
-                    <input type="password" id="google-key-input" class="modal-input" placeholder="Enter Google API Key...">
-                </div>
-                <div class="modal-input-group">
-                    <label for="cloudinary-name-input">Cloudinary Cloud Name (Optional)</label>
-                    <input type="text" id="cloudinary-name-input" class="modal-input" placeholder="Enter Cloudinary Name...">
-                </div>
-                <div class="modal-input-group">
-                    <label for="huggingface-key-input">Hugging Face Token (Optional)</label>
-                    <input type="password" id="huggingface-key-input" class="modal-input" placeholder="Enter Hugging Face Token...">
-                </div>
+            <div class="modal-input-wrapper">
+                <input type="password" id="api-key-input" class="modal-input" placeholder="Enter your API key here...">
             </div>
             <div class="modal-actions">
                 <button id="cancel-api-key-btn" class="modal-btn modal-btn-secondary">Cancel</button>
-                <button id="confirm-api-key-btn" class="modal-btn modal-btn-primary">Save Keys</button>
+                <button id="confirm-api-key-btn" class="modal-btn modal-btn-primary">Confirm</button>
             </div>
         </div>
     </div>
