@@ -2,29 +2,43 @@ import { UI } from './ui.js';
 import { OCR } from './ocr.js';
 import { Postprocessor } from './postprocessor.js';
 import { Preprocessor } from './preprocessor.js';
+import { API } from './apiHandlers.js'; // Import the main API handler
+
+/**
+ * Converts a canvas to a Base64 string, stripping the data URI prefix.
+ * @param {HTMLCanvasElement} canvas - The canvas to convert.
+ * @returns {string} The Base64 data string.
+ */
+function canvasToBase64(canvas) {
+    return canvas.toDataURL('image/png').split(',')[1];
+}
+
 
 /**
  * Handles .sub/.idx file processing using the vobsub.js library.
+ * Can use either the local Tesseract worker or the advanced Cloud OCR.
  */
 export const SubtitleHandler = {
     /**
      * Processes a pair of .sub and .idx files.
      * @param {File} subFile - The .sub file.
      * @param {File} idxFile - The .idx file.
-     * @param {Tesseract.Worker} worker - The initialized Tesseract worker.
+     * @param {Tesseract.Worker | null} worker - The initialized Tesseract worker (for local mode).
      * @param {string} lang - The language code for OCR.
+     * @param {boolean} isAdvanced - Flag to determine which OCR engine to use.
+     * @param {object} apiKeys - The API keys for cloud services.
      * @returns {Promise<string>} A promise that resolves with the full SRT content.
      */
-    process(subFile, idxFile, worker, lang) {
+    process(subFile, idxFile, worker, lang, isAdvanced, apiKeys) {
         return new Promise((resolve, reject) => {
             if (typeof VobSub === 'undefined') {
-                return reject(new Error("vobsub.js library is not loaded. Please check the file path."));
+                return reject(new Error("vobsub.js library is not loaded."));
             }
 
             const vobsub = new VobSub({
                 subFile: subFile,
                 idxFile: idxFile,
-                debug: false, // Set to true for development console logs
+                debug: false,
                 onReady: async () => {
                     try {
                         let srtOutput = '';
@@ -41,9 +55,17 @@ export const SubtitleHandler = {
                             const canvas = this.renderSubtitleToCanvas(sub);
 
                             if (canvas) {
-                                // Use the advanced preprocessor to enhance the image
-                                const preprocessedImage = await Preprocessor.process(canvas);
-                                const text = await OCR.recognize(preprocessedImage, worker);
+                                let text = '';
+                                if (isAdvanced) {
+                                    // ADVANCED MODE: Use Google Vision API
+                                    const base64Image = canvasToBase64(canvas);
+                                    text = await API.Google.recognize(base64Image, apiKeys.google);
+                                } else {
+                                    // LOCAL MODE: Use Tesseract.js worker
+                                    const preprocessedImage = await Preprocessor.process(canvas);
+                                    text = await OCR.recognize(preprocessedImage, worker);
+                                }
+                                
                                 const cleanedText = Postprocessor.cleanup(text, lang).trim();
 
                                 if (cleanedText) {
