@@ -2,7 +2,7 @@ import { UI } from './ui.js';
 import { OCR } from './ocr.js';
 import { Postprocessor } from './postprocessor.js';
 import { Preprocessor } from './preprocessor.js';
-import { API } from './apiHandlers.js'; // Import the main API handler
+import { API } from './apiHandlers.js';
 
 /**
  * Converts a canvas to a Base64 string, stripping the data URI prefix.
@@ -12,7 +12,6 @@ import { API } from './apiHandlers.js'; // Import the main API handler
 function canvasToBase64(canvas) {
     return canvas.toDataURL('image/png').split(',')[1];
 }
-
 
 /**
  * Handles .sub/.idx file processing using the vobsub.js library.
@@ -57,11 +56,11 @@ export const SubtitleHandler = {
                             if (canvas) {
                                 let text = '';
                                 if (isAdvanced) {
-                                    // ADVANCED MODE: Use Google Vision API
+                                    // ADVANCED MODE: Use Google Vision API for higher accuracy
                                     const base64Image = canvasToBase64(canvas);
                                     text = await API.Google.recognize(base64Image, apiKeys.google);
                                 } else {
-                                    // LOCAL MODE: Use Tesseract.js worker
+                                    // LOCAL MODE: Preprocess and use Tesseract.js worker
                                     const preprocessedImage = await Preprocessor.process(canvas);
                                     text = await OCR.recognize(preprocessedImage, worker);
                                 }
@@ -73,7 +72,7 @@ export const SubtitleHandler = {
                                     const endTime = this.formatTimestamp(sub.endTime);
                                     srtOutput += `${i + 1}\n`;
                                     srtOutput += `${startTime} --> ${endTime}\n`;
-                                    srtOutput += `${cleanedText}\n\n`;
+                                    srtOutput += `${cleanedText.replace(/\n/g, ' ')}\n\n`; // Ensure single line per sub
                                 }
                             }
                         }
@@ -94,7 +93,8 @@ export const SubtitleHandler = {
      * Renders a subtitle object from vobsub.js to a canvas.
      */
     renderSubtitleToCanvas(sub) {
-        if (!sub.imageData || !sub.width || !sub.height) {
+        if (!sub || !sub.imageData || !sub.width || !sub.height) {
+            console.warn("Skipping invalid subtitle image data.");
             return null;
         }
         const canvas = document.createElement('canvas');
