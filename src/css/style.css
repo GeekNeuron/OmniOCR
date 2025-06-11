@@ -77,7 +77,6 @@ body {
     background: transparent url('https://www.transparenttextures.com/patterns/light-paper-fibers.png');
     background-size: 300px 300px;
     animation: move-galaxy 180s linear infinite reverse;
-    filter: invert(1);
 }
 
 .dark-theme #galaxy-bg {
@@ -86,6 +85,7 @@ body {
 
 .light-theme #dust-bg {
     opacity: 0.05;
+    filter: invert(1);
 }
 
 
