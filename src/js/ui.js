@@ -7,12 +7,18 @@ export const UI = {
     dropZone: document.getElementById('drop-zone'),
     fileInput: document.getElementById('file-input'),
     subtitle: document.getElementById('subtitle'),
+    
+    // Custom Select elements
     customSelect: document.getElementById('custom-lang-select'),
     selectedLangText: document.getElementById('selected-lang-text'),
     langOptionsPanel: document.getElementById('lang-options-panel'),
     langOptionsList: document.getElementById('lang-options-list'),
     langSearchInput: document.getElementById('lang-search-input'),
+    
+    // Advanced Mode
     advancedToggle: document.getElementById('advanced-toggle-switch'),
+    
+    // Status and Result elements
     statusContainer: document.getElementById('status-container'),
     statusText: document.getElementById('status-text'),
     progressBar: document.getElementById('progress-bar'),
@@ -78,7 +84,6 @@ export const UI = {
         this.errorText.textContent = message;
     },
 
-    // --- Smart Subtitle Guide ---
     showSubtitlePrompt(message) {
         this.hide(this.resultContainer);
         this.hide(this.errorContainer);
@@ -123,7 +128,6 @@ export const UI = {
     promptForApiKey() {
         const key = prompt("Please enter your Google Cloud Vision API Key to use Advanced Mode:", "");
         if (key && key.trim()) {
-            // Use sessionStorage to keep the key only for the current session
             sessionStorage.setItem('cloudApiKey', key.trim());
             return key.trim();
         }
@@ -142,8 +146,20 @@ export const UI = {
         
         // Advanced Mode Toggle
         this.advancedToggle.addEventListener('change', (e) => {
-            localStorage.setItem('advancedMode', e.target.checked);
+            const isEnabled = e.target.checked;
+            localStorage.setItem('advancedMode', isEnabled);
             this.updateSubtitle();
+
+            // ** NEW LOGIC: Prompt for API Key immediately if needed **
+            if (isEnabled && !this.getApiKey()) {
+                const apiKey = this.promptForApiKey();
+                if (!apiKey) {
+                    // If user cancels or enters nothing, turn the toggle back off
+                    e.target.checked = false;
+                    localStorage.setItem('advancedMode', 'false');
+                    this.updateSubtitle();
+                }
+            }
         });
         
         // Custom Select Logic
@@ -178,7 +194,6 @@ export const UI = {
         this.langSearchInput.addEventListener('input', (e) => {
             this.filterLanguages(e.target.value);
         });
-
         this.langSearchInput.addEventListener('click', e => e.stopPropagation());
         
         // Copy button
