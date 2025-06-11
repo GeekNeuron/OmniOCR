@@ -47,7 +47,12 @@ function toBase64(source) {
 /**
  * Executes the advanced cloud-based OCR pipeline for a single image/page.
  */
-async function processWithCloud(file, apiKeys) {
+async function processWithCloud(file) {
+    const apiKeys = UI.getApiKeys();
+    if (!apiKeys.google) {
+        throw new Error("Google Vision API Key is required for Advanced Mode.");
+    }
+    
     // Step 1: Enhance image with Cloudinary (optional)
     UI.updateProgress('Enhancing image with Cloudinary...', 0.2);
     const enhancedImageUrl = await API.Cloudinary.enhanceImage(file, apiKeys.cloudinaryCloudName);
@@ -58,7 +63,6 @@ async function processWithCloud(file, apiKeys) {
     if (enhancedImageUrl) {
         ocrText = await API.Google.recognize(enhancedImageUrl, apiKeys.google);
     } else {
-        // Fallback to sending base64 if Cloudinary is not used
         const base64Image = await toBase64(file);
         ocrText = await API.Google.recognize(base64Image, apiKeys.google);
     }
@@ -92,7 +96,6 @@ async function handleSubtitleFiles() {
             worker = await getLocalOcrEngine(lang);
         }
         
-        // The subtitle handler will internally decide which OCR method to use
         const srtOutput = await SubtitleHandler.process(sub, idx, worker, lang, isAdvanced, apiKeys);
         
         if (!srtOutput) {
