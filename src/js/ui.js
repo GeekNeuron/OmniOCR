@@ -7,12 +7,18 @@ export const UI = {
     dropZone: document.getElementById('drop-zone'),
     fileInput: document.getElementById('file-input'),
     subtitle: document.getElementById('subtitle'),
+    
+    // Custom Select elements
     customSelect: document.getElementById('custom-lang-select'),
     selectedLangText: document.getElementById('selected-lang-text'),
     langOptionsPanel: document.getElementById('lang-options-panel'),
     langOptionsList: document.getElementById('lang-options-list'),
     langSearchInput: document.getElementById('lang-search-input'),
+    
+    // Advanced Mode
     advancedToggle: document.getElementById('advanced-toggle-switch'),
+    
+    // Status and Result elements
     statusContainer: document.getElementById('status-container'),
     statusText: document.getElementById('status-text'),
     progressBar: document.getElementById('progress-bar'),
@@ -140,13 +146,15 @@ export const UI = {
                     cloudinaryCloudName: this.cloudinaryNameInput.value.trim(),
                     huggingFace: this.huggingfaceKeyInput.value.trim()
                 };
+                
                 if (keys.google) {
                     sessionStorage.setItem('apiKeys', JSON.stringify(keys));
+                    cleanup();
                     resolve(keys);
                 } else {
-                    resolve(null); // Resolve with null if the essential key is missing
+                    this.googleKeyInput.style.borderColor = "red";
+                    this.googleKeyInput.placeholder = "Google API Key is required!";
                 }
-                cleanup();
             };
 
             const cancelHandler = () => {
@@ -156,6 +164,7 @@ export const UI = {
             
             const keydownHandler = (e) => {
                 if (e.key === 'Enter') {
+                    e.preventDefault();
                     confirmHandler();
                 } else if (e.key === 'Escape') {
                     cancelHandler();
