@@ -86,7 +86,6 @@ body {
     opacity: 0.05;
 }
 
-
 @keyframes move-galaxy {
     from { transform: translate(0, 0); }
     to { transform: translate(-50%, -50%); }
@@ -658,3 +657,15 @@ input:checked + .slider:before {
 .dark-theme .modal-btn-secondary { color: var(--text-color-dark); }
 .light-theme .modal-btn-secondary:hover { background-color: var(--surface-light); }
 .dark-theme .modal-btn-secondary:hover { background-color: var(--container-border-dark); }
+
+.sr-only {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    padding: 0;
+    margin: -1px;
+    overflow: hidden;
+    clip: rect(0, 0, 0, 0);
+    white-space: nowrap;
+    border-width: 0;
+}
