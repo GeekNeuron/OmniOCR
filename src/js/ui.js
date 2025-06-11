@@ -7,18 +7,12 @@ export const UI = {
     dropZone: document.getElementById('drop-zone'),
     fileInput: document.getElementById('file-input'),
     subtitle: document.getElementById('subtitle'),
-    
-    // Custom Select elements
     customSelect: document.getElementById('custom-lang-select'),
     selectedLangText: document.getElementById('selected-lang-text'),
     langOptionsPanel: document.getElementById('lang-options-panel'),
     langOptionsList: document.getElementById('lang-options-list'),
     langSearchInput: document.getElementById('lang-search-input'),
-    
-    // Advanced Mode
     advancedToggle: document.getElementById('advanced-toggle-switch'),
-    
-    // Status and Result elements
     statusContainer: document.getElementById('status-container'),
     statusText: document.getElementById('status-text'),
     progressBar: document.getElementById('progress-bar'),
@@ -64,17 +58,15 @@ export const UI = {
     displayResult(text, fileType = 'txt') {
         this.hide(this.statusContainer);
         this.show(this.resultContainer);
-        this.resultEditor.innerHTML = ''; // Clear previous content
+        this.resultEditor.innerHTML = '';
         
         this.setDownloadButtonState(fileType);
 
         const lineNumbersCol = document.createElement('div');
         lineNumbersCol.className = 'line-numbers';
-
         const codeContentCol = document.createElement('div');
         codeContentCol.className = 'code-content';
-
-        // ** NEW LOGIC: Check for RTL characters **
+        
         const rtlRegex = /[\u0600-\u06FF\u0750-\u077F\u08A0-\u08FF\uFB50-\uFDFF\uFE70-\uFEFF]/;
         if (rtlRegex.test(text)) {
             codeContentCol.dir = 'rtl';
@@ -87,14 +79,11 @@ export const UI = {
             const numberEl = document.createElement('div');
             numberEl.textContent = index + 1;
             lineNumbersCol.appendChild(numberEl);
-
             const codeEl = document.createElement('div');
             codeEl.className = 'code-line';
-            // Use a non-breaking space for empty lines to ensure height is maintained
             codeEl.textContent = line || '\u00A0'; 
             codeContentCol.appendChild(codeEl);
         });
-
         this.resultEditor.appendChild(lineNumbersCol);
         this.resultEditor.appendChild(codeContentCol);
     },
@@ -172,7 +161,7 @@ export const UI = {
 
             const cancelHandler = () => {
                 cleanup();
-                resolve(null); // Resolve with null on cancel
+                resolve(null);
             };
             
             const keydownHandler = (e) => {
@@ -210,7 +199,6 @@ export const UI = {
         this.loadAdvancedModePreference();
         this.themeToggle.addEventListener('click', () => this.toggleTheme());
         
-        // Advanced Mode Toggle
         this.advancedToggle.addEventListener('change', async (e) => {
             const isEnabled = e.target.checked;
             localStorage.setItem('advancedMode', isEnabled);
