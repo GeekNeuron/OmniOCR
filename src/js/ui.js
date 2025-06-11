@@ -64,24 +64,37 @@ export const UI = {
     displayResult(text, fileType = 'txt') {
         this.hide(this.statusContainer);
         this.show(this.resultContainer);
-        this.resultEditor.innerHTML = '';
+        this.resultEditor.innerHTML = ''; // Clear previous content
         
         this.setDownloadButtonState(fileType);
 
         const lineNumbersCol = document.createElement('div');
         lineNumbersCol.className = 'line-numbers';
+
         const codeContentCol = document.createElement('div');
         codeContentCol.className = 'code-content';
+
+        // ** NEW LOGIC: Check for RTL characters **
+        const rtlRegex = /[\u0600-\u06FF\u0750-\u077F\u08A0-\u08FF\uFB50-\uFDFF\uFE70-\uFEFF]/;
+        if (rtlRegex.test(text)) {
+            codeContentCol.dir = 'rtl';
+        } else {
+            codeContentCol.dir = 'ltr';
+        }
+
         const lines = text.trim().split('\n');
         lines.forEach((line, index) => {
             const numberEl = document.createElement('div');
             numberEl.textContent = index + 1;
             lineNumbersCol.appendChild(numberEl);
+
             const codeEl = document.createElement('div');
             codeEl.className = 'code-line';
+            // Use a non-breaking space for empty lines to ensure height is maintained
             codeEl.textContent = line || '\u00A0'; 
             codeContentCol.appendChild(codeEl);
         });
+
         this.resultEditor.appendChild(lineNumbersCol);
         this.resultEditor.appendChild(codeContentCol);
     },
