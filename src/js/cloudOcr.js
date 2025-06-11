@@ -1,11 +1,11 @@
 /**
  * Cloud OCR Module
- * Handles API calls to a cloud-based OCR service (e.g., Google Cloud Vision AI).
+ * Handles API calls to Google Cloud Vision AI.
  */
 export const CloudOCR = {
     /**
-     * Performs OCR using a cloud API.
-     * @param {string} base64Image - The base64 encoded string of the image.
+     * Performs OCR using the Google Cloud Vision API.
+     * @param {string} base64Image - The base64 encoded string of the image, without the data URI prefix.
      * @param {string} apiKey - The user's API key for the cloud service.
      * @returns {Promise<string>} A promise that resolves with the extracted text.
      */
@@ -41,18 +41,19 @@ export const CloudOCR = {
 
         if (!response.ok) {
             const errorData = await response.json();
-            throw new Error(`Cloud API Error: ${errorData.error?.message || 'Unknown error'}`);
+            const errorMessage = errorData.error?.message || 'Unknown API error';
+            throw new Error(`Cloud API Error: ${errorMessage}`);
         }
 
         const data = await response.json();
         
         const annotation = data.responses?.[0];
-        if (annotation.fullTextAnnotation) {
+        if (annotation.fullTextAnnotation && annotation.fullTextAnnotation.text) {
             return annotation.fullTextAnnotation.text;
         } else if (annotation.error) {
-            throw new Error(`Cloud API returned an error: ${annotation.error.message}`);
+            throw new Error(`Cloud API Error: ${annotation.error.message}`);
         } else {
-            return ""; // No text found
+            return ""; // No text found or empty annotation
         }
     }
 };
