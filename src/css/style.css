@@ -76,15 +76,16 @@ body {
     background: transparent url('https://www.transparenttextures.com/patterns/light-paper-fibers.png');
     background-size: 300px 300px;
     animation: move-galaxy 180s linear infinite reverse;
-    filter: invert(1); /* ** MODIFICATION: Inverts the light texture to make it dark ** */
+    filter: invert(1); /* Inverts the light texture to make it dark */
 }
 
 .dark-theme #galaxy-bg {
     opacity: 0.3;
 }
 .light-theme #dust-bg {
-    opacity: 0.05; /* ** MODIFICATION: Adjusted for better visibility ** */
+    opacity: 0.05; /* Very subtle dark dust on light background */
 }
+
 
 @keyframes move-galaxy {
     from { transform: translate(0, 0); }
@@ -314,6 +315,7 @@ input:checked + .slider:before {
 .dark-theme .lang-options-list li:hover { background-color: var(--cell-highlight-bg-dark); }
 .light-theme .lang-options-list li.selected { background-color: #eef2ff; color: var(--accent-light); }
 .dark-theme .lang-options-list li.selected { background-color: var(--button-bg-dark); color: var(--button-text-dark); }
+
 
 .drop-zone {
     width: 100%;
