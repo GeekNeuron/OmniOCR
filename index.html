@@ -98,16 +98,27 @@
     <!-- API Key Modal -->
     <div id="api-key-modal-overlay" class="modal-overlay hidden">
         <div id="api-key-modal" class="modal-content">
-            <h2 class="modal-title">API Key Required</h2>
+            <h2 class="modal-title">Advanced Mode Credentials</h2>
             <p class="modal-subtitle">
-                Advanced Mode uses Google Cloud Vision. Please enter your API key to continue. It will only be stored for this session.
+                Enter your keys for cloud services. They are only stored for this session. You can leave fields blank to skip a service.
             </p>
-            <div class="modal-input-wrapper">
-                <input type="password" id="api-key-input" class="modal-input" placeholder="Enter your API key here...">
+            <div class="modal-input-grid">
+                <div class="modal-input-group">
+                    <label for="google-key-input">Google Vision API Key</label>
+                    <input type="password" id="google-key-input" class="modal-input" placeholder="Enter Google API Key...">
+                </div>
+                <div class="modal-input-group">
+                    <label for="cloudinary-name-input">Cloudinary Cloud Name</label>
+                    <input type="text" id="cloudinary-name-input" class="modal-input" placeholder="Enter Cloudinary Name...">
+                </div>
+                <div class="modal-input-group">
+                    <label for="huggingface-key-input">Hugging Face Token</label>
+                    <input type="password" id="huggingface-key-input" class="modal-input" placeholder="Enter Hugging Face Token...">
+                </div>
             </div>
             <div class="modal-actions">
                 <button id="cancel-api-key-btn" class="modal-btn modal-btn-secondary">Cancel</button>
-                <button id="confirm-api-key-btn" class="modal-btn modal-btn-primary">Confirm</button>
+                <button id="confirm-api-key-btn" class="modal-btn modal-btn-primary">Save Keys</button>
             </div>
         </div>
     </div>
