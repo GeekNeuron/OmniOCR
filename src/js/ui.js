@@ -7,18 +7,12 @@ export const UI = {
     dropZone: document.getElementById('drop-zone'),
     fileInput: document.getElementById('file-input'),
     subtitle: document.getElementById('subtitle'),
-    
-    // Custom Select elements
     customSelect: document.getElementById('custom-lang-select'),
     selectedLangText: document.getElementById('selected-lang-text'),
     langOptionsPanel: document.getElementById('lang-options-panel'),
     langOptionsList: document.getElementById('lang-options-list'),
     langSearchInput: document.getElementById('lang-search-input'),
-    
-    // Advanced Mode
     advancedToggle: document.getElementById('advanced-toggle-switch'),
-    
-    // Status and Result elements
     statusContainer: document.getElementById('status-container'),
     statusText: document.getElementById('status-text'),
     progressBar: document.getElementById('progress-bar'),
@@ -32,7 +26,10 @@ export const UI = {
     
     // API Key Modal Elements
     apiKeyModalOverlay: document.getElementById('api-key-modal-overlay'),
-    apiKeyInput: document.getElementById('api-key-input'),
+    apiKeyModal: document.getElementById('api-key-modal'),
+    googleKeyInput: document.getElementById('google-key-input'),
+    cloudinaryNameInput: document.getElementById('cloudinary-name-input'),
+    huggingfaceKeyInput: document.getElementById('huggingface-key-input'),
     confirmApiKeyBtn: document.getElementById('confirm-api-key-btn'),
     cancelApiKeyBtn: document.getElementById('cancel-api-key-btn'),
 
@@ -90,7 +87,6 @@ export const UI = {
         this.errorText.textContent = message;
     },
 
-    // --- Smart Subtitle Guide ---
     showSubtitlePrompt(message) {
         this.hide(this.resultContainer);
         this.hide(this.errorContainer);
@@ -132,21 +128,25 @@ export const UI = {
         return this.advancedToggle.checked;
     },
     
-// --- API Key Modal Logic ---
-    promptForApiKey() {
+    // --- API Key Modal Logic ---
+    promptForApiKeys() {
         return new Promise((resolve) => {
             this.show(this.apiKeyModalOverlay);
-            this.apiKeyInput.focus();
+            this.googleKeyInput.focus();
 
             const confirmHandler = () => {
-                const key = this.apiKeyInput.value.trim();
-                cleanup();
-                if (key) {
-                    sessionStorage.setItem('cloudApiKey', key);
-                    resolve(key);
+                const keys = {
+                    google: this.googleKeyInput.value.trim(),
+                    cloudinaryCloudName: this.cloudinaryNameInput.value.trim(),
+                    huggingFace: this.huggingfaceKeyInput.value.trim()
+                };
+                if (keys.google) {
+                    sessionStorage.setItem('apiKeys', JSON.stringify(keys));
+                    resolve(keys);
                 } else {
-                    resolve(null);
+                    resolve(null); // Resolve with null if the essential key is missing
                 }
+                cleanup();
             };
 
             const cancelHandler = () => {
@@ -166,13 +166,18 @@ export const UI = {
                 this.hide(this.apiKeyModalOverlay);
                 this.confirmApiKeyBtn.removeEventListener('click', confirmHandler);
                 this.cancelApiKeyBtn.removeEventListener('click', cancelHandler);
-                document.removeEventListener('keydown', keydownHandler);
+                this.apiKeyModal.removeEventListener('keydown', keydownHandler);
             };
 
             this.confirmApiKeyBtn.addEventListener('click', confirmHandler);
             this.cancelApiKeyBtn.addEventListener('click', cancelHandler);
-            document.addEventListener('keydown', keydownHandler);
+            this.apiKeyModal.addEventListener('keydown', keydownHandler);
         });
+    },
+    
+    getApiKeys() {
+        const storedKeys = sessionStorage.getItem('apiKeys');
+        return storedKeys ? JSON.parse(storedKeys) : {};
     },
 
     // --- Event Listeners Setup ---
@@ -181,16 +186,14 @@ export const UI = {
         this.loadAdvancedModePreference();
         this.themeToggle.addEventListener('click', () => this.toggleTheme());
         
-        // Advanced Mode Toggle
         this.advancedToggle.addEventListener('change', async (e) => {
             const isEnabled = e.target.checked;
             localStorage.setItem('advancedMode', isEnabled);
             this.updateSubtitle();
 
-            if (isEnabled && !this.getApiKey()) {
-                const apiKey = await this.promptForApiKey();
-                if (!apiKey) {
-                    // If user cancels or enters nothing, turn the toggle back off
+            if (isEnabled && !this.getApiKeys().google) {
+                const keys = await this.promptForApiKeys();
+                if (!keys || !keys.google) {
                     e.target.checked = false;
                     localStorage.setItem('advancedMode', 'false');
                     this.updateSubtitle();
@@ -198,7 +201,6 @@ export const UI = {
             }
         });
         
-        // Custom Select Logic
         this.customSelect.addEventListener('click', (e) => {
             if (this.isAdvancedMode()) return;
             e.stopPropagation();
@@ -230,10 +232,8 @@ export const UI = {
         this.langSearchInput.addEventListener('input', (e) => {
             this.filterLanguages(e.target.value);
         });
-
         this.langSearchInput.addEventListener('click', e => e.stopPropagation());
         
-        // Copy button
         this.copyBtn.addEventListener('click', () => {
             const lines = Array.from(this.resultEditor.querySelectorAll('.code-line'));
             const textToCopy = lines.map(line => line.textContent.replace(/\u00A0/g, '')).join('\n');
@@ -244,7 +244,6 @@ export const UI = {
             });
         });
         
-        // Download Button Logic
         this.downloadBtn.addEventListener('click', () => {
             const lines = Array.from(this.resultEditor.querySelectorAll('.code-line'));
             const textToDownload = lines.map(line => line.textContent.replace(/\u00A0/g, '')).join('\n');
@@ -266,7 +265,6 @@ export const UI = {
             URL.revokeObjectURL(url);
         });
 
-        // Drag and drop events
         ['dragenter', 'dragover', 'dragleave', 'drop'].forEach(eventName => {
             this.dropZone.addEventListener(eventName, e => {
                 e.preventDefault();
