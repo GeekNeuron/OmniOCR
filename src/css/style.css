@@ -558,6 +558,7 @@ input:checked + .slider:before {
 .dark-theme .footer-link { color: var(--select-border-dark); }
 .footer-link:hover { text-decoration: underline; }
 
+/* --- Modal Styles --- */
 .modal-overlay {
     position: fixed;
     top: 0;
@@ -572,16 +573,18 @@ input:checked + .slider:before {
     z-index: 1000;
     opacity: 0;
     transition: opacity 0.3s ease;
+    pointer-events: none;
 }
 .modal-overlay:not(.hidden) {
     opacity: 1;
+    pointer-events: auto;
 }
 
 .modal-content {
     padding: 2rem 2.5rem;
     border-radius: 16px;
     width: 90%;
-    max-width: 400px;
+    max-width: 500px;
     position: relative;
     transform: scale(0.95);
     transition: transform 0.3s ease;
@@ -638,15 +641,14 @@ input:checked + .slider:before {
 
 .modal-btn {
     padding: 0.6rem 1.2rem;
-    border: none;
+    border: 1px solid transparent;
     border-radius: 6px;
     font-size: 0.9rem;
     font-weight: 500;
     cursor: pointer;
-    transition: background-color 0.2s, opacity 0.2s;
+    transition: background-color 0.2s, opacity 0.2s, border-color 0.2s;
     -webkit-tap-highlight-color: transparent;
 }
-
 .modal-btn:focus {
     outline: none;
 }
@@ -654,16 +656,28 @@ input:checked + .slider:before {
 .modal-btn-primary {
     color: white;
 }
-.light-theme .modal-btn-primary { background-color: var(--accent-light); }
-.dark-theme .modal-btn-primary { background-color: var(--button-bg-dark); }
+.light-theme .modal-btn-primary { 
+    background-color: var(--accent-light);
+    border-color: var(--accent-light);
+}
+.dark-theme .modal-btn-primary { 
+    background-color: var(--button-bg-dark);
+    border-color: var(--button-bg-dark);
+}
 .light-theme .modal-btn-primary:hover { background-color: #4338ca; }
 .dark-theme .modal-btn-primary:hover { background-color: var(--button-hover-bg-dark); }
 
 .modal-btn-secondary {
     background: none;
 }
-.light-theme .modal-btn-secondary { color: var(--text-secondary-light); }
-.dark-theme .modal-btn-secondary { color: var(--text-color-dark); }
+.light-theme .modal-btn-secondary { 
+    color: var(--text-secondary-light); 
+    border-color: var(--border-light);
+}
+.dark-theme .modal-btn-secondary { 
+    color: var(--text-color-dark);
+    border-color: var(--container-border-dark);
+}
 .light-theme .modal-btn-secondary:hover { background-color: var(--surface-light); }
 .dark-theme .modal-btn-secondary:hover { background-color: var(--container-border-dark); }
 
