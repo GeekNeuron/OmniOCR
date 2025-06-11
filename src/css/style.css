@@ -316,6 +316,7 @@ input:checked + .slider:before {
 .light-theme .lang-options-list li.selected { background-color: #eef2ff; color: var(--accent-light); }
 .dark-theme .lang-options-list li.selected { background-color: var(--button-bg-dark); color: var(--button-text-dark); }
 
+
 .drop-zone {
     width: 100%;
     max-width: 500px;
@@ -576,7 +577,7 @@ input:checked + .slider:before {
     padding: 2rem 2.5rem;
     border-radius: 16px;
     width: 90%;
-    max-width: 450px;
+    max-width: 500px;
     position: relative;
     transform: scale(0.95);
     transition: transform 0.3s ease;
@@ -592,6 +593,20 @@ input:checked + .slider:before {
 .modal-subtitle { margin: 0 0 1.5rem 0; font-size: 0.9rem; line-height: 1.6; }
 .light-theme .modal-subtitle { color: var(--text-secondary-light); }
 .dark-theme .modal-subtitle { color: var(--text-color-dark); }
+
+.modal-input-grid {
+    display: flex;
+    flex-direction: column;
+    gap: 1rem;
+}
+.modal-input-group label {
+    display: block;
+    font-size: 0.85rem;
+    font-weight: 500;
+    margin-bottom: 0.25rem;
+}
+.light-theme .modal-input-group label { color: var(--text-secondary-light); }
+.dark-theme .modal-input-group label { color: var(--text-color-dark); }
 
 .modal-input {
     width: 100%;
@@ -642,3 +657,15 @@ input:checked + .slider:before {
 .dark-theme .modal-btn-secondary { color: var(--text-color-dark); }
 .light-theme .modal-btn-secondary:hover { background-color: var(--surface-light); }
 .dark-theme .modal-btn-secondary:hover { background-color: var(--container-border-dark); }
+
+.sr-only {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    padding: 0;
+    margin: -1px;
+    overflow: hidden;
+    clip: rect(0, 0, 0, 0);
+    white-space: nowrap;
+    border-width: 0;
+}
