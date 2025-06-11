@@ -78,7 +78,6 @@ export const UI = {
         this.errorText.textContent = message;
     },
 
-    // --- Smart Subtitle Guide ---
     showSubtitlePrompt(message) {
         this.hide(this.resultContainer);
         this.hide(this.errorContainer);
@@ -119,6 +118,19 @@ export const UI = {
     isAdvancedMode() {
         return this.advancedToggle.checked;
     },
+    
+    promptForApiKey() {
+        const key = prompt("Please enter your Google Cloud Vision API Key to use Advanced Mode:", "");
+        if (key) {
+            sessionStorage.setItem('cloudApiKey', key);
+            return key;
+        }
+        return null;
+    },
+    
+    getApiKey() {
+        return sessionStorage.getItem('cloudApiKey');
+    },
 
     // --- Event Listeners Setup ---
     setupEventListeners() {
@@ -126,13 +138,11 @@ export const UI = {
         this.loadAdvancedModePreference();
         this.themeToggle.addEventListener('click', () => this.toggleTheme());
         
-        // Advanced Mode Toggle
         this.advancedToggle.addEventListener('change', (e) => {
             localStorage.setItem('advancedMode', e.target.checked);
             this.updateSubtitle();
         });
         
-        // Custom Select Logic
         this.customSelect.addEventListener('click', (e) => {
             if (this.isAdvancedMode()) return;
             e.stopPropagation();
@@ -164,10 +174,8 @@ export const UI = {
         this.langSearchInput.addEventListener('input', (e) => {
             this.filterLanguages(e.target.value);
         });
-
         this.langSearchInput.addEventListener('click', e => e.stopPropagation());
         
-        // Copy button
         this.copyBtn.addEventListener('click', () => {
             const lines = Array.from(this.resultEditor.querySelectorAll('.code-line'));
             const textToCopy = lines.map(line => line.textContent.replace(/\u00A0/g, '')).join('\n');
@@ -178,7 +186,6 @@ export const UI = {
             });
         });
         
-        // Download Button Logic
         this.downloadBtn.addEventListener('click', () => {
             const lines = Array.from(this.resultEditor.querySelectorAll('.code-line'));
             const textToDownload = lines.map(line => line.textContent.replace(/\u00A0/g, '')).join('\n');
@@ -200,7 +207,6 @@ export const UI = {
             URL.revokeObjectURL(url);
         });
 
-        // Drag and drop events
         ['dragenter', 'dragover', 'dragleave', 'drop'].forEach(eventName => {
             this.dropZone.addEventListener(eventName, e => {
                 e.preventDefault();
@@ -220,7 +226,7 @@ export const UI = {
         });
     },
 
-    // --- Language Preference Management ---
+    // --- Preference Management ---
     populateLanguageOptions() {
         this.langOptionsList.innerHTML = '';
         languages.forEach(lang => {
