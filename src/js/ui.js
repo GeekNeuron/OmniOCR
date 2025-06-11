@@ -29,6 +29,12 @@ export const UI = {
     downloadBtnText: document.getElementById('download-btn-text'),
     errorContainer: document.getElementById('error-container'),
     errorText: document.getElementById('error-text'),
+    
+    // API Key Modal Elements
+    apiKeyModalOverlay: document.getElementById('api-key-modal-overlay'),
+    apiKeyInput: document.getElementById('api-key-input'),
+    confirmApiKeyBtn: document.getElementById('confirm-api-key-btn'),
+    cancelApiKeyBtn: document.getElementById('cancel-api-key-btn'),
 
     // --- Core Methods ---
     
@@ -84,6 +90,7 @@ export const UI = {
         this.errorText.textContent = message;
     },
 
+    // --- Smart Subtitle Guide ---
     showSubtitlePrompt(message) {
         this.hide(this.resultContainer);
         this.hide(this.errorContainer);
@@ -125,13 +132,38 @@ export const UI = {
         return this.advancedToggle.checked;
     },
     
+    // --- API Key Modal Logic ---
     promptForApiKey() {
-        const key = prompt("Please enter your Google Cloud Vision API Key to use Advanced Mode:", "");
-        if (key && key.trim()) {
-            sessionStorage.setItem('cloudApiKey', key.trim());
-            return key.trim();
-        }
-        return null;
+        return new Promise((resolve) => {
+            this.show(this.apiKeyModalOverlay);
+            this.apiKeyInput.focus();
+
+            const confirmHandler = () => {
+                const key = this.apiKeyInput.value.trim();
+                cleanup();
+                if (key) {
+                    sessionStorage.setItem('cloudApiKey', key);
+                    resolve(key);
+                } else {
+                    resolve(null);
+                }
+            };
+
+            const cancelHandler = () => {
+                cleanup();
+                resolve(null);
+            };
+
+            const cleanup = () => {
+                this.hide(this.apiKeyModalOverlay);
+                this.confirmApiKeyBtn.removeEventListener('click', confirmHandler);
+                this.cancelApiKeyBtn.removeEventListener('click', cancelHandler);
+                this.apiKeyInput.value = '';
+            };
+
+            this.confirmApiKeyBtn.addEventListener('click', confirmHandler);
+            this.cancelApiKeyBtn.addEventListener('click', cancelHandler);
+        });
     },
     
     getApiKey() {
@@ -145,16 +177,14 @@ export const UI = {
         this.themeToggle.addEventListener('click', () => this.toggleTheme());
         
         // Advanced Mode Toggle
-        this.advancedToggle.addEventListener('change', (e) => {
+        this.advancedToggle.addEventListener('change', async (e) => {
             const isEnabled = e.target.checked;
             localStorage.setItem('advancedMode', isEnabled);
             this.updateSubtitle();
 
-            // ** NEW LOGIC: Prompt for API Key immediately if needed **
             if (isEnabled && !this.getApiKey()) {
-                const apiKey = this.promptForApiKey();
+                const apiKey = await this.promptForApiKey();
                 if (!apiKey) {
-                    // If user cancels or enters nothing, turn the toggle back off
                     e.target.checked = false;
                     localStorage.setItem('advancedMode', 'false');
                     this.updateSubtitle();
