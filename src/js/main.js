@@ -96,6 +96,7 @@ async function handleSubtitleFiles() {
             worker = await getLocalOcrEngine(lang);
         }
         
+        // The subtitle handler will internally decide which OCR method to use
         const srtOutput = await SubtitleHandler.process(sub, idx, worker, lang, isAdvanced, apiKeys);
         
         if (!srtOutput) {
