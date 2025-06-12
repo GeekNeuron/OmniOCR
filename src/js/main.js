@@ -153,18 +153,25 @@ async function handleFiles(files) {
             let rawText = '';
 
             if (isAdvanced) {
+                // (Advanced mode logic remains the same)
                 const apiKeys = UI.getApiKeys();
                 if (!apiKeys.google) {
                     throw new Error("Google Vision API Key is required for Advanced Mode. Please turn off Advanced Mode or provide a key.");
                 }
-                rawText = await processWithCloud(file);
+                rawText = await processWithCloud(file, apiKeys);
             } else {
+                // --- LOCAL MODE LOGIC ---
                 const lang = UI.getSelectedLanguage();
                 const worker = await getLocalOcrEngine(lang);
+
                 if (file.type === 'application/pdf') {
-                    rawText = await PDFHandler.process(file, worker);
+                    // PDFHandler now handles its own preprocessing
+                    rawText = await PDFHandler.process(file, worker); 
                 } else if (file.type.startsWith('image/')) {
-                    rawText = await OCR.recognize(file, worker);
+                    // ** NEW LOGIC: Preprocess the image here before OCR **
+                    UI.updateProgress('Preprocessing image...', 0.25);
+                    const preprocessedImage = await Preprocessor.process(file);
+                    rawText = await OCR.recognize(preprocessedImage, worker);
                 } else {
                     throw new Error('Unsupported file format.');
                 }
@@ -183,7 +190,6 @@ async function handleFiles(files) {
     } else if (files.length > 1) {
         UI.displayError("Please upload only one file at a time (or a matching .sub/.idx pair).");
     }
-}
 
 function init() {
     UI.populateLanguageOptions();
