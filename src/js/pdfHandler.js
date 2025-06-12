@@ -8,12 +8,12 @@ export const PDFHandler = {
      * @param {File} file - The PDF file to process.
      * @returns {Promise<string>} The concatenated text from all pages.
      */
-    async process(file) {
+    async process(file, worker) {
         if (typeof pdfjsLib === 'undefined') {
             throw new Error("PDF.js library is not loaded.");
         }
-        pdfjsLib.GlobalWorkerOptions.workerSrc = `https://mozilla.github.io/pdf.js/build/pdf.worker.js`;
-
+        pdfjsLib.GlobalWorkerOptions.workerSrc = 'src/js/libraries/pdf.worker.min.js';
+        
         const fileReader = new FileReader();
         return new Promise((resolve, reject) => {
             fileReader.onload = async (event) => {
