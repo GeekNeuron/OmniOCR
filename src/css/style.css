@@ -517,24 +517,26 @@ input:checked + .slider:before {
 .CodeMirror-vscrollbar, .CodeMirror-hscrollbar {
     -webkit-tap-highlight-color: transparent;
 }
-/* This adds the line separators */
-.CodeMirror-line {
+.code-content {
+    flex-grow: 1;
+    padding: 1rem;
+    white-space: pre-wrap;
+    word-break: break-all;
+}
+/* New style for RTL text */
+.code-content[dir="rtl"] {
+    font-family: var(--font-rtl);
+}
+.light-theme .code-content { color: var(--text-primary-light); }
+.dark-theme .code-content { color: var(--editor-text-dark); }
+
+.code-line {
     border-bottom: 1px solid;
-    /* Adding padding for better spacing inside lines */
-    padding: 0 4px; 
-    min-height: 1.6em; /* Ensure empty lines have height */
+    min-height: 1.6rem;
 }
-
-.light-theme .CodeMirror-line {
-    border-color: var(--editor-line-border-light);
-}
-
-.dark-theme .CodeMirror-line {
-    border-color: var(--editor-line-border-dark);
-}
-
-/* Prevents a border from appearing after the very last line */
-.CodeMirror-scroll > div > div > div:last-child > .CodeMirror-line {
+.light-theme .code-line { border-color: var(--editor-line-border-light); }
+.dark-theme .code-line { border-color: var(--editor-line-border-dark); }
+.code-line:last-child {
     border-bottom: none;
 }
 /* Light Theme for CodeMirror */
