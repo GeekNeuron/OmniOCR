@@ -213,6 +213,10 @@ input:checked + .slider:before {
     cursor: pointer;
     user-select: none;
     transition: opacity 0.3s;
+    -webkit-tap-highlight-color: transparent;
+}
+.custom-select-wrapper:focus {
+    outline: none;
 }
 .custom-select-wrapper.disabled {
     opacity: 0.5;
@@ -331,6 +335,7 @@ input:checked + .slider:before {
     transition: border-color 0.3s, background-color 0.3s;
     position: relative;
     box-sizing: border-box;
+    -webkit-tap-highlight-color: transparent;
 }
 .light-theme .drop-zone { border-color: var(--border-light); }
 .dark-theme .drop-zone {
@@ -445,6 +450,10 @@ input:checked + .slider:before {
     font-weight: 500;
     cursor: pointer;
     transition: background-color 0.2s, color 0.2s, border-color 0.2s;
+    -webkit-tap-highlight-color: transparent;
+}
+.action-btn:focus {
+    outline: none;
 }
 .action-btn svg {
     width: 1em;
@@ -554,6 +563,7 @@ input:checked + .slider:before {
 .footer-link {
     text-decoration: none;
     transition: color 0.3s;
+    -webkit-tap-highlight-color: transparent;
 }
 .light-theme .footer-link { color: var(--accent-light); }
 .dark-theme .footer-link { color: var(--select-border-dark); }
