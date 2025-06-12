@@ -1,7 +1,7 @@
 # OmniOCR (Web Version)
 
 <p align="center">
-  <img src="/favicon-512x512.png" alt="OmniOCR Logo" width="120">
+  <img src="/assets/images/favicon-512x512.png" alt="OmniOCR Logo" width="120">
 </p>
 
 <p align="center">
@@ -23,7 +23,7 @@
 ---
 
 <p align="center">
-  <img src="/Screenshot.png" alt="OmniOCR Application Screenshot" style="border-radius: 8px; max-width: 100%; width: 700px;">
+  <img src="/assets/images/Screenshot.png" alt="OmniOCR Application Screenshot" style="border-radius: 8px; max-width: 100%; width: 700px;">
 </p>
 
 ## ✨ Features
