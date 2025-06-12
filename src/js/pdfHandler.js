@@ -39,7 +39,7 @@ export const PDFHandler = {
                         // Preprocess the canvas image of the page
                         const preprocessedCanvas = await Preprocessor.process(canvas);
 
-                        const pageText = await OCR.recognize(preprocessedCanvas);
+                        const pageText = await OCR.recognize(preprocessedCanvas, worker);
                         fullText += pageText.trim() + '\n\n';
                         
                         page.cleanup();
