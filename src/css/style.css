@@ -517,16 +517,18 @@ input:checked + .slider:before {
 .CodeMirror-vscrollbar, .CodeMirror-hscrollbar {
     -webkit-tap-highlight-color: transparent;
 }
-
 /* This adds the line separators */
 .CodeMirror-line {
     border-bottom: 1px solid;
-    padding: 0 4px; /* Adding padding for better spacing inside lines */
+    /* Adding padding for better spacing inside lines */
+    padding: 0 4px; 
     min-height: 1.6em; /* Ensure empty lines have height */
 }
+
 .light-theme .CodeMirror-line {
     border-color: var(--editor-line-border-light);
 }
+
 .dark-theme .CodeMirror-line {
     border-color: var(--editor-line-border-dark);
 }
@@ -535,7 +537,6 @@ input:checked + .slider:before {
 .CodeMirror-scroll > div > div > div:last-child > .CodeMirror-line {
     border-bottom: none;
 }
-
 /* Light Theme for CodeMirror */
 .light-theme .CodeMirror {
     border-color: var(--border-light);
@@ -551,10 +552,6 @@ input:checked + .slider:before {
 }
 .light-theme .CodeMirror-cursor {
     border-left: 1px solid var(--text-primary-light);
-}
-/* For RTL text in light mode */
-.light-theme .CodeMirror-rtl .CodeMirror-line {
-    font-family: var(--font-rtl);
 }
 
 /* Dark Theme for CodeMirror (based on material-darker) */
@@ -580,10 +577,6 @@ input:checked + .slider:before {
 .dark-theme .cm-s-material-darker .cm-variable-2 { color: #82aaff; }
 .dark-theme .cm-s-material-darker .cm-variable-3, .dark-theme .cm-s-material-darker .cm-type { color: #ff5370; }
 .dark-theme .cm-s-material-darker .cm-string { color: #c3e88d; }
-/* For RTL text in dark mode */
-.dark-theme .CodeMirror-rtl .CodeMirror-line {
-    font-family: var(--font-rtl);
-}
 
 /* Modal Styles from the base file */
 .modal-overlay {
