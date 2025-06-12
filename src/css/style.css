@@ -212,7 +212,6 @@ input:checked + .slider:before {
     cursor: pointer;
     user-select: none;
     transition: opacity 0.3s;
-    -webkit-tap-highlight-color: transparent;
 }
 .custom-select-wrapper:focus {
     outline: none;
