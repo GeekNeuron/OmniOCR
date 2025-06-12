@@ -7,12 +7,18 @@ export const UI = {
     dropZone: document.getElementById('drop-zone'),
     fileInput: document.getElementById('file-input'),
     subtitle: document.getElementById('subtitle'),
+    
+    // Custom Select elements
     customSelect: document.getElementById('custom-lang-select'),
     selectedLangText: document.getElementById('selected-lang-text'),
     langOptionsPanel: document.getElementById('lang-options-panel'),
     langOptionsList: document.getElementById('lang-options-list'),
     langSearchInput: document.getElementById('lang-search-input'),
+    
+    // Advanced Mode
     advancedToggle: document.getElementById('advanced-toggle-switch'),
+    
+    // Status and Result elements
     statusContainer: document.getElementById('status-container'),
     statusText: document.getElementById('status-text'),
     progressBar: document.getElementById('progress-bar'),
@@ -33,6 +39,9 @@ export const UI = {
     confirmApiKeyBtn: document.getElementById('confirm-api-key-btn'),
     cancelApiKeyBtn: document.getElementById('cancel-api-key-btn'),
 
+    // CodeMirror instance
+    codeMirrorInstance: null,
+
     // --- Core Methods ---
     
     reset() {
@@ -41,7 +50,9 @@ export const UI = {
         this.hide(this.errorContainer);
         this.statusText.textContent = 'Processing...';
         this.progressBar.style.width = '0%';
-        this.resultEditor.innerHTML = '';
+        if (this.codeMirrorInstance) {
+            this.codeMirrorInstance.setValue('');
+        }
         this.copyBtn.lastElementChild.textContent = 'Copy';
         this.downloadBtnText.textContent = 'Download';
         this.updateSubtitle();
@@ -58,34 +69,30 @@ export const UI = {
     displayResult(text, fileType = 'txt') {
         this.hide(this.statusContainer);
         this.show(this.resultContainer);
-        this.resultEditor.innerHTML = '';
-        
         this.setDownloadButtonState(fileType);
 
-        const lineNumbersCol = document.createElement('div');
-        lineNumbersCol.className = 'line-numbers';
-        const codeContentCol = document.createElement('div');
-        codeContentCol.className = 'code-content';
-        
-        const rtlRegex = /[\u0600-\u06FF\u0750-\u077F\u08A0-\u08FF\uFB50-\uFDFF\uFE70-\uFEFF]/;
-        if (rtlRegex.test(text)) {
-            codeContentCol.dir = 'rtl';
-        } else {
-            codeContentCol.dir = 'ltr';
+        if (!this.codeMirrorInstance) {
+            this.codeMirrorInstance = CodeMirror.fromTextArea(this.resultEditor, {
+                lineNumbers: true,
+                mode: 'text/plain',
+                readOnly: true,
+                lineWrapping: true,
+            });
         }
 
-        const lines = text.trim().split('\n');
-        lines.forEach((line, index) => {
-            const numberEl = document.createElement('div');
-            numberEl.textContent = index + 1;
-            lineNumbersCol.appendChild(numberEl);
-            const codeEl = document.createElement('div');
-            codeEl.className = 'code-line';
-            codeEl.textContent = line || '\u00A0'; 
-            codeContentCol.appendChild(codeEl);
-        });
-        this.resultEditor.appendChild(lineNumbersCol);
-        this.resultEditor.appendChild(codeContentCol);
+        this.codeMirrorInstance.setValue(text.trim());
+        
+        const theme = this.body.classList.contains('dark-theme') ? 'material-darker' : 'default';
+        this.codeMirrorInstance.setOption("theme", theme);
+
+        const rtlRegex = /[\u0600-\u06FF\u0750-\u077F\u08A0-\u08FF\uFB50-\uFDFF\uFE70-\uFEFF]/;
+        const direction = rtlRegex.test(text) ? 'rtl' : 'ltr';
+        this.codeMirrorInstance.setOption('direction', direction);
+        
+        const editorElement = this.codeMirrorInstance.getWrapperElement();
+        editorElement.style.fontFamily = direction === 'rtl' ? "var(--font-rtl)" : "var(--font-mono)";
+        
+        setTimeout(() => this.codeMirrorInstance.refresh(), 1);
     },
 
     displayError(message) {
@@ -197,7 +204,13 @@ export const UI = {
     setupEventListeners() {
         this.loadTheme();
         this.loadAdvancedModePreference();
-        this.themeToggle.addEventListener('click', () => this.toggleTheme());
+        this.themeToggle.addEventListener('click', () => {
+            this.toggleTheme();
+            if(this.codeMirrorInstance) {
+                const newTheme = this.body.classList.contains('dark-theme') ? 'material-darker' : 'default';
+                this.codeMirrorInstance.setOption("theme", newTheme);
+            }
+        });
         
         this.advancedToggle.addEventListener('change', async (e) => {
             const isEnabled = e.target.checked;
@@ -248,8 +261,8 @@ export const UI = {
         this.langSearchInput.addEventListener('click', e => e.stopPropagation());
         
         this.copyBtn.addEventListener('click', () => {
-            const lines = Array.from(this.resultEditor.querySelectorAll('.code-line'));
-            const textToCopy = lines.map(line => line.textContent.replace(/\u00A0/g, '')).join('\n');
+            if (!this.codeMirrorInstance) return;
+            const textToCopy = this.codeMirrorInstance.getValue();
             navigator.clipboard.writeText(textToCopy).then(() => {
                 const copySpan = this.copyBtn.lastElementChild;
                 copySpan.textContent = 'Copied!';
@@ -258,8 +271,8 @@ export const UI = {
         });
         
         this.downloadBtn.addEventListener('click', () => {
-            const lines = Array.from(this.resultEditor.querySelectorAll('.code-line'));
-            const textToDownload = lines.map(line => line.textContent.replace(/\u00A0/g, '')).join('\n');
+            if (!this.codeMirrorInstance) return;
+            const textToDownload = this.codeMirrorInstance.getValue();
             
             if (!textToDownload) return;
 
@@ -333,28 +346,15 @@ export const UI = {
     },
     
     toggleTheme() {
-        const isCurrentlyDark = this.body.classList.contains('dark-theme');
-        if (isCurrentlyDark) {
-            this.body.classList.remove('dark-theme');
-            this.body.classList.add('light-theme');
-            localStorage.setItem('theme', 'light');
-        } else {
-            this.body.classList.remove('light-theme');
-            this.body.classList.add('dark-theme');
-            localStorage.setItem('theme', 'dark');
-        }
+        this.body.classList.toggle('dark-theme');
+        this.body.classList.toggle('light-theme');
+        localStorage.setItem('theme', this.body.classList.contains('dark-theme') ? 'dark' : 'light');
     },
 
     loadTheme() {
         const savedTheme = localStorage.getItem('theme');
-        // Ensure the body starts clean before applying the correct theme
-        this.body.classList.remove('light-theme', 'dark-theme');
-        
         if (savedTheme === 'dark') {
-            this.body.classList.add('dark-theme');
-        } else {
-            // Default to light theme if nothing is saved or if it's explicitly 'light'
-            this.body.classList.add('light-theme');
+            this.body.classList.replace('light-theme', 'dark-theme');
         }
     },
 
