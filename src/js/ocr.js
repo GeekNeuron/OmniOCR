@@ -30,19 +30,16 @@ export const OCR = {
     },
 
     /**
-     * Performs OCR on a given image file after preprocessing it.
-     * @param {File|HTMLCanvasElement} imageSource - The image file or canvas to process.
+     * Performs OCR on a given preprocessed image source.
+     * @param {string} preprocessedImage - The preprocessed image data URL.
+     * @param {Tesseract.Worker} worker - The worker to use for recognition.
      * @returns {Promise<string>} The extracted text.
      */
-    async recognize(imageSource) {
-        if (!this.worker) {
-            throw new Error("OCR engine is not initialized.");
+    async recognize(preprocessedImage, worker) {
+        if (!worker) {
+            throw new Error("OCR engine worker is not initialized.");
         }
-        
-        UI.updateProgress('Preprocessing image...', 0.25);
-        const preprocessedImage = await Preprocessor.process(imageSource);
-
-        const { data: { text } } = await this.worker.recognize(preprocessedImage);
+        const { data: { text } } = await worker.recognize(preprocessedImage);
         return text;
     },
 
