@@ -68,13 +68,13 @@ body {
 }
 
 #galaxy-bg {
-    background: transparent url('../assets/images/stardust.png');
+    background: transparent url('../../assets/images/stardust.png');
     background-size: 500px 500px;
     animation: move-galaxy 120s linear infinite;
 }
 
 #dust-bg {
-    background: transparent url('../assets/images/light-paper-fibers.png');
+    background: transparent url('../../assets/images/light-paper-fibers.png');
     background-size: 300px 300px;
     animation: move-galaxy 180s linear infinite reverse;
     filter: invert(1);
