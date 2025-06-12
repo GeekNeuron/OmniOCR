@@ -43,16 +43,10 @@ function toBase64(source) {
     });
 }
 
-
 /**
  * Executes the advanced cloud-based OCR pipeline for a single image/page.
  */
-async function processWithCloud(file) {
-    const apiKeys = UI.getApiKeys();
-    if (!apiKeys.google) {
-        throw new Error("Google Vision API Key is required for Advanced Mode.");
-    }
-    
+async function processWithCloud(file, apiKeys) {
     // Step 1: Enhance image with Cloudinary (optional)
     UI.updateProgress('Enhancing image with Cloudinary...', 0.2);
     const enhancedImageUrl = await API.Cloudinary.enhanceImage(file, apiKeys.cloudinaryCloudName);
@@ -96,7 +90,6 @@ async function handleSubtitleFiles() {
             worker = await getLocalOcrEngine(lang);
         }
         
-        // The subtitle handler will internally decide which OCR method to use
         const srtOutput = await SubtitleHandler.process(sub, idx, worker, lang, isAdvanced, apiKeys);
         
         if (!srtOutput) {
@@ -153,25 +146,18 @@ async function handleFiles(files) {
             let rawText = '';
 
             if (isAdvanced) {
-                // (Advanced mode logic remains the same)
                 const apiKeys = UI.getApiKeys();
                 if (!apiKeys.google) {
                     throw new Error("Google Vision API Key is required for Advanced Mode. Please turn off Advanced Mode or provide a key.");
                 }
                 rawText = await processWithCloud(file, apiKeys);
             } else {
-                // --- LOCAL MODE LOGIC ---
                 const lang = UI.getSelectedLanguage();
                 const worker = await getLocalOcrEngine(lang);
-
                 if (file.type === 'application/pdf') {
-                    // PDFHandler now handles its own preprocessing
-                    rawText = await PDFHandler.process(file, worker); 
+                    rawText = await PDFHandler.process(file, worker);
                 } else if (file.type.startsWith('image/')) {
-                    // ** NEW LOGIC: Preprocess the image here before OCR **
-                    UI.updateProgress('Preprocessing image...', 0.25);
-                    const preprocessedImage = await Preprocessor.process(file);
-                    rawText = await OCR.recognize(preprocessedImage, worker);
+                    rawText = await OCR.recognize(file, worker);
                 } else {
                     throw new Error('Unsupported file format.');
                 }
@@ -190,8 +176,12 @@ async function handleFiles(files) {
     } else if (files.length > 1) {
         UI.displayError("Please upload only one file at a time (or a matching .sub/.idx pair).");
     }
+}
 
 function init() {
+    if (window.pdfjsLib) {
+        pdfjsLib.GlobalWorkerOptions.workerSrc = 'src/js/libraries/pdf.worker.min.js';
+    }
     UI.populateLanguageOptions();
     UI.setupEventListeners();
     UI.loadLanguagePreference(); 
