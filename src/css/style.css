@@ -77,6 +77,7 @@ body {
     background: transparent url('https://www.transparenttextures.com/patterns/light-paper-fibers.png');
     background-size: 300px 300px;
     animation: move-galaxy 180s linear infinite reverse;
+    filter: invert(1);
 }
 
 .dark-theme #galaxy-bg {
@@ -84,9 +85,7 @@ body {
 }
 .light-theme #dust-bg {
     opacity: 0.05;
-    filter: invert(1);
 }
-
 
 @keyframes move-galaxy {
     from { transform: translate(0, 0); }
@@ -212,10 +211,6 @@ input:checked + .slider:before {
     cursor: pointer;
     user-select: none;
     transition: opacity 0.3s;
-    -webkit-tap-highlight-color: transparent;
-}
-.custom-select-wrapper:focus {
-    outline: none;
 }
 .custom-select-wrapper.disabled {
     opacity: 0.5;
@@ -537,6 +532,11 @@ input:checked + .slider:before {
 .light-theme .CodeMirror-cursor {
     border-left: 1px solid var(--text-primary-light);
 }
+/* For RTL text in light mode */
+.light-theme .CodeMirror-rtl {
+    font-family: var(--font-rtl);
+}
+
 
 /* Dark Theme for CodeMirror (based on material-darker) */
 .dark-theme .CodeMirror {
@@ -561,6 +561,10 @@ input:checked + .slider:before {
 .dark-theme .cm-s-material-darker .cm-variable-2 { color: #82aaff; }
 .dark-theme .cm-s-material-darker .cm-variable-3, .dark-theme .cm-s-material-darker .cm-type { color: #ff5370; }
 .dark-theme .cm-s-material-darker .cm-string { color: #c3e88d; }
+/* For RTL text in dark mode */
+.dark-theme .CodeMirror-rtl {
+    font-family: var(--font-rtl);
+}
 
 /* Modal Styles from the base file */
 .modal-overlay {
