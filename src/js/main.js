@@ -186,9 +186,6 @@ async function handleFiles(files) {
 }
 
 function init() {
-    if (window.pdfjsLib) {
-        pdfjsLib.GlobalWorkerOptions.workerSrc = 'src/js/libraries/pdf.worker.min.js';
-    }
     UI.populateLanguageOptions();
     UI.setupEventListeners();
     UI.loadLanguagePreference(); 
