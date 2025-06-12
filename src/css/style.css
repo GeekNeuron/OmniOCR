@@ -538,6 +538,7 @@ input:checked + .slider:before {
 
 .error-container {
     border: 1px solid;
+    border-radius: 8px;
 }
 .light-theme .error-container {
     background-color: #fef2f2;
