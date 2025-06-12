@@ -5,7 +5,7 @@
 </p>
 
 <p align="center">
-  <strong>A modern, offline-first OCR engine that runs entirely in your browser.</strong>
+  <strong>A modern, offline-first OCR engine that runs entirely in your browser, with an optional, powerful cloud-based advanced mode.</strong>
   <br />
   Built with Tesseract.js and designed for performance, privacy, and ease of use.
 </p>
@@ -28,23 +28,29 @@
 
 ## ✨ Features
 
-- **Client-Side Processing**: All OCR operations happen directly in your browser. Your files are never uploaded to a server, ensuring 100% privacy.
-- **Multi-Format Support**: Seamlessly extract text from **Images** (`JPG`, `PNG`) and multi-page **PDFs**.
-- **Multilingual Engine**: Powered by Tesseract.js, supporting over 100 languages, including complex scripts like Persian, Arabic, and Japanese.
-- **High Accuracy**: Includes automatic image preprocessing (grayscale, thresholding) and text post-processing to significantly improve accuracy.
-- **Modern UI**: A clean, minimalist interface with light and galaxy-themed dark modes, built for a great user experience.
-- **Zero Installation**: No setup required. Just open the web page and start processing.
+-   **Dual-Mode OCR**:
+    -   **Local Mode**: Uses Tesseract.js for fast, private, and fully offline processing directly in your browser.
+    -   **Advanced Mode**: Connects to powerful cloud APIs (Google Vision, Cloudinary, Hugging Face) for maximum accuracy on complex images.
+-   **Multi-Format Support**: Seamlessly extract text from **Images** (`JPG`, `PNG`), multi-page **PDFs**, and image-based subtitles (`.sub`/`.idx`).
+-   **Multilingual Engine**: Powered by Tesseract.js, supporting over 60 languages with a searchable dropdown menu.
+-   **High Accuracy**: Includes advanced **image preprocessing** (upscaling, thresholding) and **text post-processing** to significantly improve accuracy, especially for RTL languages.
+-   **Optimized Performance**: Features an intelligent **caching system** for the OCR engine, providing near-instant processing for consecutive tasks in the same language.
+-   **Modern UI/UX**: A clean, minimalist interface with a theme switcher (light & galaxy-dark), smooth animations, and smart file handling.
+-   **Smart Download**: A dynamic download button provides a `.txt` file for images/PDFs and a fully formatted `.srt` file for subtitles.
+-   **Zero Installation & Offline First**: No setup required. The application can run entirely offline after the first visit.
 
 ---
 
 ## 🛠️ Technology Stack
 
-OmniOCR is built with modern, browser-native technologies:
+OmniOCR leverages powerful, browser-native and cloud technologies:
 
-- **OCR Engine**: [Tesseract.js](https://github.com/naptha/tesseract.js)
-- **PDF Rendering**: [PDF.js](https://mozilla.github.io/pdf.js/)
-- **Styling**: Pure CSS with a modern, themeable design.
-- **Core Logic**: Vanilla JavaScript (ES6+ Modules)
+-   **Local OCR Engine**: [Tesseract.js](https://github.com/naptha/tesseract.js)
+-   **Cloud OCR Engine**: [Google Cloud Vision AI](https://cloud.google.com/vision)
+-   **PDF Rendering**: [PDF.js](https://mozilla.github.io/pdf.js/)
+-   **Subtitle Parsing**: [vobsub.js](https://github.com/vobsub/vobsub.js)
+-   **Styling**: Pure CSS with a modern, themeable design.
+-   **Core Logic**: Vanilla JavaScript (ES6+ Modules)
 
 ---
 
@@ -53,9 +59,14 @@ OmniOCR is built with modern, browser-native technologies:
 Using OmniOCR is simple:
 
 1.  **Open the Web App**: Navigate to the [live demo page](https://geekneuron.github.io/OmniOCR/).
-2.  **Select a Language**: Choose the primary language of your document from the dropdown menu.
-3.  **Upload a File**: Drag and drop your file (`.jpg`, `.png`, or `.pdf`) onto the designated area, or click to select it from your device.
-4.  **Get Results**: The app will automatically process the file and display the extracted text. You can then copy the result to your clipboard.
+2.  **Choose Your Mode**:
+    -   Keep **Advanced Mode** off for fast, offline processing.
+    -   Toggle it on and provide your API keys for the highest possible accuracy.
+3.  **Select a Language**: Use the searchable dropdown (in local mode) to select the language of your document. Your choice will be saved for future visits.
+4.  **Upload a File**:
+    -   For **images or PDFs**, drop a single file or click to select.
+    -   For **subtitles**, drop or select both the `.sub` and `.idx` files together.
+5.  **Get Results**: The app will automatically process the file and display the extracted text in a code-like editor. You can then copy the result or download it in the appropriate format.
 
 To switch between light and dark themes, simply click on the **OmniOCR** title at the top of the page.
 
