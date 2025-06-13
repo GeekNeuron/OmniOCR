@@ -2,6 +2,7 @@ import { UI } from './ui.js';
 import { OCR } from './ocr.js';
 import { PDFHandler } from './pdfHandler.js';
 import { Postprocessor } from './postprocessor.js';
+import { Preprocessor } from './preprocessor.js'; // Ensure Preprocessor is imported
 import { SubtitleHandler } from './subtitleHandler.js';
 import { API } from './apiHandlers.js';
 
@@ -13,15 +14,11 @@ let ocrEngineCache = { worker: null, lang: null };
  */
 async function getLocalOcrEngine(langString) {
     if (ocrEngineCache.worker && ocrEngineCache.lang === langString) {
-        console.log("Using cached OCR engine.");
         return ocrEngineCache.worker;
     }
-    
-    console.log("Initializing new OCR engine for:", langString);
     if (ocrEngineCache.worker) {
         await ocrEngineCache.worker.terminate();
     }
-    
     const worker = await OCR.initialize(langString);
     ocrEngineCache = { worker, lang: langString };
     return worker;
@@ -47,11 +44,9 @@ function toBase64(source) {
  * Executes the advanced cloud-based OCR pipeline for a single image/page.
  */
 async function processWithCloud(file, apiKeys) {
-    // Step 1: Enhance image with Cloudinary (optional)
     UI.updateProgress('Enhancing image with Cloudinary...', 0.2);
     const enhancedImageUrl = await API.Cloudinary.enhanceImage(file, apiKeys.cloudinaryCloudName);
     
-    // Step 2: Perform OCR with Google Vision AI
     UI.updateProgress('Performing OCR with Google Vision AI...', 0.5);
     let ocrText;
     if (enhancedImageUrl) {
@@ -61,7 +56,6 @@ async function processWithCloud(file, apiKeys) {
         ocrText = await API.Google.recognize(base64Image, apiKeys.google);
     }
 
-    // Step 3: Correct grammar with Hugging Face (optional)
     if (apiKeys.huggingFace && ocrText) {
         UI.updateProgress('Correcting grammar with Hugging Face...', 0.8);
         ocrText = await API.HuggingFace.correctGrammar(ocrText, apiKeys.huggingFace);
@@ -72,7 +66,6 @@ async function processWithCloud(file, apiKeys) {
 
 /**
  * Handles the logic for processing a pair of .sub and .idx files.
- * This version decides whether to use local or cloud OCR for subtitles based on the Advanced toggle.
  */
 async function handleSubtitleFiles() {
     const { idx, sub } = fileCache;
@@ -148,7 +141,11 @@ async function handleFiles(files) {
             const primaryLang = UI.getSelectedLanguage();
 
             if (isAdvanced) {
-                rawText = await processWithCloud(file, UI.getApiKeys());
+                const apiKeys = UI.getApiKeys();
+                if (!apiKeys.google) {
+                    throw new Error("Google Vision API Key is required. Please turn off Advanced Mode or provide a key.");
+                }
+                rawText = await processWithCloud(file);
             } else {
                 const langString = (primaryLang !== 'eng') ? `${primaryLang}+eng` : 'eng';
                 const worker = await getLocalOcrEngine(langString);
@@ -177,9 +174,6 @@ async function handleFiles(files) {
 }
 
 function init() {
-    if (window.pdfjsLib) {
-        pdfjsLib.GlobalWorkerOptions.workerSrc = 'src/js/libraries/pdf.worker.min.js';
-    }
     UI.populateLanguageOptions();
     UI.setupEventListeners();
     UI.loadLanguagePreference(); 
