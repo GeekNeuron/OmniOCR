@@ -18,6 +18,11 @@ export const UI = {
     // Advanced Mode
     advancedToggle: document.getElementById('advanced-toggle-switch'),
     
+    // Help Modal Elements
+    helpIconContainer: document.getElementById('help-icon-container'),
+    helpModalOverlay: document.getElementById('help-modal-overlay'),
+    helpModalCloseBtn: document.getElementById('help-modal-close-btn'),
+
     // Status and Result elements
     statusContainer: document.getElementById('status-container'),
     statusText: document.getElementById('status-text'),
@@ -306,6 +311,22 @@ export const UI = {
             if (e.dataTransfer.files && e.dataTransfer.files.length > 0) {
                 this.fileInput.files = e.dataTransfer.files;
                 this.fileInput.dispatchEvent(new Event('change'));
+            }
+        });
+
+        // --- Help Modal Logic ---
+        this.helpIconContainer.addEventListener('click', (e) => {
+            e.stopPropagation(); 
+            this.show(this.helpModalOverlay);
+        });
+
+        this.helpModalCloseBtn.addEventListener('click', () => {
+            this.hide(this.helpModalOverlay);
+        });
+
+        this.helpModalOverlay.addEventListener('click', (e) => {
+            if (e.target === this.helpModalOverlay) {
+                this.hide(this.helpModalOverlay);
             }
         });
     },
