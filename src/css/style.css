@@ -562,22 +562,23 @@ input:checked + .slider:before {
 }
 
 /* This adds the line separators */
-.CodeMirror-line {
+.CodeMirror-code .CodeMirror-line {
     border-bottom: 1px solid;
     padding: 0 4px; /* Adds a bit of padding for better spacing */
     box-sizing: border-box; /* Ensures padding doesn't affect layout */
 }
-.light-theme .CodeMirror-line {
+.light-theme .CodeMirror-code .CodeMirror-line {
     border-color: var(--editor-line-border-light);
 }
-.dark-theme .CodeMirror-line {
+.dark-theme .CodeMirror-code .CodeMirror-line {
     border-color: var(--editor-line-border-dark);
 }
 
 /* Removes the border from the very last line in the editor */
-.CodeMirror-code > div:last-child > .CodeMirror-line {
+.CodeMirror-line:last-of-type {
     border-bottom: none;
 }
+
 
 /* Light Theme for CodeMirror */
 .light-theme .CodeMirror {
