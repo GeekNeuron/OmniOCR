@@ -10,6 +10,7 @@ import { API } from './apiHandlers.js';
  * @returns {string} The Base64 data string.
  */
 function canvasToBase64(canvas) {
+    if (!canvas) return null;
     return canvas.toDataURL('image/png').split(',')[1];
 }
 
@@ -25,7 +26,7 @@ export const SubtitleHandler = {
      * @param {Tesseract.Worker | null} worker - The initialized Tesseract worker (for local mode).
      * @param {string} lang - The language code for OCR.
      * @param {boolean} isAdvanced - Flag to determine which OCR engine to use.
-     * @param {object} apiKeys - The API keys for cloud services.
+     * @param {object | null} apiKeys - The API keys for cloud services.
      * @returns {Promise<string>} A promise that resolves with the full SRT content.
      */
     process(subFile, idxFile, worker, lang, isAdvanced, apiKeys) {
@@ -55,14 +56,15 @@ export const SubtitleHandler = {
 
                             if (canvas) {
                                 let text = '';
-                                if (isAdvanced) {
+                                if (isAdvanced && apiKeys) {
                                     // ADVANCED MODE: Use Google Vision API for higher accuracy
                                     const base64Image = canvasToBase64(canvas);
-                                    text = await API.Google.recognize(base64Image, apiKeys.google);
+                                    if(base64Image) {
+                                        text = await API.Google.recognize(base64Image, apiKeys.google);
+                                    }
                                 } else {
                                     // LOCAL MODE: Preprocess and use Tesseract.js worker
-                                    const preprocessedImage = await Preprocessor.process(canvas);
-                                    text = await OCR.recognize(preprocessedImage, worker);
+                                    text = await OCR.recognize(canvas, worker);
                                 }
                                 
                                 const cleanedText = Postprocessor.cleanup(text, lang).trim();
@@ -110,6 +112,7 @@ export const SubtitleHandler = {
      * Formats a timestamp from milliseconds to SRT format (hh:mm:ss,ms).
      */
     formatTimestamp(ms) {
+        if (isNaN(ms)) return "00:00:00,000";
         const date = new Date(0);
         date.setUTCMilliseconds(ms);
         const hours = String(date.getUTCHours()).padStart(2, '0');
