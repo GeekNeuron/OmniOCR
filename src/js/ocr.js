@@ -1,15 +1,13 @@
 import { UI } from './ui.js';
 import { AppConfig } from './config.js';
-import { Preprocessor } from './preprocessor.js';
 
 /**
  * OCR Module
  * This module is a stateless wrapper around the Tesseract.js library.
- * It initializes a worker and performs recognition.
  */
 export const OCR = {
     /**
-     * Initializes a new Tesseract worker with a specified language string and parameters.
+     * Initializes a new Tesseract worker with a specified language and parameters.
      * @param {string} langString - The language code(s) for OCR (e.g., 'eng', 'fas+eng').
      * @returns {Promise<Tesseract.Worker>} The initialized Tesseract worker.
      */
@@ -24,10 +22,7 @@ export const OCR = {
             }
         });
 
-        // Split the language string (e.g., "fas+eng") into an array (['fas', 'eng'])
         const langs = langString.split('+');
-        
-        // Get the combined whitelist for all specified languages.
         const combinedWhitelist = AppConfig.getCombinedWhitelist(langs);
         
         if (combinedWhitelist) {
@@ -41,8 +36,9 @@ export const OCR = {
     },
 
     /**
-     * Performs OCR on a given image source using the provided worker.
-     * @param {File|HTMLCanvasElement} imageSource - The image file or canvas to process.
+     * Performs OCR on a given preprocessed image source.
+     * This function now assumes the image is ALREADY preprocessed.
+     * @param {HTMLCanvasElement|string} imageSource - The preprocessed image canvas or data URL.
      * @param {Tesseract.Worker} worker - The worker to use for recognition.
      * @returns {Promise<string>} The extracted text.
      */
@@ -51,11 +47,8 @@ export const OCR = {
             throw new Error("OCR engine worker is not available.");
         }
         
-        UI.updateProgress('Preprocessing image...', 0.1); // Give user feedback
-        const preprocessedImage = await Preprocessor.process(imageSource);
-        
-        UI.updateProgress('Recognizing text...', 0.3); // Initial recognition status
-        const { data: { text } } = await worker.recognize(preprocessedImage);
+        UI.updateProgress('Recognizing text...', 0.3);
+        const { data: { text } } = await worker.recognize(imageSource);
         
         return text;
     },
