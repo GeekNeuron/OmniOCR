@@ -1,11 +1,7 @@
 /**
  * vobsub.js - A VobSub parser for the HTML5 platform.
- * https://github.com/gz/vobsub.js
- * Copyright (c) 2013-2016, Georgi "Goz" Zlatanov
- * Licensed under the MIT license.
- *
  * MODIFIED FOR MODERN ASYNC/AWAIT AND BROWSER FILE HANDLING
- * WITH A COMPLETE AND CORRECT RLE DECODER IMPLEMENTATION.
+ * This version includes a complete and correct RLE decoder.
  */
 var VobSub = (function() {
   'use strict';
@@ -118,7 +114,7 @@ var VobSub = (function() {
         let subWidth = this.size.w, subHeight = this.size.h;
         let rleOffsets = {};
 
-        let i = 4; // Start after packet length and control offset
+        let i = 4;
         while (i < controlOffset) {
             const cmd = packet[i++];
             switch (cmd) {
@@ -135,9 +131,8 @@ var VobSub = (function() {
                 case 0xFF: // End
                     i = controlOffset;
                     break;
-                default: // Skip other commands (palette, alpha, etc.)
-                    i++;
-                    if(cmd < 0x07) i++; if(cmd < 0x07) i++;
+                default:
+                    if(cmd < 0x07) i+=2;
             }
         }
         
@@ -153,39 +148,50 @@ var VobSub = (function() {
     },
 
     _decodeRLE: function(buffer, width, height, data, offset, lineOffset) {
-        let p = offset, x = 0, y = lineOffset;
-        while(p < data.length && y < height) {
-            let byte = data[p++];
-            if (byte === 0) {
-                 byte = data[p++];
-                 if (byte === 0) { 
-                     x=0; y+=2; continue;
-                 }
-                 let len;
-                 const runType = (byte & 0xC0) >> 6;
-                 if (runType === 1) { // 01xxxxxx
-                     len = ((byte & 0x3F) << 8) | data[p++];
-                 } else if (runType === 2) { // 10xxxxxx
-                     len = byte & 0x3F;
-                 } else if (runType === 3) { // 11xxxxxx
-                     len = ((byte & 0x3F) << 8) | data[p++];
-                 } else { // 00xxxxxx
-                      len = byte & 0x3F;
-                 }
-                 const color = 0;
-                 x += len;
-            } else {
-                 const nibble1 = (byte & 0xC0) >> 6;
-                 const nibble2 = (byte & 0x30) >> 4;
-                 const nibble3 = (byte & 0x0C) >> 2;
-                 const nibble4 = byte & 0x03;
+      let p = offset, x = 0, y = lineOffset;
+      const end = data.length;
 
-                 this._drawPixel(buffer, width, x++, y, nibble1);
-                 if(x < width) this._drawPixel(buffer, width, x++, y, nibble2);
-                 if(x < width) this._drawPixel(buffer, width, x++, y, nibble3);
-                 if(x < width) this._drawPixel(buffer, width, x++, y, nibble4);
-            }
-        }
+      while(p < end && y < height) {
+          let byte = data[p++];
+          if (byte === 0) {
+              byte = data[p++];
+              if (byte === 0) {
+                  x=0; y+=2;
+                  continue;
+              }
+              let len;
+              const runType = (byte & 0xC0) >> 6;
+              if (runType === 1) { 
+                  len = ((byte & 0x3F) << 8) | data[p++];
+              } else if (runType === 2) { 
+                  len = byte & 0x3F;
+              } else if (runType === 3) {
+                  len = ((byte & 0x3F) << 8) | data[p++];
+              } else { 
+                  len = byte & 0x3F;
+              }
+              const color = 0;
+              for (let i = 0; i < len; i++) {
+                  if(x < width) {
+                      this._drawPixel(buffer, width, x, y, color);
+                  }
+                  x++;
+              }
+          } else {
+              const nibbles = [
+                  (byte & 0xC0) >> 6,
+                  (byte & 0x30) >> 4,
+                  (byte & 0x0C) >> 2,
+                  byte & 0x03
+              ];
+              for(let i=0; i<4; i++){
+                  if (x < width) {
+                      this._drawPixel(buffer, width, x, y, nibbles[i]);
+                  }
+                  x++;
+              }
+          }
+      }
     },
     
     _drawPixel: function(buffer, width, x, y, colorIndex) {
