@@ -560,11 +560,25 @@ input:checked + .slider:before {
 .CodeMirror-vscrollbar, .CodeMirror-hscrollbar {
     -webkit-tap-highlight-color: transparent;
 }
+
 /* This adds the line separators */
 .CodeMirror-line {
-    border-bottom: 1px solid var(--editor-line-border-light);
-    /* Adding padding for better spacing inside lines */
-    padding: 0 4px; 
+    border-bottom: 1px solid;
+    padding: 0 4px; /* Adds a bit of padding for better spacing */
+    box-sizing: border-box; /* Ensures padding doesn't affect layout */
+}
+
+.light-theme .CodeMirror-line {
+    border-color: var(--editor-line-border-light);
+}
+
+.dark-theme .CodeMirror-line {
+    border-color: var(--editor-line-border-dark);
+}
+
+/* Removes the border from the very last line in the editor */
+.CodeMirror-code > div:last-child > .CodeMirror-line {
+    border-bottom: none;
 }
 
 .dark-theme .CodeMirror-line {
