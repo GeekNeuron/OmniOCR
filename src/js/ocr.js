@@ -9,14 +9,14 @@ import { Preprocessor } from './preprocessor.js';
  */
 export const OCR = {
     /**
-     * Initializes a new Tesseract worker with a specified language and parameters.
-     * @param {string} lang - The language code for OCR (e.g., 'eng', 'fas').
+     * Initializes a new Tesseract worker with a specified language string and parameters.
+     * @param {string} langString - The language code(s) for OCR (e.g., 'eng', 'fas+eng').
      * @returns {Promise<Tesseract.Worker>} The initialized Tesseract worker.
      */
-    async initialize(lang) {
-        UI.updateProgress('Loading language model...', 0);
+    async initialize(langString) {
+        UI.updateProgress('Loading language model(s)...', 0);
         
-        const worker = await Tesseract.createWorker(lang, 1, {
+        const worker = await Tesseract.createWorker(langString, 1, {
             logger: m => {
                 if (m.status === 'recognizing text') {
                    UI.updateProgress(`Recognizing text... (${Math.round(m.progress * 100)}%)`, m.progress);
@@ -24,13 +24,17 @@ export const OCR = {
             }
         });
 
-        // Set a character whitelist if available for the language.
-        // This dramatically reduces "hallucinated" characters from other scripts.
-        if (AppConfig.whitelists[lang]) {
+        // Split the language string (e.g., "fas+eng") into an array (['fas', 'eng'])
+        const langs = langString.split('+');
+        
+        // Get the combined whitelist for all specified languages.
+        const combinedWhitelist = AppConfig.getCombinedWhitelist(langs);
+        
+        if (combinedWhitelist) {
             await worker.setParameters({
-                tessedit_char_whitelist: AppConfig.whitelists[lang],
+                tessedit_char_whitelist: combinedWhitelist,
             });
-            console.log(`Whitelist applied for language: ${lang}`);
+            console.log(`Whitelist applied for languages: ${langs.join(', ')}`);
         }
         
         return worker;
