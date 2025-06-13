@@ -7,6 +7,10 @@ export const UI = {
     dropZone: document.getElementById('drop-zone'),
     fileInput: document.getElementById('file-input'),
     subtitle: document.getElementById('subtitle'),
+    // Help Modal Elements
+    helpIcon: document.getElementById('help-icon'),
+    helpModalOverlay: document.getElementById('help-modal-overlay'),
+    helpModalCloseBtn: document.getElementById('help-modal-close-btn'),
     
     // Custom Select elements
     customSelect: document.getElementById('custom-lang-select'),
@@ -306,6 +310,22 @@ export const UI = {
             if (e.dataTransfer.files && e.dataTransfer.files.length > 0) {
                 this.fileInput.files = e.dataTransfer.files;
                 this.fileInput.dispatchEvent(new Event('change'));
+            }
+        });
+        // --- Help Modal Logic ---
+        this.helpIcon.addEventListener('click', (e) => {
+            e.stopPropagation(); // Prevents the document click listener from closing it immediately
+            this.show(this.helpModalOverlay);
+        });
+
+        this.helpModalCloseBtn.addEventListener('click', () => {
+            this.hide(this.helpModalOverlay);
+        });
+
+        // Also close the modal if the user clicks on the overlay background
+        this.helpModalOverlay.addEventListener('click', (e) => {
+            if (e.target === this.helpModalOverlay) {
+                this.hide(this.helpModalOverlay);
             }
         });
     },
