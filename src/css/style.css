@@ -140,12 +140,19 @@ body {
 }
 .top-controls-container {
     display: flex;
-    justify-content: space-between; /* This pushes items to opposite ends */
+    justify-content: space-between;
     align-items: center;
     margin-bottom: 1rem;
 }
+.advanced-toggle-container {
+    display: flex;
+    justify-content: flex-end;
+    align-items: center;
+    gap: 0.75rem;
+    font-size: 0.8rem;
+    font-weight: 500;
+}
 
-/* --- Advanced Mode Toggle Styles --- */
 /* --- Advanced Mode & Help Icon Styles --- */
 .advanced-toggle-container {
     display: flex;
@@ -193,7 +200,22 @@ body {
     border-radius: 50%;
     transition: transform .4s;
 }
-
+.help-icon-container svg {
+    width: 20px;
+    height: 20px;
+    cursor: pointer;
+    transition: transform 0.2s, opacity 0.2s;
+}
+.help-icon-container svg:hover {
+    transform: scale(1.1);
+    opacity: 0.8;
+}
+.light-theme .help-icon-container svg {
+    color: var(--text-secondary-light);
+}
+.dark-theme .help-icon-container svg {
+    color: var(--text-color-dark);
+}
 input:checked + .slider {
     background-color: var(--accent-light);
 }
@@ -580,41 +602,22 @@ input:checked + .slider:before {
 .dark-theme .cm-s-material-darker .cm-string { color: #c3e88d; }
 
 /* --- Help Icon Styles --- */
-.help-icon-container {
-    position: absolute;
-    top: -5px; /* Adjust position relative to the advanced toggle */
-    right: -30px; /* Position it to the right of the toggle */
-}
-
-#help-icon {
-    display: flex;
-    align-items: center;
-    justify-content: center;
+.help-icon-container svg {
     width: 20px;
     height: 20px;
-    border-radius: 50%;
-    border: 1.5px solid;
-    font-size: 0.8rem;
-    font-weight: 700;
     cursor: pointer;
-    transition: transform 0.2s, background-color 0.2s;
+    transition: transform 0.2s, opacity 0.2s;
+    -webkit-tap-highlight-color: transparent;
 }
-.light-theme #help-icon {
-    color: var(--text-secondary-light);
-    border-color: var(--text-secondary-light);
-}
-.dark-theme #help-icon {
-    color: var(--text-color-dark);
-    border-color: var(--text-color-dark);
-}
-#help-icon:hover {
+.help-icon-container svg:hover {
     transform: scale(1.1);
+    opacity: 0.8;
 }
-.light-theme #help-icon:hover {
-    background-color: var(--surface-light);
+.light-theme .help-icon-container svg {
+    color: var(--text-secondary-light);
 }
-.dark-theme #help-icon:hover {
-    background-color: var(--container-border-dark);
+.dark-theme .help-icon-container svg {
+    color: var(--text-color-dark);
 }
 
 /* --- Help Modal Content Styles --- */
