@@ -138,14 +138,19 @@ body {
     max-width: 500px;
     margin-bottom: 1.5rem;
 }
+.top-controls-container {
+    display: flex;
+    justify-content: space-between; /* This pushes items to opposite ends */
+    align-items: center;
+    margin-bottom: 1rem;
+}
 
 /* --- Advanced Mode Toggle Styles --- */
+/* --- Advanced Mode & Help Icon Styles --- */
 .advanced-toggle-container {
     display: flex;
-    justify-content: flex-end;
     align-items: center;
     gap: 0.75rem;
-    margin-bottom: 1rem;
     font-size: 0.8rem;
     font-weight: 500;
 }
@@ -202,6 +207,23 @@ input:focus + .slider {
 
 input:checked + .slider:before {
     transform: translateX(16px);
+}
+
+.help-icon-container svg {
+    width: 20px;
+    height: 20px;
+    cursor: pointer;
+    transition: transform 0.2s, opacity 0.2s;
+}
+.help-icon-container svg:hover {
+    transform: scale(1.1);
+    opacity: 0.8;
+}
+.light-theme .help-icon-container svg {
+    color: var(--text-secondary-light);
+}
+.dark-theme .help-icon-container svg {
+    color: var(--text-color-dark);
 }
 
 /* --- Custom Select (Dropdown) Styles --- */
@@ -556,6 +578,87 @@ input:checked + .slider:before {
 .dark-theme .cm-s-material-darker .cm-variable-2 { color: #82aaff; }
 .dark-theme .cm-s-material-darker .cm-variable-3, .dark-theme .cm-s-material-darker .cm-type { color: #ff5370; }
 .dark-theme .cm-s-material-darker .cm-string { color: #c3e88d; }
+
+/* --- Help Icon Styles --- */
+.help-icon-container {
+    position: absolute;
+    top: -5px; /* Adjust position relative to the advanced toggle */
+    right: -30px; /* Position it to the right of the toggle */
+}
+
+#help-icon {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 20px;
+    height: 20px;
+    border-radius: 50%;
+    border: 1.5px solid;
+    font-size: 0.8rem;
+    font-weight: 700;
+    cursor: pointer;
+    transition: transform 0.2s, background-color 0.2s;
+}
+.light-theme #help-icon {
+    color: var(--text-secondary-light);
+    border-color: var(--text-secondary-light);
+}
+.dark-theme #help-icon {
+    color: var(--text-color-dark);
+    border-color: var(--text-color-dark);
+}
+#help-icon:hover {
+    transform: scale(1.1);
+}
+.light-theme #help-icon:hover {
+    background-color: var(--surface-light);
+}
+.dark-theme #help-icon:hover {
+    background-color: var(--container-border-dark);
+}
+
+/* --- Help Modal Content Styles --- */
+.modal-guide {
+    margin-top: 1.5rem;
+    padding-top: 1rem;
+}
+.light-theme .modal-guide {
+    border-top: 1px solid var(--border-light);
+}
+.dark-theme .modal-guide {
+    border-top: 1px solid var(--container-border-dark);
+}
+.modal-guide h3 {
+    margin: 0 0 0.5rem 0;
+    font-size: 1.1rem;
+}
+.modal-guide p {
+    margin: 0 0 0.75rem 0;
+    font-size: 0.9rem;
+    line-height: 1.6;
+    color: var(--text-secondary-light);
+}
+.dark-theme .modal-guide p {
+    color: var(--text-color-dark);
+}
+
+.modal-guide ul {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+    font-size: 0.9rem;
+}
+.modal-guide li {
+    padding-left: 1.5em;
+    position: relative;
+    margin-bottom: 0.5rem;
+}
+.modal-guide li::before {
+    content: '✓';
+    position: absolute;
+    left: 0;
+    color: #22c55e; /* Green checkmark */
+}
 
 /* Modal Styles from the base file */
 .modal-overlay {
