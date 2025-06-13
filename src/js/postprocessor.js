@@ -18,6 +18,21 @@ export const Postprocessor = {
         if (lang === 'fas') {
             // Normalize Arabic characters to their Persian counterparts
             cleanedText = cleanedText.replace(/ي/g, 'ی').replace(/ك/g, 'ک');
+
+            // ** NEW LOGIC: Add Zero-Width Non-Joiner (نیم‌فاصله) for compound words **
+            // Handles common suffixes like ها, های, ام, ای, ات, اش
+            const zwnjPatterns = [
+                /(\S+)(ها)\b/g,   // for words ending in ها (e.g., کتابها -> کتاب‌ها)
+                /(\S+)(های)\b/g,  // for words ending in های (e.g., کتابهای -> کتاب‌های)
+                /(\S+)(ام)\b/g,   // for words ending in ام (e.g., کتابم -> کتاب‌ام)
+                /(\S+)(ای)\b/g,   // for words ending in ای (e.g., نامه\u200cای -> نامه‌ای)
+                /(\S+)(ات)\b/g,   // for words ending in ات (e.g., اطلاعات -> اطلاعات)
+                /(\S+)(اش)\b/g,   // for words ending in اش (e.g., کتابش -> کتاب‌اش)
+            ];
+
+            zwnjPatterns.forEach(pattern => {
+                cleanedText = cleanedText.replace(pattern, '$1\u200c$2');
+            });
         }
         
         // --- Step 2: Universal Spacing and Punctuation Cleanup ---
