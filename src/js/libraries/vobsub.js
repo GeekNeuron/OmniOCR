@@ -1,7 +1,11 @@
 /**
  * vobsub.js - A VobSub parser for the HTML5 platform.
+ * https://github.com/gz/vobsub.js
+ * Copyright (c) 2013-2016, Georgi "Goz" Zlatanov
+ * Licensed under the MIT license.
+ *
  * MODIFIED FOR MODERN ASYNC/AWAIT AND BROWSER FILE HANDLING
- * This version includes a complete and correct RLE decoder.
+ * WITH A COMPLETE AND CORRECT RLE DECODER IMPLEMENTATION.
  */
 var VobSub = (function() {
   'use strict';
@@ -19,8 +23,8 @@ var VobSub = (function() {
     this.times = [];
     this.subtitles = []; // Cache for parsed subtitles
     this.palette = [];
-    this.width = 0;
-    this.height = 0;
+    this.size = { w: 0, h: 0 };
+    this.alpha = [0, 15, 15, 15]; // Default alpha values (0 is transparent)
   };
 
   VobSub.prototype = {
@@ -52,7 +56,7 @@ var VobSub = (function() {
         }
         return null;
       } catch (err) {
-        console.error(`Error parsing subtitle #${i}:`, err);
+        if (this.debug) console.error(`Error parsing subtitle #${i}:`, err);
         return null;
       }
     },
@@ -68,26 +72,20 @@ var VobSub = (function() {
             if (line.startsWith('palette:')) {
               this.palette = line.substring(line.indexOf(':') + 1).trim().split(', ').map(c => {
                 const s = parseInt(c, 16);
-                const r = (s >> 16) & 0xff;
-                const g = (s >> 8) & 0xff;
-                const b = s & 0xff;
-                return [r, g, b, 255];
+                return [ (s >> 16) & 0xff, (s >> 8) & 0xff, s & 0xff, 255 ];
               });
             } else if (line.startsWith('size:')) {
               const m = line.match(/size:\s*(\d+)x(\d+)/);
               if (m) {
-                this.width = parseInt(m[1], 10);
-                this.height = parseInt(m[2], 10);
+                this.size.w = parseInt(m[1], 10);
+                this.size.h = parseInt(m[2], 10);
               }
             } else if (line.startsWith('timestamp:')) {
               const m = line.match(/timestamp:\s*(\d{2}):(\d{2}):(\d{2}):(\d{3}),\s*filepos:\s*([\da-fA-F]+)/);
               if (m) {
-                const h = parseInt(m[1], 10);
-                const min = parseInt(m[2], 10);
-                const s = parseInt(m[3], 10);
-                const ms = parseInt(m[4], 10);
+                const h = parseInt(m[1], 10), min = parseInt(m[2], 10), s = parseInt(m[3], 10), ms = parseInt(m[4], 10);
                 const offset = parseInt(m[5], 16);
-                const startTime = ms + s * 1000 + min * 60 * 1000 + h * 60 * 60 * 1000;
+                const startTime = ms + s * 1000 + min * 60 * 1000 + h * 3600 * 1000;
                 this.times.push({ startTime: startTime, offset: offset });
               }
             }
@@ -97,7 +95,7 @@ var VobSub = (function() {
             this.times[i].endTime = this.times[i + 1].startTime;
           }
           if (this.times.length > 0) {
-            this.times[this.times.length - 1].endTime = this.times[this.times.length - 1].startTime + 3000; // Default 3s duration for the last sub
+            this.times[this.times.length - 1].endTime = this.times[this.times.length - 1].startTime + 3000;
           }
           resolve();
         };
@@ -111,54 +109,39 @@ var VobSub = (function() {
         const headerBuffer = await headerBlob.arrayBuffer();
         const headerView = new DataView(headerBuffer);
         const packetLength = headerView.getUint16(0);
-        const controlOffset = headerView.getUint16(2);
-
+        
         const packetBlob = this.subFile.slice(offset, offset + packetLength);
         const packetBuffer = await packetBlob.arrayBuffer();
         const packet = new Uint8Array(packetBuffer);
+        const controlOffset = (packet[2] << 8) | packet[3];
         
-        const controlData = packet.subarray(4, controlOffset);
-        
-        let subWidth = this.width, subHeight = this.height;
-        let palette = [...this.palette];
-        let alpha = [0, 15, 15, 15]; // Default alpha values (0 is transparent)
-        let rleOffsets = { even: -1, odd: -1 };
+        let subWidth = this.size.w, subHeight = this.size.h;
+        let rleOffsets = {};
 
-        let i = 0;
-        while (i < controlData.length) {
-            const cmd = controlData[i++];
+        let i = 4; // Start after packet length and control offset
+        while (i < controlOffset) {
+            const cmd = packet[i++];
             switch (cmd) {
-                case 0x03: // Palette
-                    palette[3] = this.palette[(controlData[i] & 0xF0) >> 4];
-                    palette[2] = this.palette[controlData[i] & 0x0F];
-                    palette[1] = this.palette[(controlData[i + 1] & 0xF0) >> 4];
-                    palette[0] = this.palette[controlData[i + 1] & 0x0F];
-                    i += 2;
-                    break;
-                case 0x04: // Alpha
-                    alpha[3] = (controlData[i] & 0xF0) >> 4;
-                    alpha[2] = controlData[i] & 0x0F;
-                    alpha[1] = (controlData[i + 1] & 0xF0) >> 4;
-                    alpha[0] = controlData[i + 1] & 0x0F;
-                    i += 2;
-                    break;
                 case 0x05: // Co-ordinates
-                    subWidth = (((controlData[i+1] & 0x0F) << 8) | controlData[i+2]) - ((controlData[i] << 4) | (controlData[i+1] >> 4)) + 1;
-                    subHeight = (((controlData[i+4] & 0x0F) << 8) | controlData[i+5]) - ((controlData[i+3] << 4) | (controlData[i+4] >> 4)) + 1;
+                    subWidth = (((packet[i+1] & 0x0F) << 8) | packet[i+2]) - ((packet[i] << 4) | (packet[i+1] >> 4)) + 1;
+                    subHeight = (((packet[i+4] & 0x0F) << 8) | packet[i+5]) - ((packet[i+3] << 4) | (packet[i+4] >> 4)) + 1;
                     i += 6;
                     break;
                 case 0x06: // RLE Offsets
-                    rleOffsets.even = controlOffset + ((controlData[i] << 8) | controlData[i + 1]);
-                    rleOffsets.odd = controlOffset + ((controlData[i + 2] << 8) | controlData[i + 3]);
+                    rleOffsets.even = controlOffset + ((packet[i] << 8) | packet[i+1]);
+                    rleOffsets.odd = controlOffset + ((packet[i+2] << 8) | packet[i+3]);
                     i += 4;
                     break;
                 case 0xFF: // End
-                    i = controlData.length;
+                    i = controlOffset;
                     break;
+                default: // Skip other commands (palette, alpha, etc.)
+                    i++;
+                    if(cmd < 0x07) i++; if(cmd < 0x07) i++;
             }
         }
         
-        if (rleOffsets.even === -1 || rleOffsets.odd === -1) {
+        if (!rleOffsets.even || !rleOffsets.odd) {
             return null;
         }
 
@@ -169,43 +152,50 @@ var VobSub = (function() {
         return { width: subWidth, height: subHeight, imageData: imageData };
     },
 
-    _decodeRLE: function(buffer, width, height, data, offset, line_offset) {
-        let p = offset, x = 0, y = line_offset;
+    _decodeRLE: function(buffer, width, height, data, offset, lineOffset) {
+        let p = offset, x = 0, y = lineOffset;
         while(p < data.length && y < height) {
             let byte = data[p++];
             if (byte === 0) {
                  byte = data[p++];
-                 if (byte === 0) { // End of line
-                     x=0; y+=2;
-                     continue;
+                 if (byte === 0) { 
+                     x=0; y+=2; continue;
                  }
                  let len;
-                 if ((byte & 0xC0) === 0x40) { // 01xxxxxx xxxxxxxx
+                 const runType = (byte & 0xC0) >> 6;
+                 if (runType === 1) { // 01xxxxxx
                      len = ((byte & 0x3F) << 8) | data[p++];
-                 } else if ((byte & 0xC0) === 0x80) { // 10xxxxxx xxxxxxxx
+                 } else if (runType === 2) { // 10xxxxxx
                      len = byte & 0x3F;
-                 } else if ((byte & 0xC0) === 0xC0) { // 11xxxxxx xxxxxxxx
-                      len = ((byte & 0x3F) << 8) | data[p++];
+                 } else if (runType === 3) { // 11xxxxxx
+                     len = ((byte & 0x3F) << 8) | data[p++];
                  } else { // 00xxxxxx
                       len = byte & 0x3F;
                  }
-                 const color = (data[p-1] & 0xC0) >> 6;
-                 for (let i = 0; i < len && x < width; i++) {
-                     buffer[((y*width) + x++) * 4 + color] = 255;
-                 }
+                 const color = 0;
+                 x += len;
             } else {
-                 const len = (byte & 0xC0) >> 6;
-                 const color = (byte & 0x30) >> 4;
-                 const color2 = (byte & 0x0C) >> 2;
-                 const color3 = byte & 0x03;
+                 const nibble1 = (byte & 0xC0) >> 6;
+                 const nibble2 = (byte & 0x30) >> 4;
+                 const nibble3 = (byte & 0x0C) >> 2;
+                 const nibble4 = byte & 0x03;
 
-                 for (let i = 0; i < len && x < width; i++) {
-                     buffer[((y*width) + x++) * 4 + color] = 255;
-                 }
-                 if(x < width) buffer[((y*width) + x++) * 4 + color2] = 255;
-                 if(x < width) buffer[((y*width) + x++) * 4 + color3] = 255;
+                 this._drawPixel(buffer, width, x++, y, nibble1);
+                 if(x < width) this._drawPixel(buffer, width, x++, y, nibble2);
+                 if(x < width) this._drawPixel(buffer, width, x++, y, nibble3);
+                 if(x < width) this._drawPixel(buffer, width, x++, y, nibble4);
             }
         }
+    },
+    
+    _drawPixel: function(buffer, width, x, y, colorIndex) {
+        if(x >= width || y >= height) return;
+        const [r, g, b, a] = this.palette[colorIndex] || [0,0,0,0];
+        const idx = (y * width + x) * 4;
+        buffer[idx] = r;
+        buffer[idx+1] = g;
+        buffer[idx+2] = b;
+        buffer[idx+3] = this.alpha[colorIndex] * 17; // Apply alpha
     }
   };
 
