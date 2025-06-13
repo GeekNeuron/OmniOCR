@@ -28,12 +28,12 @@ export const SubtitleHandler = {
      * @param {object | null} apiKeys - The API keys for cloud services.
      * @returns {Promise<string>} A promise that resolves with the full SRT content.
      */
-    process(subFile, idxFile, worker, lang, isAdvanced, apiKeys) {
-        return new Promise((resolve, reject) => {
-            if (typeof VobSub === 'undefined') {
-                return reject(new Error("vobsub.js library is not loaded."));
-            }
+    async process(subFile, idxFile, worker, lang, isAdvanced, apiKeys) {
+        if (typeof VobSub === 'undefined') {
+            throw new Error("vobsub.js library is not loaded.");
+        }
 
+        return new Promise((resolve, reject) => {
             const vobsub = new VobSub({
                 subFile: subFile,
                 idxFile: idxFile,
