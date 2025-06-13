@@ -6,6 +6,8 @@ import { API } from './apiHandlers.js';
 
 /**
  * Converts a canvas to a Base64 string, stripping the data URI prefix.
+ * @param {HTMLCanvasElement} canvas - The canvas to convert.
+ * @returns {string | null} The Base64 data string or null if canvas is invalid.
  */
 function canvasToBase64(canvas) {
     if (!canvas) return null;
@@ -14,6 +16,7 @@ function canvasToBase64(canvas) {
 
 /**
  * Handles .sub/.idx file processing using the vobsub.js library.
+ * Can use either the local Tesseract worker or the advanced Cloud OCR.
  */
 export const SubtitleHandler = {
     /**
@@ -26,7 +29,7 @@ export const SubtitleHandler = {
      * @param {object | null} apiKeys - The API keys for cloud services.
      * @returns {Promise<string>} A promise that resolves with the full SRT content.
      */
-    async process(subFile, idxFile, worker, lang, isAdvanced, apiKeys) {
+    process(subFile, idxFile, worker, lang, isAdvanced, apiKeys) {
         return new Promise((resolve, reject) => {
             if (typeof VobSub === 'undefined') {
                 return reject(new Error("vobsub.js library is not loaded."));
@@ -35,6 +38,7 @@ export const SubtitleHandler = {
             const vobsub = new VobSub({
                 subFile: subFile,
                 idxFile: idxFile,
+                debug: false,
                 onReady: async () => {
                     try {
                         let srtOutput = '';
@@ -68,7 +72,7 @@ export const SubtitleHandler = {
                                     const endTime = this.formatTimestamp(sub.endTime);
                                     srtOutput += `${i + 1}\n`;
                                     srtOutput += `${startTime} --> ${endTime}\n`;
-                                    srtOutput += `${cleanedText.replace(/\n/g, ' ')}\n\n`;
+                                    srtOutput += `${cleanedText.replace(/\n/g, ' ')}\n\n`; // Ensure single line per sub
                                 }
                             }
                         }
@@ -85,8 +89,12 @@ export const SubtitleHandler = {
         });
     },
 
+    /**
+     * Renders a subtitle object from vobsub.js to a canvas.
+     */
     renderSubtitleToCanvas(sub) {
         if (!sub || !sub.imageData || !sub.width || !sub.height) {
+            console.warn("Skipping invalid subtitle image data.");
             return null;
         }
         const canvas = document.createElement('canvas');
@@ -98,6 +106,9 @@ export const SubtitleHandler = {
         return canvas;
     },
 
+    /**
+     * Formats a timestamp from milliseconds to SRT format (hh:mm:ss,ms).
+     */
     formatTimestamp(ms) {
         if (isNaN(ms)) return "00:00:00,000";
         const date = new Date(0);
