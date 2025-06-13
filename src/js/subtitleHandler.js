@@ -1,7 +1,6 @@
 import { UI } from './ui.js';
 import { OCR } from './ocr.js';
 import { Postprocessor } from './postprocessor.js';
-import { Preprocessor } from './preprocessor.js';
 import { API } from './apiHandlers.js';
 
 /**
@@ -38,7 +37,6 @@ export const SubtitleHandler = {
             const vobsub = new VobSub({
                 subFile: subFile,
                 idxFile: idxFile,
-                debug: false,
                 onReady: async () => {
                     try {
                         let srtOutput = '';
@@ -58,7 +56,7 @@ export const SubtitleHandler = {
                                 let text = '';
                                 if (isAdvanced && apiKeys) {
                                     const base64Image = canvasToBase64(canvas);
-                                    if(base64Image) {
+                                    if (base64Image) {
                                         text = await API.Google.recognize(base64Image, apiKeys.google);
                                     }
                                 } else {
@@ -72,7 +70,7 @@ export const SubtitleHandler = {
                                     const endTime = this.formatTimestamp(sub.endTime);
                                     srtOutput += `${i + 1}\n`;
                                     srtOutput += `${startTime} --> ${endTime}\n`;
-                                    srtOutput += `${cleanedText.replace(/\n/g, ' ')}\n\n`; // Ensure single line per sub
+                                    srtOutput += `${cleanedText.replace(/\n/g, ' ')}\n\n`;
                                 }
                             }
                         }
@@ -89,12 +87,8 @@ export const SubtitleHandler = {
         });
     },
 
-    /**
-     * Renders a subtitle object from vobsub.js to a canvas.
-     */
     renderSubtitleToCanvas(sub) {
         if (!sub || !sub.imageData || !sub.width || !sub.height) {
-            console.warn("Skipping invalid subtitle image data.");
             return null;
         }
         const canvas = document.createElement('canvas');
@@ -106,9 +100,6 @@ export const SubtitleHandler = {
         return canvas;
     },
 
-    /**
-     * Formats a timestamp from milliseconds to SRT format (hh:mm:ss,ms).
-     */
     formatTimestamp(ms) {
         if (isNaN(ms)) return "00:00:00,000";
         const date = new Date(0);
