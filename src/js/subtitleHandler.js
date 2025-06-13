@@ -6,8 +6,6 @@ import { API } from './apiHandlers.js';
 
 /**
  * Converts a canvas to a Base64 string, stripping the data URI prefix.
- * @param {HTMLCanvasElement} canvas - The canvas to convert.
- * @returns {string} The Base64 data string.
  */
 function canvasToBase64(canvas) {
     if (!canvas) return null;
@@ -16,7 +14,6 @@ function canvasToBase64(canvas) {
 
 /**
  * Handles .sub/.idx file processing using the vobsub.js library.
- * Can use either the local Tesseract worker or the advanced Cloud OCR.
  */
 export const SubtitleHandler = {
     /**
@@ -29,7 +26,7 @@ export const SubtitleHandler = {
      * @param {object | null} apiKeys - The API keys for cloud services.
      * @returns {Promise<string>} A promise that resolves with the full SRT content.
      */
-    process(subFile, idxFile, worker, lang, isAdvanced, apiKeys) {
+    async process(subFile, idxFile, worker, lang, isAdvanced, apiKeys) {
         return new Promise((resolve, reject) => {
             if (typeof VobSub === 'undefined') {
                 return reject(new Error("vobsub.js library is not loaded."));
@@ -38,7 +35,6 @@ export const SubtitleHandler = {
             const vobsub = new VobSub({
                 subFile: subFile,
                 idxFile: idxFile,
-                debug: false,
                 onReady: async () => {
                     try {
                         let srtOutput = '';
@@ -51,19 +47,17 @@ export const SubtitleHandler = {
                         for (let i = 0; i < totalSubs; i++) {
                             UI.updateProgress(`Processing subtitle ${i + 1} of ${totalSubs}...`, (i + 1) / totalSubs);
                             
-                            const sub = vobsub.getSubtitle(i);
+                            const sub = await vobsub.getSubtitle(i);
                             const canvas = this.renderSubtitleToCanvas(sub);
 
                             if (canvas) {
                                 let text = '';
                                 if (isAdvanced && apiKeys) {
-                                    // ADVANCED MODE: Use Google Vision API for higher accuracy
                                     const base64Image = canvasToBase64(canvas);
                                     if(base64Image) {
                                         text = await API.Google.recognize(base64Image, apiKeys.google);
                                     }
                                 } else {
-                                    // LOCAL MODE: Preprocess and use Tesseract.js worker
                                     text = await OCR.recognize(canvas, worker);
                                 }
                                 
@@ -74,7 +68,7 @@ export const SubtitleHandler = {
                                     const endTime = this.formatTimestamp(sub.endTime);
                                     srtOutput += `${i + 1}\n`;
                                     srtOutput += `${startTime} --> ${endTime}\n`;
-                                    srtOutput += `${cleanedText.replace(/\n/g, ' ')}\n\n`; // Ensure single line per sub
+                                    srtOutput += `${cleanedText.replace(/\n/g, ' ')}\n\n`;
                                 }
                             }
                         }
@@ -91,12 +85,8 @@ export const SubtitleHandler = {
         });
     },
 
-    /**
-     * Renders a subtitle object from vobsub.js to a canvas.
-     */
     renderSubtitleToCanvas(sub) {
         if (!sub || !sub.imageData || !sub.width || !sub.height) {
-            console.warn("Skipping invalid subtitle image data.");
             return null;
         }
         const canvas = document.createElement('canvas');
@@ -108,9 +98,6 @@ export const SubtitleHandler = {
         return canvas;
     },
 
-    /**
-     * Formats a timestamp from milliseconds to SRT format (hh:mm:ss,ms).
-     */
     formatTimestamp(ms) {
         if (isNaN(ms)) return "00:00:00,000";
         const date = new Date(0);
