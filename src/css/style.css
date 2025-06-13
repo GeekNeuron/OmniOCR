@@ -562,23 +562,17 @@ input:checked + .slider:before {
 }
 
 /* This adds the line separators */
-.CodeMirror-code .CodeMirror-line {
+.CodeMirror-line {
     border-bottom: 1px solid;
     padding: 0 4px; /* Adds a bit of padding for better spacing */
     box-sizing: border-box; /* Ensures padding doesn't affect layout */
-}
-.light-theme .CodeMirror-code .CodeMirror-line {
-    border-color: var(--editor-line-border-light);
-}
-.dark-theme .CodeMirror-code .CodeMirror-line {
-    border-color: var(--editor-line-border-dark);
+    min-height: 1.6em; /* Ensure empty lines have height */
 }
 
 /* Removes the border from the very last line in the editor */
-.CodeMirror-line:last-of-type {
+.CodeMirror-code > div:last-child .CodeMirror-line {
     border-bottom: none;
 }
-
 
 /* Light Theme for CodeMirror */
 .light-theme .CodeMirror {
@@ -596,7 +590,9 @@ input:checked + .slider:before {
 .light-theme .CodeMirror-cursor {
     border-left: 1px solid var(--text-primary-light);
 }
-/* For RTL text in light mode */
+.light-theme .CodeMirror-line {
+    border-color: var(--editor-line-border-light);
+}
 .light-theme .CodeMirror-rtl {
     font-family: var(--font-rtl);
 }
@@ -605,6 +601,9 @@ input:checked + .slider:before {
 /* Dark Theme for CodeMirror (based on material-darker) */
 .dark-theme .CodeMirror {
     border-color: var(--container-border-dark);
+}
+.dark-theme .CodeMirror-line {
+    border-color: var(--editor-line-border-dark);
 }
 .dark-theme .cm-s-material-darker.CodeMirror {
      background-color: var(--editor-bg-dark);
@@ -625,7 +624,6 @@ input:checked + .slider:before {
 .dark-theme .cm-s-material-darker .cm-variable-2 { color: #82aaff; }
 .dark-theme .cm-s-material-darker .cm-variable-3, .dark-theme .cm-s-material-darker .cm-type { color: #ff5370; }
 .dark-theme .cm-s-material-darker .cm-string { color: #c3e88d; }
-/* For RTL text in dark mode */
 .dark-theme .CodeMirror-rtl {
     font-family: var(--font-rtl);
 }
