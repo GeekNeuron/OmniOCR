@@ -22,9 +22,21 @@ async function loadFFmpeg() {
             const script = document.createElement('script');
             script.src = 'src/js/libraries/ffmpeg/ffmpeg.min.js';
             script.onload = resolve;
-            script.onerror = reject;
+            script.onerror = () => reject(new Error("Failed to load FFmpeg main script."));
             document.head.appendChild(script);
         });
+    }
+
+    // ** THIS IS THE FIX **
+    // Poll for the FFmpeg object to be ready, in case of race conditions.
+    let retries = 0;
+    while (!window.FFmpeg && retries < 100) { // Poll for up to 10 seconds
+        await new Promise(r => setTimeout(r, 100)); // wait 100ms
+        retries++;
+    }
+
+    if (!window.FFmpeg) {
+        throw new Error("FFmpeg library failed to initialize in time.");
     }
 
     const { FFmpeg } = window.FFmpeg;
@@ -37,7 +49,7 @@ async function loadFFmpeg() {
 
     UI.updateProgress('Loading FFmpeg engine (~32MB)...', 0.1);
     
-    // Fetch the two parts of the WASM file
+    // Logic to fetch and merge split WASM file
     const part1Url = 'src/js/libraries/ffmpeg/ffmpeg-core.wasm.part1';
     const part2Url = 'src/js/libraries/ffmpeg/ffmpeg-core.wasm.part2';
 
@@ -47,7 +59,6 @@ async function loadFFmpeg() {
         throw new Error("Failed to download FFmpeg core components. Please check the file paths.");
     }
 
-    // Combine the ArrayBuffers of the two parts
     const part1Buffer = await part1Res.arrayBuffer();
     const part2Buffer = await part2Res.arrayBuffer();
 
@@ -55,11 +66,9 @@ async function loadFFmpeg() {
     combinedBuffer.set(new Uint8Array(part1Buffer), 0);
     combinedBuffer.set(new Uint8Array(part2Buffer), part1Buffer.byteLength);
     
-    // Create a Blob and a URL from the combined buffer
     const wasmBlob = new Blob([combinedBuffer]);
     const wasmUrl = URL.createObjectURL(wasmBlob);
     
-    // Load the FFmpeg core with the merged WASM file
     await ffmpeg.load({
         coreURL: 'src/js/libraries/ffmpeg/ffmpeg-core.js',
         wasmURL: wasmUrl, 
