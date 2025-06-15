@@ -1,70 +1,107 @@
 import { UI } from './ui.js';
 import { Postprocessor } from './postprocessor.js';
-import { API } from './apiHandlers.js';
-import { OCR } from './ocr.js';
-import { Preprocessor } from './preprocessor.js';
 
 // --- FFmpeg Loader ---
-let ffmpeg; // Use a global-like variable within the module to cache the loaded instance
+let ffmpeg; // Use a module-level variable to cache the loaded instance
 
 /**
- * Loads the FFmpeg library dynamically and only once, with a robust polling mechanism.
+ * A helper function to fetch a file while reporting its download progress.
+ * @param {string} url - The URL of the file to fetch.
+ * @param {(progress: number) => void} onProgress - A callback function to report progress (0-1).
+ * @returns {Promise<ArrayBuffer>} A promise that resolves with the file's ArrayBuffer.
+ */
+async function fetchWithProgress(url, onProgress) {
+    const response = await fetch(url);
+    if (!response.ok) {
+        throw new Error(`Failed to fetch ${url}: ${response.statusText}`);
+    }
+
+    const contentLength = +response.headers.get('Content-Length');
+    let loaded = 0;
+
+    const reader = response.body.getReader();
+    const chunks = [];
+    while (true) {
+        const { done, value } = await reader.read();
+        if (done) {
+            break;
+        }
+        chunks.push(value);
+        loaded += value.length;
+        if (contentLength) {
+            onProgress(loaded / contentLength);
+        }
+    }
+
+    const buffer = new Uint8Array(loaded);
+    let position = 0;
+    for (const chunk of chunks) {
+        buffer.set(chunk, position);
+        position += chunk.length;
+    }
+
+    return buffer.buffer;
+}
+
+/**
+ * Loads the FFmpeg library dynamically and only once, with robust progress reporting.
+ * This function also handles the merging of the split .wasm file.
  * @returns {Promise<FFmpeg>} The loaded and ready-to-use FFmpeg instance.
  */
 async function loadFFmpeg() {
-    // If FFmpeg is already loaded and ready, return it immediately.
     if (ffmpeg && ffmpeg.loaded) {
         console.log("Returning cached FFmpeg instance.");
         return ffmpeg;
     }
 
-    // Dynamically load the main FFmpeg script if it's not already on the page
     if (!window.FFmpeg) {
-        UI.updateProgress('Downloading FFmpeg library...', 0.05);
+        UI.updateProgress('Downloading FFmpeg library...', 0.01);
         await new Promise((resolve, reject) => {
             const script = document.createElement('script');
             script.src = 'src/js/libraries/ffmpeg/ffmpeg.min.js';
             script.onload = resolve;
-            script.onerror = () => reject(new Error("Failed to load FFmpeg main script. Check file paths and network."));
+            script.onerror = () => reject(new Error("Failed to load FFmpeg main script."));
             document.head.appendChild(script);
         });
     }
 
-    // ** THE FIX: Poll with a longer timeout to wait for the script to execute **
-    let retries = 0;
-    const maxRetries = 300; // Poll for up to 30 seconds
-    while (!window.FFmpeg && retries < maxRetries) {
-        await new Promise(r => setTimeout(r, 100)); // wait 100ms
-        retries++;
-    }
-    
     if (!window.FFmpeg) {
-        throw new Error("FFmpeg library failed to initialize. This might be due to a slow connection or a browser issue. Please try refreshing the page.");
+        throw new Error("FFmpeg library failed to initialize.");
     }
     
     const { FFmpeg } = window.FFmpeg;
     ffmpeg = new FFmpeg();
     
     ffmpeg.on('log', ({ message }) => {
-        // This log can be very verbose. Enable only when debugging FFmpeg issues.
         // console.log(message);
     });
 
-    UI.updateProgress('Loading FFmpeg engine (~32MB)...', 0.1);
-    
-    // Logic to fetch and merge split WASM file
+    UI.updateProgress('Downloading FFmpeg Core (~32MB)...', 0.05);
+
+    // Fetch and merge the split WASM file with progress
     const part1Url = 'src/js/libraries/ffmpeg/ffmpeg-core.wasm.part1';
     const part2Url = 'src/js/libraries/ffmpeg/ffmpeg-core.wasm.part2';
 
-    const [part1Res, part2Res] = await Promise.all([fetch(part1Url), fetch(part2Url)]);
+    let loaded1 = 0, total1 = 0;
+    let loaded2 = 0, total2 = 0;
+
+    const updateCombinedProgress = () => {
+        const total = total1 + total2;
+        if (total > 0) {
+            const progress = (loaded1 + loaded2) / total;
+            // Scale progress from 0.05 to 0.8 for the download phase
+            UI.updateProgress(`Downloading FFmpeg Core... ${Math.round(progress * 100)}%`, 0.05 + (progress * 0.75));
+        }
+    };
     
-    if (!part1Res.ok || !part2Res.ok) {
-        throw new Error("Failed to download FFmpeg core components. Please check the file paths.");
-    }
-
-    const part1Buffer = await part1Res.arrayBuffer();
-    const part2Buffer = await part2Res.arrayBuffer();
-
+    const part1Res = await fetch(part1Url);
+    total1 = +part1Res.headers.get('Content-Length');
+    const part1Buffer = await fetchWithProgress(part1Url, (p) => { loaded1 = p * total1; updateCombinedProgress(); });
+    
+    const part2Res = await fetch(part2Url);
+    total2 = +part2Res.headers.get('Content-Length');
+    const part2Buffer = await fetchWithProgress(part2Url, (p) => { loaded2 = p * total2; updateCombinedProgress(); });
+    
     const combinedBuffer = new Uint8Array(part1Buffer.byteLength + part2Buffer.byteLength);
     combinedBuffer.set(new Uint8Array(part1Buffer), 0);
     combinedBuffer.set(new Uint8Array(part2Buffer), part1Buffer.byteLength);
@@ -72,6 +109,7 @@ async function loadFFmpeg() {
     const wasmBlob = new Blob([combinedBuffer]);
     const wasmUrl = URL.createObjectURL(wasmBlob);
     
+    UI.updateProgress('Initializing FFmpeg Engine...', 0.85);
     await ffmpeg.load({
         coreURL: 'src/js/libraries/ffmpeg/ffmpeg-core.js',
         wasmURL: wasmUrl, 
@@ -86,26 +124,18 @@ async function loadFFmpeg() {
  * Handles .sub/.idx file processing using the FFmpeg.wasm library.
  */
 export const SubtitleHandler = {
-    /**
-     * Processes a pair of .sub and .idx files by converting them to SRT format.
-     * @param {File} subFile - The .sub file.
-     * @param {File} idxFile - The .idx file.
-     * @returns {Promise<string>} A promise that resolves with the full SRT content.
-     */
     async process(subFile, idxFile) {
         const ffmpeg = await loadFFmpeg();
         
-        UI.updateProgress('Loading files into virtual system...', 0.3);
+        UI.updateProgress('Loading files into virtual system...', 0.9);
         await ffmpeg.writeFile(idxFile.name, new Uint8Array(await idxFile.arrayBuffer()));
         await ffmpeg.writeFile(subFile.name, new Uint8Array(await subFile.arrayBuffer()));
         
-        UI.updateProgress('Extracting subtitles with FFmpeg...', 0.6);
+        UI.updateProgress('Extracting subtitles with FFmpeg...', 0.95);
         await ffmpeg.exec(['-i', idxFile.name, 'output.srt']);
         
-        UI.updateProgress('Reading result...', 0.9);
         const { data } = await ffmpeg.readFile('output.srt');
         
-        // Cleanup the virtual files to free memory
         await ffmpeg.deleteFile(idxFile.name);
         await ffmpeg.deleteFile(subFile.name);
         await ffmpeg.deleteFile('output.srt');
@@ -115,7 +145,6 @@ export const SubtitleHandler = {
             throw new Error("FFmpeg failed to extract any subtitle text.");
         }
 
-        // Post-process the extracted SRT to fix any minor issues like spacing
-        return Postprocessor.cleanup(srtContent, 'eng'); // SRT is always treated as LTR
+        return Postprocessor.cleanup(srtContent, 'eng');
     }
 };
