@@ -2,9 +2,9 @@ import { UI } from './ui.js';
 import { OCR } from './ocr.js';
 import { PDFHandler } from './pdfHandler.js';
 import { Postprocessor } from './postprocessor.js';
+import { Preprocessor } from './preprocessor.js';
 import { SubtitleHandler } from './subtitleHandler.js';
 import { API } from './apiHandlers.js';
-import { Preprocessor } from './preprocessor.js';
 
 const fileCache = { idx: null, sub: null };
 let ocrEngineCache = { worker: null, lang: null };
@@ -72,29 +72,16 @@ async function processWithCloud(file, apiKeys) {
 }
 
 /**
- * Handles the logic for processing a pair of .sub and .idx files.
+ * Handles the logic for processing a pair of .sub and .idx files using FFmpeg.
  */
 async function handleSubtitleFiles() {
     const { idx, sub } = fileCache;
-    const isAdvanced = UI.isAdvancedMode();
-    const primaryLang = UI.getSelectedLanguage();
-
     try {
-        let apiKeys = null;
-        let worker = null;
-
-        if (isAdvanced) {
-            apiKeys = UI.getApiKeys();
-            if (!apiKeys.google) throw new Error("Google Vision API Key is required for Advanced Subtitle OCR.");
-        } else {
-            const langString = (primaryLang !== 'eng') ? `${primaryLang}+eng` : 'eng';
-            worker = await getLocalOcrEngine(langString);
-        }
-        
-        const srtOutput = await SubtitleHandler.process(sub, idx, worker, primaryLang, isAdvanced, apiKeys);
+        // The new SubtitleHandler with FFmpeg is mode-agnostic and is the best approach.
+        const srtOutput = await SubtitleHandler.process(sub, idx);
         
         if (!srtOutput) {
-            throw new Error("No text could be extracted from the subtitle files.");
+            throw new Error("FFmpeg failed to extract any subtitle text.");
         }
         
         UI.displayResult(srtOutput, 'srt');
@@ -130,10 +117,8 @@ async function handleFiles(files) {
     if (isSubtitleJob) {
         if (fileCache.idx && fileCache.sub) {
             handleSubtitleFiles();
-        } else if (fileCache.idx) {
-            UI.showSubtitlePrompt("IDX file received. Please add the corresponding SUB file.");
-        } else if (fileCache.sub) {
-            UI.showSubtitlePrompt("SUB file received. Please add the corresponding IDX file.");
+        } else {
+            UI.showSubtitlePrompt(`Received ${fileCache.idx ? 'IDX' : 'SUB'}. Please add the corresponding file.`);
         }
         return;
     }
@@ -169,7 +154,6 @@ async function handleFiles(files) {
             
             const finalText = Postprocessor.cleanup(rawText, primaryLang);
             UI.displayResult(finalText, 'txt');
-
         } catch (error) {
             console.error('Processing Error:', error);
             UI.displayError(error.message);
@@ -182,9 +166,6 @@ async function handleFiles(files) {
 }
 
 function init() {
-    if (window.pdfjsLib) {
-        pdfjsLib.GlobalWorkerOptions.workerSrc = 'src/js/libraries/pdf.worker.min.js';
-    }
     UI.populateLanguageOptions();
     UI.setupEventListeners();
     UI.loadLanguagePreference(); 
