@@ -5,12 +5,11 @@ import { Postprocessor } from './postprocessor.js';
 let ffmpeg; // Use a global-like variable within the module to cache the loaded instance
 
 /**
- * Loads the FFmpeg library dynamically and only once.
- * This function also handles the merging of the split .wasm file.
+ * Loads the FFmpeg library dynamically and only once, with a robust polling mechanism.
  * @returns {Promise<FFmpeg>} The loaded and ready-to-use FFmpeg instance.
  */
 async function loadFFmpeg() {
-    // If FFmpeg is already loaded, return it immediately.
+    // If FFmpeg is already loaded and ready, return it immediately.
     if (ffmpeg && ffmpeg.loaded) {
         console.log("Returning cached FFmpeg instance.");
         return ffmpeg;
@@ -18,27 +17,28 @@ async function loadFFmpeg() {
 
     // Dynamically load the main FFmpeg script if it's not already on the page
     if (!window.FFmpeg) {
+        UI.updateProgress('Downloading FFmpeg library...', 0.05);
         await new Promise((resolve, reject) => {
             const script = document.createElement('script');
             script.src = 'src/js/libraries/ffmpeg/ffmpeg.min.js';
             script.onload = resolve;
-            script.onerror = () => reject(new Error("Failed to load FFmpeg main script."));
+            script.onerror = () => reject(new Error("Failed to load FFmpeg main script. Check file paths and network."));
             document.head.appendChild(script);
         });
     }
 
-    // ** THIS IS THE FIX **
-    // Poll for the FFmpeg object to be ready, in case of race conditions.
+    // ** THE FIX: Poll with a longer timeout to wait for the script to execute **
     let retries = 0;
-    while (!window.FFmpeg && retries < 100) { // Poll for up to 10 seconds
+    const maxRetries = 300; // Poll for up to 30 seconds
+    while (!window.FFmpeg && retries < maxRetries) {
         await new Promise(r => setTimeout(r, 100)); // wait 100ms
         retries++;
     }
-
+    
     if (!window.FFmpeg) {
-        throw new Error("FFmpeg library failed to initialize in time.");
+        throw new Error("FFmpeg library failed to initialize. This might be due to a slow connection or a browser issue. Please try refreshing the page.");
     }
-
+    
     const { FFmpeg } = window.FFmpeg;
     ffmpeg = new FFmpeg();
     
@@ -78,6 +78,7 @@ async function loadFFmpeg() {
     return ffmpeg;
 }
 
+
 /**
  * Handles .sub/.idx file processing using the FFmpeg.wasm library.
  */
@@ -96,14 +97,11 @@ export const SubtitleHandler = {
         await ffmpeg.writeFile(subFile.name, new Uint8Array(await subFile.arrayBuffer()));
         
         UI.updateProgress('Extracting subtitles with FFmpeg...', 0.6);
-        // This command tells FFmpeg to use the .idx file as input to create an .srt file.
-        // It's a very powerful and direct way to convert subtitles.
         await ffmpeg.exec(['-i', idxFile.name, 'output.srt']);
         
         UI.updateProgress('Reading result...', 0.9);
         const { data } = await ffmpeg.readFile('output.srt');
         
-        // Cleanup the virtual files to free memory
         await ffmpeg.deleteFile(idxFile.name);
         await ffmpeg.deleteFile(subFile.name);
         await ffmpeg.deleteFile('output.srt');
@@ -113,7 +111,6 @@ export const SubtitleHandler = {
             throw new Error("FFmpeg failed to extract any subtitle text.");
         }
 
-        // Post-process the extracted SRT to fix any minor issues like spacing
-        return Postprocessor.cleanup(srtContent, 'eng'); // SRT is always treated as LTR for cleanup
+        return Postprocessor.cleanup(srtContent, 'eng'); // SRT is always treated as LTR
     }
 };
