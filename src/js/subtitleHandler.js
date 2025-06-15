@@ -1,113 +1,110 @@
 import { UI } from './ui.js';
-import { OCR } from './ocr.js';
 import { Postprocessor } from './postprocessor.js';
-import { API } from './apiHandlers.js';
+
+// --- FFmpeg Loader ---
+let ffmpeg; // Use a global-like variable within the module to cache the loaded instance
 
 /**
- * Converts a canvas to a Base64 string, stripping the data URI prefix.
- * @param {HTMLCanvasElement} canvas - The canvas to convert.
- * @returns {string | null} The Base64 data string or null if canvas is invalid.
+ * Loads the FFmpeg library dynamically and only once.
+ * This function also handles the merging of the split .wasm file.
+ * @returns {Promise<FFmpeg>} The loaded and ready-to-use FFmpeg instance.
  */
-function canvasToBase64(canvas) {
-    if (!canvas) return null;
-    return canvas.toDataURL('image/png').split(',')[1];
+async function loadFFmpeg() {
+    // If FFmpeg is already loaded, return it immediately.
+    if (ffmpeg && ffmpeg.loaded) {
+        console.log("Returning cached FFmpeg instance.");
+        return ffmpeg;
+    }
+
+    // Dynamically load the main FFmpeg script if it's not already on the page
+    if (!window.FFmpeg) {
+        await new Promise((resolve, reject) => {
+            const script = document.createElement('script');
+            script.src = 'src/js/libraries/ffmpeg/ffmpeg.min.js';
+            script.onload = resolve;
+            script.onerror = reject;
+            document.head.appendChild(script);
+        });
+    }
+
+    const { FFmpeg } = window.FFmpeg;
+    ffmpeg = new FFmpeg();
+    
+    ffmpeg.on('log', ({ message }) => {
+        // This log can be very verbose. Enable only when debugging FFmpeg issues.
+        // console.log(message);
+    });
+
+    UI.updateProgress('Loading FFmpeg engine (~32MB)...', 0.1);
+    
+    // Fetch the two parts of the WASM file
+    const part1Url = 'src/js/libraries/ffmpeg/ffmpeg-core.wasm.part1';
+    const part2Url = 'src/js/libraries/ffmpeg/ffmpeg-core.wasm.part2';
+
+    const [part1Res, part2Res] = await Promise.all([fetch(part1Url), fetch(part2Url)]);
+    
+    if (!part1Res.ok || !part2Res.ok) {
+        throw new Error("Failed to download FFmpeg core components. Please check the file paths.");
+    }
+
+    // Combine the ArrayBuffers of the two parts
+    const part1Buffer = await part1Res.arrayBuffer();
+    const part2Buffer = await part2Res.arrayBuffer();
+
+    const combinedBuffer = new Uint8Array(part1Buffer.byteLength + part2Buffer.byteLength);
+    combinedBuffer.set(new Uint8Array(part1Buffer), 0);
+    combinedBuffer.set(new Uint8Array(part2Buffer), part1Buffer.byteLength);
+    
+    // Create a Blob and a URL from the combined buffer
+    const wasmBlob = new Blob([combinedBuffer]);
+    const wasmUrl = URL.createObjectURL(wasmBlob);
+    
+    // Load the FFmpeg core with the merged WASM file
+    await ffmpeg.load({
+        coreURL: 'src/js/libraries/ffmpeg/ffmpeg-core.js',
+        wasmURL: wasmUrl, 
+        workerURL: 'src/js/libraries/ffmpeg/ffmpeg-core.worker.js',
+    });
+    
+    return ffmpeg;
 }
 
 /**
- * Handles .sub/.idx file processing using the vobsub.js library.
- * Can use either the local Tesseract worker or the advanced Cloud OCR.
+ * Handles .sub/.idx file processing using the FFmpeg.wasm library.
  */
 export const SubtitleHandler = {
     /**
-     * Processes a pair of .sub and .idx files.
+     * Processes a pair of .sub and .idx files by converting them to SRT format.
      * @param {File} subFile - The .sub file.
      * @param {File} idxFile - The .idx file.
-     * @param {Tesseract.Worker | null} worker - The initialized Tesseract worker (for local mode).
-     * @param {string} lang - The language code for OCR.
-     * @param {boolean} isAdvanced - Flag to determine which OCR engine to use.
-     * @param {object | null} apiKeys - The API keys for cloud services.
      * @returns {Promise<string>} A promise that resolves with the full SRT content.
      */
-    async process(subFile, idxFile, worker, lang, isAdvanced, apiKeys) {
-        if (typeof VobSub === 'undefined') {
-            throw new Error("vobsub.js library is not loaded.");
+    async process(subFile, idxFile) {
+        const ffmpeg = await loadFFmpeg();
+        
+        UI.updateProgress('Loading files into virtual system...', 0.3);
+        await ffmpeg.writeFile(idxFile.name, new Uint8Array(await idxFile.arrayBuffer()));
+        await ffmpeg.writeFile(subFile.name, new Uint8Array(await subFile.arrayBuffer()));
+        
+        UI.updateProgress('Extracting subtitles with FFmpeg...', 0.6);
+        // This command tells FFmpeg to use the .idx file as input to create an .srt file.
+        // It's a very powerful and direct way to convert subtitles.
+        await ffmpeg.exec(['-i', idxFile.name, 'output.srt']);
+        
+        UI.updateProgress('Reading result...', 0.9);
+        const { data } = await ffmpeg.readFile('output.srt');
+        
+        // Cleanup the virtual files to free memory
+        await ffmpeg.deleteFile(idxFile.name);
+        await ffmpeg.deleteFile(subFile.name);
+        await ffmpeg.deleteFile('output.srt');
+        
+        const srtContent = new TextDecoder().decode(data);
+        if (!srtContent) {
+            throw new Error("FFmpeg failed to extract any subtitle text.");
         }
 
-        return new Promise((resolve, reject) => {
-            const vobsub = new VobSub({
-                subFile: subFile,
-                idxFile: idxFile,
-                onReady: async () => {
-                    try {
-                        let srtOutput = '';
-                        const totalSubs = vobsub.getSubtitleCount();
-                        
-                        if (totalSubs === 0) {
-                            return reject(new Error("No subtitles were found in the provided files."));
-                        }
-
-                        for (let i = 0; i < totalSubs; i++) {
-                            UI.updateProgress(`Processing subtitle ${i + 1} of ${totalSubs}...`, (i + 1) / totalSubs);
-                            
-                            const sub = await vobsub.getSubtitle(i);
-                            const canvas = this.renderSubtitleToCanvas(sub);
-
-                            if (canvas) {
-                                let text = '';
-                                if (isAdvanced && apiKeys) {
-                                    const base64Image = canvasToBase64(canvas);
-                                    if (base64Image) {
-                                        text = await API.Google.recognize(base64Image, apiKeys.google);
-                                    }
-                                } else {
-                                    text = await OCR.recognize(canvas, worker);
-                                }
-                                
-                                const cleanedText = Postprocessor.cleanup(text, lang).trim();
-
-                                if (cleanedText) {
-                                    const startTime = this.formatTimestamp(sub.startTime);
-                                    const endTime = this.formatTimestamp(sub.endTime);
-                                    srtOutput += `${i + 1}\n`;
-                                    srtOutput += `${startTime} --> ${endTime}\n`;
-                                    srtOutput += `${cleanedText.replace(/\n/g, ' ')}\n\n`;
-                                }
-                            }
-                        }
-                        resolve(srtOutput);
-                    } catch (error) {
-                        reject(error);
-                    }
-                },
-                onError: (error) => {
-                    reject(new Error("Failed to parse subtitle files: " + (error.message || 'Unknown error')));
-                }
-            });
-            vobsub.init();
-        });
-    },
-
-    renderSubtitleToCanvas(sub) {
-        if (!sub || !sub.imageData || !sub.width || !sub.height) {
-            return null;
-        }
-        const canvas = document.createElement('canvas');
-        canvas.width = sub.width;
-        canvas.height = sub.height;
-        const ctx = canvas.getContext('2d');
-        const imageData = new ImageData(new Uint8ClampedArray(sub.imageData), sub.width, sub.height);
-        ctx.putImageData(imageData, 0, 0);
-        return canvas;
-    },
-
-    formatTimestamp(ms) {
-        if (isNaN(ms)) return "00:00:00,000";
-        const date = new Date(0);
-        date.setUTCMilliseconds(ms);
-        const hours = String(date.getUTCHours()).padStart(2, '0');
-        const minutes = String(date.getUTCMinutes()).padStart(2, '0');
-        const seconds = String(date.getUTCSeconds()).padStart(2, '0');
-        const milliseconds = String(date.getUTCMilliseconds()).padStart(3, '0');
-        return `${hours}:${minutes}:${seconds},${milliseconds}`;
+        // Post-process the extracted SRT to fix any minor issues like spacing
+        return Postprocessor.cleanup(srtContent, 'eng'); // SRT is always treated as LTR for cleanup
     }
 };
