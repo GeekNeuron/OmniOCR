@@ -1,5 +1,8 @@
 import { UI } from './ui.js';
 import { Postprocessor } from './postprocessor.js';
+import { API } from './apiHandlers.js';
+import { OCR } from './ocr.js';
+import { Preprocessor } from './preprocessor.js';
 
 // --- FFmpeg Loader ---
 let ffmpeg; // Use a global-like variable within the module to cache the loaded instance
@@ -102,6 +105,7 @@ export const SubtitleHandler = {
         UI.updateProgress('Reading result...', 0.9);
         const { data } = await ffmpeg.readFile('output.srt');
         
+        // Cleanup the virtual files to free memory
         await ffmpeg.deleteFile(idxFile.name);
         await ffmpeg.deleteFile(subFile.name);
         await ffmpeg.deleteFile('output.srt');
@@ -111,6 +115,7 @@ export const SubtitleHandler = {
             throw new Error("FFmpeg failed to extract any subtitle text.");
         }
 
+        // Post-process the extracted SRT to fix any minor issues like spacing
         return Postprocessor.cleanup(srtContent, 'eng'); // SRT is always treated as LTR
     }
 };
