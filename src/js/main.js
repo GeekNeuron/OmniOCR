@@ -72,16 +72,46 @@ async function processWithCloud(file, apiKeys) {
 }
 
 /**
- * Handles the logic for processing a pair of .sub and .idx files using FFmpeg.
+ * Returns the currently stored API keys, or re-prompts the user for them if
+ * Advanced Mode is on but no Google key is available (e.g. localStorage says
+ * advancedMode=true but sessionStorage was cleared in a new browser session).
+ * Throws if the user cancels or still doesn't provide a key.
+ */
+async function getOrPromptApiKeys() {
+    let apiKeys = UI.getApiKeys();
+    if (!apiKeys.google) {
+        apiKeys = await UI.promptForApiKeys();
+        if (!apiKeys || !apiKeys.google) {
+            throw new Error("Google Vision API Key is required for Advanced Mode. Please turn off Advanced Mode or provide a key.");
+        }
+    }
+    return apiKeys;
+}
+
+/**
+ * Handles the logic for processing a pair of .sub and .idx files using vobsub.js.
+ * Routes each extracted subtitle bitmap through either the local Tesseract engine
+ * or the cloud (Google Vision) pipeline, depending on the current mode.
  */
 async function handleSubtitleFiles() {
     const { idx, sub } = fileCache;
     try {
-        // The new SubtitleHandler with FFmpeg is mode-agnostic and is the best approach.
-        const srtOutput = await SubtitleHandler.process(sub, idx);
-        
+        const isAdvanced = UI.isAdvancedMode();
+        const primaryLang = UI.getSelectedLanguage();
+        let worker = null;
+        let apiKeys = null;
+
+        if (isAdvanced) {
+            apiKeys = await getOrPromptApiKeys();
+        } else {
+            const langString = (primaryLang !== 'eng') ? `${primaryLang}+eng` : 'eng';
+            worker = await getLocalOcrEngine(langString);
+        }
+
+        const srtOutput = await SubtitleHandler.process(sub, idx, worker, primaryLang, isAdvanced, apiKeys);
+
         if (!srtOutput) {
-            throw new Error("FFmpeg failed to extract any subtitle text.");
+            throw new Error("No subtitle text could be extracted from the provided files.");
         }
         
         UI.displayResult(srtOutput, 'srt');
@@ -96,6 +126,27 @@ async function handleSubtitleFiles() {
     }
 }
 
+
+/**
+ * Runs the full OCR pipeline (cloud or local) for a single image/PDF file and
+ * returns the postprocessed text. Shared by both the single-file and batch paths.
+ */
+async function processSingleFile(file, { primaryLang, isAdvanced, apiKeys, worker }) {
+    let rawText = '';
+    if (isAdvanced) {
+        rawText = await processWithCloud(file, apiKeys);
+    } else {
+        if (file.type === 'application/pdf') {
+            rawText = await PDFHandler.process(file, worker);
+        } else if (file.type.startsWith('image/')) {
+            const preprocessedImage = await Preprocessor.process(file, { binarize: UI.isBinarizeEnabled() });
+            rawText = await OCR.recognize(preprocessedImage, worker);
+        } else {
+            throw new Error('Unsupported file format.');
+        }
+    }
+    return Postprocessor.cleanup(rawText, primaryLang);
+}
 
 /**
  * Main file handling logic. Routes files to the correct processor.
@@ -123,45 +174,46 @@ async function handleFiles(files) {
         return;
     }
 
-    // --- Image & PDF Processing ---
-    if (files.length === 1) {
-        const file = files[0];
-        const isAdvanced = UI.isAdvancedMode();
-        
-        try {
-            let rawText = '';
-            const primaryLang = UI.getSelectedLanguage();
+    // --- Image & PDF Processing (single file or batch) ---
+    const isAdvanced = UI.isAdvancedMode();
+    const primaryLang = UI.getSelectedLanguage();
 
-            if (isAdvanced) {
-                const apiKeys = UI.getApiKeys();
-                if (!apiKeys.google) {
-                    throw new Error("Google Vision API Key is required for Advanced Mode. Please turn off Advanced Mode or provide a key.");
-                }
-                rawText = await processWithCloud(file, apiKeys);
-            } else {
-                const langString = (primaryLang !== 'eng') ? `${primaryLang}+eng` : 'eng';
-                const worker = await getLocalOcrEngine(langString);
-                
-                if (file.type === 'application/pdf') {
-                    rawText = await PDFHandler.process(file, worker);
-                } else if (file.type.startsWith('image/')) {
-                    const preprocessedImage = await Preprocessor.process(file);
-                    rawText = await OCR.recognize(preprocessedImage, worker);
-                } else {
-                    throw new Error('Unsupported file format.');
+    try {
+        let apiKeys = null;
+        let worker = null;
+
+        if (isAdvanced) {
+            apiKeys = await getOrPromptApiKeys();
+        } else {
+            const langString = (primaryLang !== 'eng') ? `${primaryLang}+eng` : 'eng';
+            worker = await getLocalOcrEngine(langString);
+        }
+
+        if (files.length === 1) {
+            const finalText = await processSingleFile(files[0], { primaryLang, isAdvanced, apiKeys, worker });
+            UI.displayResult(finalText, 'txt');
+        } else {
+            // Batch: process each file sequentially, reusing the same worker/apiKeys.
+            // One file's failure doesn't stop the rest — it's noted inline and processing continues.
+            const parts = [];
+            for (let i = 0; i < files.length; i++) {
+                const file = files[i];
+                UI.updateProgress(`Processing file ${i + 1} of ${files.length}: ${file.name}`, i / files.length);
+                try {
+                    const finalText = await processSingleFile(file, { primaryLang, isAdvanced, apiKeys, worker });
+                    parts.push(`=== ${file.name} ===\n\n${finalText}`);
+                } catch (fileError) {
+                    console.error(`Batch processing error on ${file.name}:`, fileError);
+                    parts.push(`=== ${file.name} ===\n\n[Error: ${fileError.message}]`);
                 }
             }
-            
-            const finalText = Postprocessor.cleanup(rawText, primaryLang);
-            UI.displayResult(finalText, 'txt');
-        } catch (error) {
-            console.error('Processing Error:', error);
-            UI.displayError(error.message);
-        } finally {
-            UI.fileInput.value = '';
+            UI.displayResult(parts.join('\n\n\n'), 'txt');
         }
-    } else if (files.length > 1) {
-        UI.displayError("Please upload only one file at a time (or a matching .sub/.idx pair).");
+    } catch (error) {
+        console.error('Processing Error:', error);
+        UI.displayError(error.message);
+    } finally {
+        UI.fileInput.value = '';
     }
 }
 

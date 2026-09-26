@@ -759,6 +759,18 @@ input:checked + .slider:before {
 .modal-subtitle { margin: 0 0 1.5rem 0; font-size: 0.9rem; line-height: 1.6; }
 .light-theme .modal-subtitle { color: var(--text-secondary-light); }
 .dark-theme .modal-subtitle { color: var(--text-color-dark); }
+
+.modal-security-notice {
+    margin: -0.5rem 0 1.5rem 0;
+    padding: 0.75rem 1rem;
+    font-size: 0.82rem;
+    line-height: 1.6;
+    border-radius: 8px;
+    border: 1px solid rgba(245, 158, 11, 0.4);
+    background-color: rgba(245, 158, 11, 0.1);
+}
+.light-theme .modal-security-notice { color: #7a4d00; }
+.dark-theme .modal-security-notice { color: #f5c877; }
 .modal-input-grid {
     display: flex;
     flex-direction: column;

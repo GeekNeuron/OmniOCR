@@ -37,10 +37,9 @@ export const PDFHandler = {
                         canvas.width = viewport.width;
 
                         await page.render({ canvasContext: context, viewport: viewport }).promise;
-                        
-                        // Pass the worker to the recognize function, which now expects a preprocessed image
-                        // Note: Preprocessing is handled inside the OCR.recognize method now.
-                        const pageText = await OCR.recognize(canvas, worker);
+
+                        const preprocessedImage = await Preprocessor.process(canvas, { binarize: UI.isBinarizeEnabled() });
+                        const pageText = await OCR.recognize(preprocessedImage, worker);
                         fullText += pageText.trim() + '\n\n';
                         
                         page.cleanup();

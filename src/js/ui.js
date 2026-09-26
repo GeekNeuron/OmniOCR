@@ -17,6 +17,9 @@ export const UI = {
     
     // Advanced Mode
     advancedToggle: document.getElementById('advanced-toggle-switch'),
+
+    // Preprocessing options
+    binarizeToggle: document.getElementById('binarize-toggle-switch'),
     
     // Help Modal Elements
     helpIconContainer: document.getElementById('help-icon-container'),
@@ -147,6 +150,10 @@ export const UI = {
     isAdvancedMode() {
         return this.advancedToggle.checked;
     },
+
+    isBinarizeEnabled() {
+        return this.binarizeToggle.checked;
+    },
     
     // --- API Key Modal Logic ---
     promptForApiKeys() {
@@ -230,6 +237,10 @@ export const UI = {
                     this.updateSubtitle();
                 }
             }
+        });
+
+        this.binarizeToggle.addEventListener('change', (e) => {
+            localStorage.setItem('binarizeEnabled', e.target.checked);
         });
         
         this.customSelect.addEventListener('click', (e) => {
@@ -383,6 +394,9 @@ export const UI = {
         const savedMode = localStorage.getItem('advancedMode') === 'true';
         this.advancedToggle.checked = savedMode;
         this.updateSubtitle();
+
+        const savedBinarize = localStorage.getItem('binarizeEnabled');
+        this.binarizeToggle.checked = savedBinarize === null ? true : savedBinarize === 'true';
     },
     
     getSelectedLanguage() {

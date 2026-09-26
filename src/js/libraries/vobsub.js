@@ -30,7 +30,13 @@ var VobSub = (function() {
         getSubtitle: async function(i) {
             const entry = this.times[i];
             if (!entry) return null;
-            return await this._parseSub(entry.offset);
+            const subImage = await this._parseSub(entry.offset);
+            if (!subImage) return null;
+            return {
+                ...subImage,
+                startTime: entry.startTime,
+                endTime: entry.endTime
+            };
         },
 
         _parseIdx: function() {
@@ -74,40 +80,164 @@ var VobSub = (function() {
             });
         },
 
-        _parseSub: async function(offset) {
-            const headerBlob = this.subFile.slice(offset, offset + 4);
-            const headerBuffer = await headerBlob.arrayBuffer();
-            const headerView = new DataView(headerBuffer);
-            const packetLength = headerView.getUint16(0);
+        /**
+         * Real DVD-ripped .sub files don't store raw SPU packets at the .idx
+         * filepos offset directly - each one is wrapped in an MPEG Program Stream
+         * pack header (00 00 01 BA) followed by a private_stream_1 PES packet
+         * (00 00 01 BD), exactly like a stripped-down .VOB file. A single SPU
+         * packet can also span multiple such pack+PES fragments back to back if
+         * it's larger than one PES payload. This unwraps that container and
+         * returns the raw, reassembled SPU packet bytes.
+         */
+        _extractSpuBytes: async function(offset) {
+            let filePos = offset;
+            let spuBytes = null;
+            let spuWritten = 0;
+            let expectedLength = null;
 
-            const packetBlob = this.subFile.slice(offset, offset + packetLength);
-            const packetBuffer = await packetBlob.arrayBuffer();
-            const packet = new Uint8Array(packetBuffer);
+            for (let guard = 0; guard < 64; guard++) {
+                const headBuf = new Uint8Array(await this.subFile.slice(filePos, filePos + 20).arrayBuffer());
+                if (headBuf.length < 14 || headBuf[0] !== 0 || headBuf[1] !== 0 || headBuf[2] !== 1 || headBuf[3] !== 0xba) {
+                    break; // Not a valid MPEG pack header - stop.
+                }
+                const stuffingLength = headBuf[13] & 0x07;
+                let p = 14 + stuffingLength;
+
+                // Optional system header (00 00 01 BB) - skip if present.
+                const peekBuf = new Uint8Array(await this.subFile.slice(filePos, filePos + p + 6).arrayBuffer());
+                if (peekBuf[p] === 0 && peekBuf[p + 1] === 0 && peekBuf[p + 2] === 1 && peekBuf[p + 3] === 0xbb) {
+                    const sysHeaderLen = (peekBuf[p + 4] << 8) | peekBuf[p + 5];
+                    p += 6 + sysHeaderLen;
+                }
+
+                const pesHead = new Uint8Array(await this.subFile.slice(filePos + p, filePos + p + 9).arrayBuffer());
+                if (pesHead[0] !== 0 || pesHead[1] !== 0 || pesHead[2] !== 1 || pesHead[3] !== 0xbd) {
+                    break; // Not a private_stream_1 (subtitle) PES packet - stop.
+                }
+                const pesPacketLength = (pesHead[4] << 8) | pesHead[5];
+                const headerDataLength = pesHead[8];
+                const pesPayloadEnd = filePos + p + 6 + pesPacketLength;
+                let dataStart = filePos + p + 9 + headerDataLength;
+
+                if (spuBytes === null) {
+                    dataStart += 1; // Skip the 1-byte subtitle substream ID (only present on the first fragment)
+                }
+
+                const chunk = new Uint8Array(await this.subFile.slice(dataStart, pesPayloadEnd).arrayBuffer());
+
+                if (spuBytes === null) {
+                    if (chunk.length < 4) break;
+                    expectedLength = (chunk[0] << 8) | chunk[1];
+                    spuBytes = new Uint8Array(expectedLength);
+                }
+
+                const toCopy = Math.min(chunk.length, expectedLength - spuWritten);
+                spuBytes.set(chunk.subarray(0, toCopy), spuWritten);
+                spuWritten += toCopy;
+
+                if (spuWritten >= expectedLength) break;
+                filePos = pesPayloadEnd; // Continue into the next pack+PES fragment
+            }
+
+            return (spuBytes && spuWritten >= expectedLength) ? spuBytes : null;
+        },
+
+        /**
+         * Attempts to parse a subpicture control command stream starting at `start`.
+         * Returns the parsed color/alpha/coordinate/RLE-offset data if the stream is
+         * well-formed (every command recognized, terminating cleanly at 0xFF),
+         * or null if it hits anything unrecognized (a sign `start` was wrong).
+         */
+        _tryParseControlCommands: function(packet, start) {
+            let colorMap = [0, 1, 2, 3];
+            let alphaMap = this.alpha.slice();
+            let rleOffsets = {};
+            let coords = null;
+            let i = start;
+            const end = packet.length;
+            let terminated = false;
+
+            while (i < end) {
+                const cmd = packet[i++];
+                switch (cmd) {
+                    case 0x00:
+                    case 0x01:
+                    case 0x02:
+                        break;
+                    case 0x03:
+                        if (i + 1 >= end) return null;
+                        colorMap = [
+                            packet[i + 1] & 0x0F, (packet[i + 1] >> 4) & 0x0F,
+                            packet[i] & 0x0F, (packet[i] >> 4) & 0x0F
+                        ];
+                        i += 2;
+                        break;
+                    case 0x04:
+                        if (i + 1 >= end) return null;
+                        alphaMap = [
+                            packet[i + 1] & 0x0F, (packet[i + 1] >> 4) & 0x0F,
+                            packet[i] & 0x0F, (packet[i] >> 4) & 0x0F
+                        ];
+                        i += 2;
+                        break;
+                    case 0x05: {
+                        if (i + 5 >= end) return null;
+                        const w = (((packet[i + 1] & 0x0F) << 8) | packet[i + 2]) - ((packet[i] << 4) | (packet[i + 1] >> 4)) + 1;
+                        const h = (((packet[i + 4] & 0x0F) << 8) | packet[i + 5]) - ((packet[i + 3] << 4) | (packet[i + 4] >> 4)) + 1;
+                        if (w <= 0 || h <= 0 || w > 2000 || h > 2000) return null; // sanity bounds
+                        coords = { w, h };
+                        i += 6;
+                        break;
+                    }
+                    case 0x06:
+                        if (i + 3 >= end) return null;
+                        rleOffsets = {
+                            even: (packet[i] << 8) | packet[i + 1],
+                            odd: (packet[i + 2] << 8) | packet[i + 3]
+                        };
+                        i += 4;
+                        break;
+                    case 0xFF:
+                        terminated = true;
+                        i = end;
+                        break;
+                    default:
+                        return null; // Unrecognized command - this start offset is wrong
+                }
+            }
+
+            return terminated ? { colorMap, alphaMap, rleOffsets, coords } : null;
+        },
+
+        _parseSub: async function(offset) {
+            const packet = await this._extractSpuBytes(offset);
+            if (!packet) return null;
             const controlOffset = (packet[2] << 8) | packet[3];
 
             let subWidth = this.size.w, subHeight = this.size.h;
+            let colorMap = [0, 1, 2, 3];
+            let alphaMap = this.alpha.slice();
             let rleOffsets = {};
 
-            let i = 4;
-            while (i < controlOffset) {
-                const cmd = packet[i++];
-                switch (cmd) {
-                    case 0x05: // Co-ordinates
-                        subWidth = (((packet[i + 1] & 0x0F) << 8) | packet[i + 2]) - ((packet[i] << 4) | (packet[i + 1] >> 4)) + 1;
-                        subHeight = (((packet[i + 4] & 0x0F) << 8) | packet[i + 5]) - ((packet[i + 3] << 4) | (packet[i + 4] >> 4)) + 1;
-                        i += 6;
-                        break;
-                    case 0x06: // RLE Offsets
-                        rleOffsets.even = controlOffset + ((packet[i] << 8) | packet[i + 1]);
-                        rleOffsets.odd = controlOffset + ((packet[i + 2] << 8) | packet[i + 3]);
-                        i += 4;
-                        break;
-                    case 0xFF: // End
-                        i = controlOffset;
-                        break;
-                    default:
-                        if (cmd < 0x07) i += 2;
+            // The exact size of the small header (a delay + "next sequence" pointer)
+            // before the first control command varies slightly between encoders, so
+            // try the handful of plausible offsets and use whichever parses as a
+            // fully valid, self-terminating command stream.
+            let found = null;
+            for (let headerLen = 2; headerLen <= 8 && !found; headerLen++) {
+                const parsed = this._tryParseControlCommands(packet, controlOffset + headerLen);
+                if (parsed && parsed.rleOffsets.even && parsed.rleOffsets.odd) {
+                    found = parsed;
                 }
+            }
+            if (!found) return null;
+
+            colorMap = found.colorMap;
+            alphaMap = found.alphaMap;
+            rleOffsets = found.rleOffsets;
+            if (found.coords) {
+                subWidth = found.coords.w;
+                subHeight = found.coords.h;
             }
 
             if (!rleOffsets.even || !rleOffsets.odd) {
@@ -115,51 +245,88 @@ var VobSub = (function() {
             }
 
             const imageData = new Uint8ClampedArray(subWidth * subHeight * 4);
-            this._decodeRLE(imageData, subWidth, subHeight, packet, rleOffsets.even, 0);
-            this._decodeRLE(imageData, subWidth, subHeight, packet, rleOffsets.odd, 1);
+            imageData.fill(255); // Default every pixel to opaque white (background) until proven otherwise
+            this._decodeRLE(imageData, subWidth, subHeight, packet, rleOffsets.even, 0, colorMap, alphaMap);
+            this._decodeRLE(imageData, subWidth, subHeight, packet, rleOffsets.odd, 1, colorMap, alphaMap);
 
             return { width: subWidth, height: subHeight, imageData: imageData };
         },
 
-        _decodeRLE: function(image, width, height, data, offset, lineOffset) {
-            let p = offset, x = 0, y = lineOffset, len, color;
-            while (p < data.length && y < height) {
-                let byte = data[p++];
-                if (byte === 0) {
-                    byte = data[p++];
-                    if (byte === 0) {
-                        x = 0; y += 2;
-                        continue;
-                    }
-                    const runType = (byte & 0xC0) >> 6;
-                    if (runType === 1) len = ((byte & 0x3F) << 8) | data[p++];
-                    else if (runType === 2) len = byte & 0x3F;
-                    else if (runType === 3) len = ((byte & 0x3F) << 8) | data[p++];
-                    else len = byte & 0x3F;
-                    
-                    color = (data[p - 1] & 0xC0) >> 6;
-                    for (let i = 0; i < len; i++) {
-                        if (x < width) this._drawPixel(image, width, height, x++, y, color);
-                    }
+        /**
+         * Decodes one field (even or odd scanlines) of a DVD subpicture's RLE-encoded
+         * pixel data. Real DVD SPU RLE codes are nibble-based (4 bits), not byte-based:
+         * each code is 4, 8, 12, or 16 bits long (read MSB-first, 4 bits at a time and
+         * accumulated), where the top bits are the run length and the bottom 2 bits are
+         * the color slot (0-3). A run length of 0 in the 16-bit form means "fill to the
+         * end of the line". Each line's encoding is padded to end on a byte boundary.
+         */
+        _decodeRLE: function(image, width, height, data, byteOffset, lineParity, colorMap, alphaMap) {
+            let bytePos = byteOffset;
+            let highNibble = true;
+            let x = 0, y = lineParity;
+
+            const getNibble = () => {
+                if (bytePos >= data.length) return 0;
+                const byte = data[bytePos];
+                let nibble;
+                if (highNibble) {
+                    nibble = (byte >> 4) & 0x0F;
+                    highNibble = false;
                 } else {
-                    const val = byte;
-                    let run_len = 1;
-                    if (val < 0x40) run_len = val;
-                    this._drawPixel(image, width, height, x++, y, val >> 6);
-                    if (run_len > 1) {
-                         for(let i=1; i<run_len; i++) {
-                             if(x<width) this._drawPixel(image, width, height, x++, y, 0);
-                         }
+                    nibble = byte & 0x0F;
+                    highNibble = true;
+                    bytePos++;
+                }
+                return nibble;
+            };
+
+            while (y < height && bytePos < data.length) {
+                let val = getNibble();
+                if (val < 0x4) {
+                    val = (val << 4) | getNibble();
+                    if (val < 0x10) {
+                        val = (val << 4) | getNibble();
+                        if (val < 0x40) {
+                            val = (val << 4) | getNibble();
+                        }
                     }
+                }
+                let runLength = val >> 2;
+                const color = val & 0x3;
+                if (runLength === 0) {
+                    runLength = width - x; // Fill to end of line
+                }
+
+                for (let k = 0; k < runLength && x < width; k++) {
+                    this._drawPixel(image, width, height, x++, y, color, colorMap, alphaMap);
+                }
+
+                if (x >= width) {
+                    // Each line is padded to a byte boundary before the next one starts.
+                    if (!highNibble) { bytePos++; highNibble = true; }
+                    x = 0;
+                    y += 2;
                 }
             }
         },
 
-        _drawPixel: function(buffer, width, height, x, y, colorIndex) {
+        /**
+         * Renders a decoded pixel as pure black (text ink) or pure white (background),
+         * using the subtitle's own semantic color mapping rather than raw palette RGB values.
+         * This sidesteps generic thresholding entirely: whatever the on-screen subtitle color
+         * scheme was (white text, yellow text, colored outlines...), OCR always receives a
+         * clean, high-contrast black-on-white image.
+         */
+        _drawPixel: function(buffer, width, height, x, y, colorSlot, colorMap, alphaMap) {
             if (x >= width || y >= height) return;
-            const [r, g, b, a] = this.palette[colorIndex] || [0, 0, 0, 0];
             const idx = (y * width + x) * 4;
-            buffer[idx] = r; buffer[idx + 1] = g; buffer[idx + 2] = b; buffer[idx + 3] = this.alpha[colorIndex] * 17;
+            const alpha = alphaMap[colorSlot] || 0;
+            const isInk = colorSlot !== 0 && alpha > 0;
+            if (isInk) {
+                buffer[idx] = 0; buffer[idx + 1] = 0; buffer[idx + 2] = 0; buffer[idx + 3] = 255;
+            } else {
+                buffer[idx] = 255; buffer[idx + 1] = 255; buffer[idx + 2] = 255; buffer[idx + 3] = 255;
+            }
         }
     };
 

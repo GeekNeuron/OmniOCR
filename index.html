@@ -26,7 +26,10 @@
     <!-- CodeMirror Library -->
     <script src="src/codemirror/codemirror.min.js"></script>
     <script src="src/codemirror/javascript.min.js"></script>
-    
+
+    <!-- VobSub Library (for .sub/.idx subtitle OCR) -->
+    <script src="src/js/libraries/vobsub.js" defer></script>
+
     <!-- Main Application Logic -->
     <script type="module" src="src/js/main.js" defer></script>
 </head>
@@ -51,6 +54,13 @@
         <label for="advanced-toggle-switch" class="advanced-toggle-label">Advanced:</label>
         <label class="switch">
             <input type="checkbox" id="advanced-toggle-switch">
+            <span class="slider"></span>
+        </label>
+    </div>
+    <div id="binarize-toggle-container" class="advanced-toggle-container" title="Hard black/white thresholding. Good for clean scans; can hurt accuracy on photos, colored backgrounds, or non-Latin scripts with fine detail (e.g. CJK).">
+        <label for="binarize-toggle-switch" class="advanced-toggle-label">Sharp B/W:</label>
+        <label class="switch">
+            <input type="checkbox" id="binarize-toggle-switch" checked>
             <span class="slider"></span>
         </label>
     </div>
@@ -116,6 +126,13 @@
             <h2 class="modal-title">Advanced Mode Credentials</h2>
             <p class="modal-subtitle">
                 Enter your keys for cloud services. They are only stored for this session. You can leave optional fields blank.
+            </p>
+            <p class="modal-security-notice">
+                ⚠️ These keys are stored only in this browser tab's session storage and sent directly from your
+                browser to the cloud provider — they are never sent to any OmniOCR server. Anyone with access to
+                this browser (or its DevTools/Network tab) could read them. For the Google Vision key, we strongly
+                recommend creating a <strong>restricted</strong> key in Google Cloud Console
+                (HTTP referrer and/or API restrictions) rather than using an unrestricted key.
             </p>
             <div class="modal-input-grid">
                 <div class="modal-input-group">
